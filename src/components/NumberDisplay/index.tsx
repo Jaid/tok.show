@@ -8,6 +8,7 @@ type Props = {
   gluedPrefix?: boolean
   gluedSuffix?: boolean
   numberClassName?: string
+  numberRef?: (element: HTMLSpanElement | null) => void
   prefix?: string
   prefixClassName?: string
   splitMinimum?: number
@@ -61,7 +62,7 @@ const NumberDisplay = (props: Props) => {
     return elements
   }
   const numberParts = getNumberParts()
-  const numberElement = <span className={clsx(props.numberClassName, css.number)}>{numberParts}</span>
+  const numberElement = <span ref={props.numberRef} className={clsx(props.numberClassName, css.number)}>{numberParts}</span>
   return <span className={clsx(props.className, css.element)}>
     {prefixElement}
     {numberElement}

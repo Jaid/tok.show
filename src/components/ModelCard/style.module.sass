@@ -1,13 +1,11 @@
 .card
   display: flex
   align-items: center
-  gap: 12px
-  padding: 6px 10px
   cursor: pointer
   flex-direction: column
-
-.focused
-  border-color: #fff
+  &:hover
+    .triangle
+      color: gray
 
 .loading
   opacity: .72
@@ -19,9 +17,29 @@
   cursor: grab
   align-self: stretch
 
+.triangle
+  line-height: 0.8
+  color: transparent
+  margin-top: -4px
+
+.focused
+  .triangle
+    color: white
+
 .count
   font-size: 24px
   text-align: center
+  margin-bottom: 16px
+
+.countElement
+  display: flex
+  flex-direction: column
+
+.countLabel
+  font-size: 10px
+  line-height: 0.5
+  font-weight: 200
+  color: gray
 
 .countLoading
   animation: blink 1s step-end infinite

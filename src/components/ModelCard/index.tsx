@@ -18,7 +18,7 @@ type Props = {
 }
 
 export default function ModelCard({model, count, isFocused, isLoading, error, onClick, handleRef}: Props) {
-  return <div className={clsx(css.card, isFocused && css.focused, isLoading && css.loading)}
+  return <div className={clsx(css.card, isLoading && css.loading, isFocused && css.focused)}
     onClick={onClick}
     role="button"
     tabIndex={0}
@@ -30,8 +30,9 @@ export default function ModelCard({model, count, isFocused, isLoading, error, on
     }}
     title={error ?? undefined}
   >
+    <div className={css.triangle}>▲</div>
     <div className={css.count}>
-      {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <PulsatingNumber value={count} /> : <span className={css.countNa}>–</span>}
+      {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <PulsatingNumber suffix="token" suffixPlural gluedSuffix className={css.countElement} suffixClassName={css.countLabel} value={count} /> : <span className={css.countNa}>–</span>}
     </div>
     <div ref={handleRef} className={css.profile}>
       <ModelProfile model={model} />

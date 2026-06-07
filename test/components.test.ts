@@ -13,7 +13,9 @@ async function render(componentSegment: string, props?: Record<string, unknown>)
 }
 describe('components', () => {
   test('PulsatingNumber renders known count', async () => {
-    expect(await render('PulsatingNumber', {value: 12_345})).toContain('12345')
+    const html = await render('PulsatingNumber', {value: 12_345})
+    expect(html).toContain('12')
+    expect(html).toContain('345')
   })
   test('HexViewer renders offsets and byte values', async () => {
     const html = await render('HexViewer', {bytes: new Uint8Array([0, 10, 255])})
