@@ -1,11 +1,16 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {EntryId} from '#src/lib/state.ts'
 
+import {KeyboardSensor, PointerActivationConstraints, PointerSensor} from '@dnd-kit/dom'
 import {DragDropProvider} from '@dnd-kit/react'
 import {isSortableOperation, useSortable} from '@dnd-kit/react/sortable'
 import {useCallback} from 'react'
 
 import DraggableCard from '#component/DraggableCard'
+
+const pointerSensor = PointerSensor.configure({
+  activationConstraints: [new PointerActivationConstraints.Distance({value: 8})],
+})
 
 type Props = {
   averageCount: number | null
@@ -48,7 +53,7 @@ export default function DraggableCardContainer({entries, modelsById, counts, err
     }
   }, [entries, onReorder, onStashDrop])
   return (
-    <DragDropProvider onDragEnd={handleDragEnd}>
+    <DragDropProvider onDragEnd={handleDragEnd} sensors={[pointerSensor, KeyboardSensor.configure({})]}>
       <div className="draggable-cards">
         {entries.map((entry, index) => {
           if (entry === 'average') {
