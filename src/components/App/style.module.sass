@@ -1,12 +1,8 @@
 $font-code: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas', 'Courier New', monospace
+$borderColor: #222
 
-.root
-  height: 100%
-  width: 100%
-  display: flex
-  flex-direction: column
-  position: relative
-
+div:has(>.root)
+  height: stretch
   &.dragOver::after
     content: ''
     position: absolute
@@ -27,34 +23,24 @@ $font-code: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas
   z-index: 20
   pointer-events: none
 
-.mainPanels
-  flex: 1
-  height: 100%
-
 .paneSeparator
-  width: 4px
-  background: #1a1a1a
+  width: 1px
+  background: $borderColor
   cursor: col-resize
-  transition: background 0.1s
-  &:hover
-    background: #333
 
 .pane
   height: 100%
   display: flex
   flex-direction: column
   overflow: hidden
-  background: #050505
 
 .paneHeader
   display: flex
   align-items: center
   gap: 6px
   padding: 6px 10px
-  background: #080808
-  border-bottom: 1px solid #1a1a1a
+  border-bottom: 1px solid $borderColor
   flex-shrink: 0
-
   &.tabsRow
     gap: 2px
 
@@ -62,15 +48,13 @@ $font-code: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas
   flex: 1
   overflow: hidden
   min-height: 0
-  background: #000
 
 .paneFooter
   display: flex
   align-items: center
   justify-content: space-between
   padding: 6px 10px
-  background: #080808
-  border-top: 1px solid #1a1a1a
+  border-top: 1px solid $borderColor
   flex-shrink: 0
   font-size: 12px
 
@@ -97,14 +81,13 @@ $font-code: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas
 
 .miniBtn
   background: transparent
-  border: 1px solid #1a1a1a
+  border: 1px solid $borderColor
   color: #888
   padding: 2px 8px
   border-radius: 4px
   cursor: pointer
   font-size: 11px
   transition: border-color 0.1s
-
   &:hover
     border-color: #333
     color: #e0e0e0
@@ -118,11 +101,9 @@ $font-code: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas
   cursor: pointer
   border-radius: 3px
   transition: all 0.1s
-
   &:hover
     color: #e0e0e0
     border-color: #333
-
   &.active
     color: #e0e0e0
     background: #111
@@ -131,7 +112,7 @@ $font-code: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas
 .iconBtn
   margin-left: auto
   background: transparent
-  border: 1px solid #1a1a1a
+  border: 1px solid $borderColor
   color: #888
   padding: 4px 6px
   border-radius: 4px
@@ -139,7 +120,6 @@ $font-code: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas
   display: flex
   align-items: center
   font-size: 14px
-
   &:hover
     color: #e0e0e0
     border-color: #333
@@ -151,7 +131,6 @@ $font-code: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas
   color: #555
   text-decoration: none
   font-size: 11px
-
   &:hover
     color: #888
 
@@ -174,7 +153,6 @@ $font-code: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'SF Mono', 'Consolas
   align-content: flex-start
   overflow: auto
   height: 100%
-
   &.tokEmpty
     display: flex
     align-items: center

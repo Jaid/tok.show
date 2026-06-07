@@ -3,9 +3,8 @@ import '#src/style.sass'
 import {StrictMode} from 'react'
 import {createRoot} from 'react-dom/client'
 
-import App from '#component/App'
+import DecoratedApp from '#component/DecoratedApp'
 
-const app = <App/>
 if (import.meta.env.DEV) {
   let rootNode = document.body.querySelector(':scope>div')
   if (!rootNode) {
@@ -13,10 +12,10 @@ if (import.meta.env.DEV) {
     document.body.append(rootNode)
   }
   const root = createRoot(rootNode)
-  root.render(<StrictMode>{app}</StrictMode>)
+  root.render(<StrictMode><DecoratedApp/></StrictMode>)
 } else {
   const rootNode = document.createElement('div')
   document.body.append(rootNode)
   const root = createRoot(rootNode)
-  root.render(app)
+  root.render(<DecoratedApp/>)
 }

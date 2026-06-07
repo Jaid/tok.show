@@ -4,7 +4,6 @@ import type {ModelId} from 'token-vocabs'
 
 import clsx from 'clsx'
 import {parseAsBoolean, parseAsString, useQueryState} from 'nuqs'
-import {NuqsAdapter} from 'nuqs/adapters/react'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {FaArrowUpRightFromSquare, FaRegCopy} from 'react-icons/fa6'
@@ -299,73 +298,70 @@ export default function App() {
       />
     )
   }
-  return <NuqsAdapter>
-    <div className={clsx(css.root, isDragOver && css.dragOver)}
-      onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-      <Group orientation="horizontal" className={css.mainPanels}>
-        {/* LEFT */}
-        <Panel defaultSize={50} minSize={20}>
-          <div className={css.pane}>
-            <div className={css.paneHeader}>
-              <div className={clsx(css.tab, css.active)}>input.txt</div>
-              <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
+  return <>
+    <Group orientation="horizontal" className={clsx(css.root, css.mainPanels)}>
+      {/* LEFT */}
+      <Panel defaultSize={50} minSize={20}>
+        <div className={css.pane}>
+          <div className={css.paneHeader}>
+            <div className={clsx(css.tab, css.active)}>input.txt</div>
+            <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
+          </div>
+          <div className={css.paneBody}>
+            <Editor value={state.text} onChange={onInput} useMonaco={state.useMonaco}
+              isBinary={state.isBinary} binaryData={state.binaryData} highlightRange={editorRange} />
+          </div>
+          <div className={css.paneFooter}>
+            <div className={css.footerInfo}>
+              <span className={css.footerIcon}>📝</span>
+              <span className={css.footerTitle}>Tok·Show</span>
+              <span className={css.footerSize}>{state.isBinary && state.binaryData ? `${state.binaryData.byteLength.toLocaleString('en-US')} bytes` : `${(new TextEncoder).encode(state.text).byteLength.toLocaleString('en-US')} bytes · ${state.text.length.toLocaleString('en-US')} chars`}</span>
             </div>
-            <div className={css.paneBody}>
-              <Editor value={state.text} onChange={onInput} useMonaco={state.useMonaco}
-                isBinary={state.isBinary} binaryData={state.binaryData} highlightRange={editorRange} />
-            </div>
-            <div className={css.paneFooter}>
-              <div className={css.footerInfo}>
-                <span className={css.footerIcon}>📝</span>
-                <span className={css.footerTitle}>Tok·Show</span>
-                <span className={css.footerSize}>{state.isBinary && state.binaryData ? `${state.binaryData.byteLength.toLocaleString('en-US')} bytes` : `${(new TextEncoder).encode(state.text).byteLength.toLocaleString('en-US')} bytes · ${state.text.length.toLocaleString('en-US')} chars`}</span>
-              </div>
-              <div className={css.footerRight}>
-                <button className={css.miniBtn} onClick={() => {
-                  state.useMonaco = !state.useMonaco
-                }}>
-                  {state.useMonaco ? 'Monaco' : 'textarea'}
-                </button>
-                <a className={css.shareLink} href={shareUrl} target="_blank" rel="noopener noreferrer"
-                  title="Duplicate or share this session (right-click to copy link)">
-                  <FaArrowUpRightFromSquare /><span>session URL</span>
-                </a>
-              </div>
+            <div className={css.footerRight}>
+              <button className={css.miniBtn} onClick={() => {
+                state.useMonaco = !state.useMonaco
+              }}>
+                {state.useMonaco ? 'Monaco' : 'textarea'}
+              </button>
+              <a className={css.shareLink} href={shareUrl} target="_blank" rel="noopener noreferrer"
+                title="Duplicate or share this session (right-click to copy link)">
+                <FaArrowUpRightFromSquare />
+              </a>
             </div>
           </div>
-        </Panel>
+        </div>
+      </Panel>
 
-        <Separator className={css.paneSeparator} />
+      <Separator className={css.paneSeparator} />
 
-        {/* RIGHT */}
-        <Panel defaultSize={50} minSize={20}>
-          <div className={css.pane}>
-            <div className={clsx(css.paneHeader, css.tabsRow)}>
-              <button className={clsx(css.tab, currentTab === 'mirror' && css.active)}
-                onClick={() => setCurrentTab('mirror')}>mirror</button>
-              <button className={clsx(css.tab, currentTab === 'tokenized' && css.active)}
-                onClick={() => setCurrentTab('tokenized')}>tokenized</button>
-              <button className={clsx(css.tab, currentTab === 'ids' && css.active)}
-                onClick={() => setCurrentTab('ids')}>IDs</button>
-            </div>
-            <div className={css.paneBody}>{rightContent()}</div>
-            <div className={clsx(css.paneFooter, css.modelBar)}>
-              <DraggableCardContainer entries={state.visibleEntries} modelsById={modelsMap}
-                counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
-                hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}
-                onReorder={onReorder} onFocus={onFocus} onStashDrop={onStashDrop}
-                showAverage={showAvg} averageCount={avgCount} visibleModelCount={visibleCount}>
-                <HiddenCardStashButton hiddenModels={hidden}
-                  onUnhide={onUnhide} onHide={(id: string) => onHide(id)} />
-              </DraggableCardContainer>
-            </div>
+      {/* RIGHT */}
+      <Panel defaultSize={50} minSize={20}>
+        <div className={css.pane}>
+          <div className={clsx(css.paneHeader, css.tabsRow)}>
+            <button className={clsx(css.tab, currentTab === 'mirror' && css.active)}
+              onClick={() => setCurrentTab('mirror')}>mirror</button>
+            <button className={clsx(css.tab, currentTab === 'tokenized' && css.active)}
+              onClick={() => setCurrentTab('tokenized')}>tokenized</button>
+            <button className={clsx(css.tab, currentTab === 'ids' && css.active)}
+              onClick={() => setCurrentTab('ids')}>IDs</button>
           </div>
-        </Panel>
-      </Group>
+          <div className={css.paneBody}>{rightContent()}</div>
+          <div className={clsx(css.paneFooter, css.modelBar)}>
+            <DraggableCardContainer entries={state.visibleEntries} modelsById={modelsMap}
+              counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
+              hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}
+              onReorder={onReorder} onFocus={onFocus} onStashDrop={onStashDrop}
+              showAverage={showAvg} averageCount={avgCount} visibleModelCount={visibleCount}>
+              <HiddenCardStashButton hiddenModels={hidden}
+                onUnhide={onUnhide} onHide={(id: string) => onHide(id)} />
+            </DraggableCardContainer>
+          </div>
+        </div>
+      </Panel>
+    </Group>
 
-      {isDragOver && <div className={css.dropOverlay}>Drop text or file anywhere</div>}
-    </div>
-  </NuqsAdapter>
+    {isDragOver && <div className={css.dropOverlay}>Drop text or file anywhere</div>}
+  </>
 }
 
 // Custom URL param parser for models array (comma-separated)
