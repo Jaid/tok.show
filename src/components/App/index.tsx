@@ -4,6 +4,7 @@ import type {ModelId} from 'token-vocabs'
 
 import clsx from 'clsx'
 import {parseAsBoolean, parseAsString, useQueryState} from 'nuqs'
+import {NuqsAdapter} from 'nuqs/adapters/react'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {FaArrowUpRightFromSquare, FaRegCopy} from 'react-icons/fa6'
@@ -19,6 +20,8 @@ import modelsMap from '#src/lib/models/index.ts'
 import {getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, state} from '#src/lib/state.ts'
 import {ensureModelLoaded, initializeModels, runTokenization, unloadModel} from '#src/lib/tokenManager.ts'
 import {getTokenSpans} from '#src/lib/tokenSpans.ts'
+
+import css from './style.module.sass'
 
 const allModelIds = modelIds as ReadonlyArray<ModelId>
 
@@ -273,16 +276,16 @@ export default function App() {
   const rightContent = () => {
     if (currentTab === 'mirror') {
       const d = curInput instanceof Uint8Array ? new TextDecoder('utf-8', {fatal: false}).decode(curInput) : curInput
-      return <div className="mirror-view">{d || <span className="tok-empty">Start typing…</span>}</div>
+      return <div className={css.mirrorView}>{d || <span className={css.empty}>Start typing…</span>}</div>
     }
     if (currentTab === 'ids') {
       const td = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData : null
       if (!td) {
-        return <div className="ids-view tok-empty">No tokens (focus a model)</div>
+        return <div className={clsx(css.idsView, css.tokEmpty)}>No tokens (focus a model)</div>
       }
       return (
-        <div className="ids-view">
-          {td.tokens.map((id: number, i: number) => <span key={i} className="token-id-chip">{id}</span>)}
+        <div className={css.idsView}>
+          {td.tokens.map((id: number, i: number) => <span key={i} className={css.tokenIdChip}>{id}</span>)}
         </div>
       )
     }
@@ -296,34 +299,34 @@ export default function App() {
       />
     )
   }
-  return (
-    <div className={clsx('app-root', isDragOver && 'drag-over')}
+  return <NuqsAdapter>
+    <div className={clsx(css.root, isDragOver && css.dragOver)}
       onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-      <Group orientation="horizontal" className="main-panels">
+      <Group orientation="horizontal" className={css.mainPanels}>
         {/* LEFT */}
         <Panel defaultSize={50} minSize={20}>
-          <div className="pane">
-            <div className="pane-header">
-              <div className="tab active">input.txt</div>
-              <button className="icon-btn" onClick={onCopy} title="Copy input"><FaRegCopy /></button>
+          <div className={css.pane}>
+            <div className={css.paneHeader}>
+              <div className={clsx(css.tab, css.active)}>input.txt</div>
+              <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
             </div>
-            <div className="pane-body">
+            <div className={css.paneBody}>
               <Editor value={state.text} onChange={onInput} useMonaco={state.useMonaco}
                 isBinary={state.isBinary} binaryData={state.binaryData} highlightRange={editorRange} />
             </div>
-            <div className="pane-footer">
-              <div className="footer-info">
-                <span className="footer-icon">📝</span>
-                <span className="footer-title">Tok·Show</span>
-                <span className="footer-size">{state.isBinary && state.binaryData ? `${state.binaryData.byteLength.toLocaleString('en-US')} bytes` : `${(new TextEncoder).encode(state.text).byteLength.toLocaleString('en-US')} bytes · ${state.text.length.toLocaleString('en-US')} chars`}</span>
+            <div className={css.paneFooter}>
+              <div className={css.footerInfo}>
+                <span className={css.footerIcon}>📝</span>
+                <span className={css.footerTitle}>Tok·Show</span>
+                <span className={css.footerSize}>{state.isBinary && state.binaryData ? `${state.binaryData.byteLength.toLocaleString('en-US')} bytes` : `${(new TextEncoder).encode(state.text).byteLength.toLocaleString('en-US')} bytes · ${state.text.length.toLocaleString('en-US')} chars`}</span>
               </div>
-              <div className="footer-right">
-                <button className="mini-btn" onClick={() => {
+              <div className={css.footerRight}>
+                <button className={css.miniBtn} onClick={() => {
                   state.useMonaco = !state.useMonaco
                 }}>
                   {state.useMonaco ? 'Monaco' : 'textarea'}
                 </button>
-                <a className="share-link" href={shareUrl} target="_blank" rel="noopener noreferrer"
+                <a className={css.shareLink} href={shareUrl} target="_blank" rel="noopener noreferrer"
                   title="Duplicate or share this session (right-click to copy link)">
                   <FaArrowUpRightFromSquare /><span>session URL</span>
                 </a>
@@ -332,21 +335,21 @@ export default function App() {
           </div>
         </Panel>
 
-        <Separator className="pane-separator" />
+        <Separator className={css.paneSeparator} />
 
         {/* RIGHT */}
         <Panel defaultSize={50} minSize={20}>
-          <div className="pane">
-            <div className="pane-header tabs-row">
-              <button className={clsx('tab', currentTab === 'mirror' && 'active')}
+          <div className={css.pane}>
+            <div className={clsx(css.paneHeader, css.tabsRow)}>
+              <button className={clsx(css.tab, currentTab === 'mirror' && css.active)}
                 onClick={() => setCurrentTab('mirror')}>mirror</button>
-              <button className={clsx('tab', currentTab === 'tokenized' && 'active')}
+              <button className={clsx(css.tab, currentTab === 'tokenized' && css.active)}
                 onClick={() => setCurrentTab('tokenized')}>tokenized</button>
-              <button className={clsx('tab', currentTab === 'ids' && 'active')}
+              <button className={clsx(css.tab, currentTab === 'ids' && css.active)}
                 onClick={() => setCurrentTab('ids')}>IDs</button>
             </div>
-            <div className="pane-body tokenized-body">{rightContent()}</div>
-            <div className="pane-footer model-bar">
+            <div className={css.paneBody}>{rightContent()}</div>
+            <div className={clsx(css.paneFooter, css.modelBar)}>
               <DraggableCardContainer entries={state.visibleEntries} modelsById={modelsMap}
                 counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
                 hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}
@@ -360,9 +363,9 @@ export default function App() {
         </Panel>
       </Group>
 
-      {isDragOver && <div className="drop-overlay">Drop text or file anywhere</div>}
+      {isDragOver && <div className={css.dropOverlay}>Drop text or file anywhere</div>}
     </div>
-  )
+  </NuqsAdapter>
 }
 
 // Custom URL param parser for models array (comma-separated)

@@ -9,6 +9,8 @@ import {useCallback} from 'react'
 
 import DraggableCard from '#component/DraggableCard'
 
+import css from './style.module.sass'
+
 const pointerSensor = PointerSensor.configure({
   activationConstraints: [new PointerActivationConstraints.Distance({value: 8})],
 })
@@ -56,7 +58,7 @@ export default function DraggableCardContainer({children, entries, modelsById, c
   }, [entries, onReorder, onStashDrop])
   return (
     <DragDropProvider onDragEnd={handleDragEnd} sensors={[pointerSensor, KeyboardSensor.configure({})]}>
-      <div className="draggable-cards">
+      <div className={css.cardList}>
         {entries.map((entry, index) => {
           if (entry === 'average') {
             return (
@@ -102,13 +104,13 @@ function arrayMove<T>(array: Array<T>, from: number, to: number): Array<T> {
 function AverageCard({count, subtext}: {count: number | null
   subtext: string}) {
   return (
-    <div className="average-card">
-      <div className="average-card-icon">⟲</div>
-      <div className="average-card-text">
-        <div className="average-card-name">Average</div>
-        <div className="average-card-subname">{subtext}</div>
+    <div className={css.averageCard}>
+      <div className={css.averageCardIcon}>⟲</div>
+      <div className={css.averageCardText}>
+        <div className={css.averageCardName}>Average</div>
+        <div className={css.averageCardSubname}>{subtext}</div>
       </div>
-      <div className="average-card-count">{count !== null ? count : '\u2013'}</div>
+      <div className={css.averageCardCount}>{count !== null ? count : '\u2013'}</div>
     </div>
   )
 }
@@ -125,7 +127,7 @@ function DraggableAverageCard({averageCount, index, showAverage, visibleModelCou
     return null
   }
   if (isDragging) {
-    return <div ref={ref} className="draggable-card-placeholder" />
+    return <div ref={ref} className={css.placeholder} />
   }
   const subtext = visibleModelCount >= 2 ? `${visibleModelCount} visible models` : 'waiting for counts'
   return (
