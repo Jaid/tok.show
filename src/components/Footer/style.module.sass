@@ -1,0 +1,54 @@
+$borderColor: #222
+
+.footer
+  display: flex
+  align-items: center
+  justify-content: space-between
+  padding: 6px 10px
+  border-top: 1px solid $borderColor
+  flex-shrink: 0
+  font-size: 12px
+
+.footerInfo
+  display: flex
+  align-items: center
+  gap: 6px
+  color: #555
+
+.footerIcon
+  font-size: 14px
+
+.footerTitle
+  font-weight: 500
+
+.footerSize
+  color: #888
+  font-size: 11px
+
+.footerRight
+  display: flex
+  align-items: center
+  gap: 10px
+
+.miniBtn
+  background: transparent
+  border: 1px solid $borderColor
+  color: #888
+  padding: 2px 8px
+  border-radius: 4px
+  cursor: pointer
+  font-size: 11px
+  transition: border-color 0.1s
+  &:hover
+    border-color: #333
+    color: #e0e0e0
+
+.shareLink
+  display: inline-flex
+  align-items: center
+  gap: 4px
+  color: #555
+  text-decoration: none
+  font-size: 11px
+  &:hover
+    color: #888

@@ -6,13 +6,14 @@ import clsx from 'clsx'
 import {parseAsBoolean, parseAsString, useQueryState} from 'nuqs'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useHotkeys} from 'react-hotkeys-hook'
-import {FaArrowUpRightFromSquare, FaRegCopy} from 'react-icons/fa6'
+import {FaRegCopy} from 'react-icons/fa6'
 import {Group, Panel, Separator} from 'react-resizable-panels'
 import {modelIds} from 'token-vocabs'
 import {useSnapshot} from 'valtio'
 
 import DraggableCardContainer from '#component/DraggableCardContainer'
 import Editor from '#component/Editor'
+import Footer from '#component/Footer'
 import HiddenCardStashButton from '#component/HiddenCardStashButton'
 import TokenizedText from '#component/TokenizedText'
 import modelsMap from '#src/lib/models/index.ts'
@@ -33,7 +34,7 @@ export default function App() {
   const [modelParam, setModelParam] = useQueryState('model', parseAsString.withDefault('gpt'))
   const [monacoParam] = useQueryState('monaco', parseAsBoolean.withDefault(true))
   // models param (handled manually)
-  const [modelsRaw, setModelsRaw] = useQueryState('models', parseAsString.withDefault('gpt,deepseek,mimo,qwen'))
+  const [modelsRaw, setModelsRaw] = useQueryState('models', parseAsString.withDefault('gpt,deepseek'))
   // Local UI
   const [currentTab, setCurrentTab] = useState<Tab>('tokenized')
   const [editorRange, setEditorRange] = useState<{end: number
@@ -311,24 +312,16 @@ export default function App() {
             <Editor value={state.text} onChange={onInput} useMonaco={state.useMonaco}
               isBinary={state.isBinary} binaryData={state.binaryData} highlightRange={editorRange} />
           </div>
-          <div className={css.paneFooter}>
-            <div className={css.footerInfo}>
-              <span className={css.footerIcon}>📝</span>
-              <span className={css.footerTitle}>Tok·Show</span>
-              <span className={css.footerSize}>{state.isBinary && state.binaryData ? `${state.binaryData.byteLength.toLocaleString('en-US')} bytes` : `${(new TextEncoder).encode(state.text).byteLength.toLocaleString('en-US')} bytes · ${state.text.length.toLocaleString('en-US')} chars`}</span>
-            </div>
-            <div className={css.footerRight}>
-              <button className={css.miniBtn} onClick={() => {
-                state.useMonaco = !state.useMonaco
-              }}>
-                {state.useMonaco ? 'Monaco' : 'textarea'}
-              </button>
-              <a className={css.shareLink} href={shareUrl} target="_blank" rel="noopener noreferrer"
-                title="Duplicate or share this session (right-click to copy link)">
-                <FaArrowUpRightFromSquare />
-              </a>
-            </div>
-          </div>
+          <Footer
+            isBinary={state.isBinary && !!state.binaryData}
+            byteLength={state.isBinary && state.binaryData ? state.binaryData.byteLength : (new TextEncoder).encode(state.text).byteLength}
+            charLength={state.text.length}
+            useMonaco={state.useMonaco}
+            onToggleMonaco={() => {
+              state.useMonaco = !state.useMonaco
+            }}
+            shareUrl={shareUrl}
+          />
         </div>
       </Panel>
 
@@ -367,7 +360,7 @@ export default function App() {
 // Custom URL param parser for models array (comma-separated)
 function getModelsFromUrl(value: string | null): Array<string> {
   if (!value) {
-    return ['gpt', 'deepseek', 'mimo', 'qwen']
+    return ['gpt', 'deepseek']
   }
   return value.split(',').map(s => s.trim()).filter(Boolean)
 }
