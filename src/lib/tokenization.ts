@@ -14,7 +14,7 @@ export type DisplayToken = ByteRange & {
   visuallyRepresentable: boolean
 }
 
-const utf8Encoder = new TextEncoder()
+const utf8Encoder = new TextEncoder
 const utf8Decoder = new TextDecoder('utf-8', {fatal: false})
 
 export const encodeUtf8 = (text: string) => utf8Encoder.encode(text)
@@ -29,7 +29,7 @@ export const getTokenRanges = (tokenizeResult: RawTokenizeResult, inputByteLengt
   const starts = getTokenStartOffsets(tokenizeResult)
   return starts.map((start, index) => ({
     end: starts[index + 1] ?? inputByteLength,
-    start
+    start,
   }))
 }
 
@@ -37,8 +37,8 @@ export const bytesToHexPairs = (bytes: Uint8Array) => Array.from(bytes, byte => 
 
 export const bytesToHex = (bytes: Uint8Array) => bytesToHexPairs(bytes).join(' ')
 
-const controlCharacterPattern = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF\uFFFD]/u
-const visibleContentPattern = /[\p{Letter}\p{Number}\p{Punctuation}\p{Symbol}\p{Separator}\p{Mark}]/u
+const controlCharacterPattern = /[\u0000-\u0008\v\f\u000E-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF\uFFFD]/u
+const visibleContentPattern = /[\p{Letter}\p{Mark}\p{Number}\p{Punctuation}\p{Separator}\p{Symbol}]/u
 
 export const isVisuallyRepresentable = (text: string) => {
   if (text.length === 0) {
@@ -64,7 +64,7 @@ export const buildDisplayTokens = (input: TokenizeInput, tokenizeResult: RawToke
       index,
       key: `${index}:${range.start}:${range.end}:${tokenizeResult.tokens[index] ?? -1}`,
       text,
-      visuallyRepresentable: isVisuallyRepresentable(text)
+      visuallyRepresentable: isVisuallyRepresentable(text),
     }
   })
 }
@@ -81,13 +81,12 @@ const getByteOffsetToStringIndex = (text: string) => {
   }
   return (offset: number) => map.get(offset) ?? text.length
 }
-
 const getLineColumnFromIndex = (text: string, index: number) => {
   const segment = text.slice(0, index)
   const lines = segment.split('\n')
   return {
     column: (lines.at(-1)?.length ?? 0) + 1,
-    lineNumber: lines.length
+    lineNumber: lines.length,
   }
 }
 
@@ -99,7 +98,7 @@ export const getTextRangeFromByteRange = (text: string, range: ByteRange) => {
     endColumn: end.column,
     endLineNumber: end.lineNumber,
     startColumn: start.column,
-    startLineNumber: start.lineNumber
+    startLineNumber: start.lineNumber,
   }
 }
 

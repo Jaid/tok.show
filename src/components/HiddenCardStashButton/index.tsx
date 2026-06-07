@@ -1,6 +1,8 @@
 import type {Model} from '#src/lib/models/index.ts'
-import {useFloating, useClick, useDismiss, useInteractions, offset, flip, shift} from '@floating-ui/react'
-import {useState, forwardRef, useImperativeHandle, useRef} from 'react'
+
+import {flip, offset, shift, useClick, useDismiss, useFloating, useInteractions} from '@floating-ui/react'
+import {forwardRef, useImperativeHandle, useRef, useState} from 'react'
+
 import HiddenCardStash from '#component/HiddenCardStash'
 
 export type HiddenCardStashButtonHandle = {
@@ -8,50 +10,43 @@ export type HiddenCardStashButtonHandle = {
 }
 
 type Props = {
+  hiddenModels: Array<Model>
   onHide: (modelId: string) => void
   onUnhide: (modelId: string) => void
-  hiddenModels: Model[]
 }
 
-const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(
-  ({hiddenModels, onUnhide, onHide}, ref) => {
-    const [isOpen, setIsOpen] = useState(false)
-    const buttonRef = useRef<HTMLButtonElement>(null)
-
-    useImperativeHandle(ref, () => ({
-      getBoundingClientRect: () => buttonRef.current?.getBoundingClientRect() ?? null,
-    }))
-
-    const {refs, floatingStyles, context} = useFloating({
-      open: isOpen,
-      onOpenChange: setIsOpen,
-      placement: 'top-end',
-      middleware: [offset(8), flip(), shift()],
-    })
-
-    const click = useClick(context)
-    const dismiss = useDismiss(context)
-    const {getReferenceProps, getFloatingProps} = useInteractions([click, dismiss])
-
-    const setRefs = (el: HTMLButtonElement | null) => {
-      buttonRef.current = el
-      refs.setReference(el)
-    }
-
-    const count = hiddenModels.length
-
-    return (
-      <>
-        <button
-          ref={setRefs}
-          className="stash-button"
-          {...getReferenceProps()}
-          aria-label={count > 0 ? `${count} more models hidden` : 'Hidden models'}
-        >
-          {count > 0 ? `${count} more` : '⋯'}
-        </button>
-        {isOpen && (
-          <div
+const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(({hiddenModels, onUnhide, onHide}, ref) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+  useImperativeHandle(ref, () => ({
+    getBoundingClientRect: () => buttonRef.current?.getBoundingClientRect() ?? null,
+  }))
+  const {refs, floatingStyles, context} = useFloating({
+    open: isOpen,
+    onOpenChange: setIsOpen,
+    placement: 'top-end',
+    middleware: [offset(8), flip(), shift()],
+  })
+  const click = useClick(context)
+  const dismiss = useDismiss(context)
+  const {getReferenceProps, getFloatingProps} = useInteractions([click, dismiss])
+  const setRefs = (el: HTMLButtonElement | null) => {
+    buttonRef.current = el
+    refs.setReference(el)
+  }
+  const count = hiddenModels.length
+  return (
+    <>
+      <button
+        ref={setRefs}
+        className="stash-button"
+        {...getReferenceProps()}
+        aria-label={count > 0 ? `${count} more models hidden` : 'Hidden models'}
+      >
+        {count > 0 ? `${count} more` : '⋯'}
+      </button>
+      {isOpen
+          && <div
             ref={refs.setFloating}
             style={floatingStyles}
             className="stash-popover"
@@ -62,8 +57,8 @@ const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(
               setIsOpen(false)
             }} />
           </div>
-        )}
-        <style>{`
+      }
+      <style>{`
           .stash-button {
             display: inline-flex;
             align-items: center;
@@ -93,9 +88,8 @@ const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(
             z-index: 100;
           }
         `}</style>
-      </>
-    )
-  },
-)
+    </>
+  )
+})
 
 export default HiddenCardStashButton

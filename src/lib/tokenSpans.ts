@@ -13,10 +13,10 @@ export type TokenSpan = {
 }
 
 export type TokenizeDataLike = {
-  offsets: readonly number[]
+  offsets: ReadonlyArray<number>
   originalInput?: TokenizeInput
-  processedInput?: string | Uint8Array
-  tokens: readonly number[]
+  processedInput?: Uint8Array | string
+  tokens: ReadonlyArray<number>
 }
 
 /**
@@ -24,9 +24,8 @@ export type TokenizeDataLike = {
  * Uses deepseek's Unicode-aware representability check and GPT's
  * byte-offset-precise text extraction.
  */
-export function getTokenSpans(data: TokenizeDataLike): TokenSpan[] {
+export function getTokenSpans(data: TokenizeDataLike): Array<TokenSpan> {
   const effectiveInput = data.processedInput ?? data.originalInput
-
   if (effectiveInput === undefined) {
     // Fallback: tokens without offsets = just show IDs
     return data.tokens.map((id, index) => ({
@@ -39,23 +38,23 @@ export function getTokenSpans(data: TokenizeDataLike): TokenSpan[] {
       text: String(id),
     }))
   }
-
   if (effectiveInput instanceof Uint8Array) {
     return getBinaryTokenSpans(effectiveInput, data)
   }
-
   return getTextTokenSpans(effectiveInput, data)
 }
 
-function getBinaryTokenSpans(bytes: Uint8Array, data: TokenizeDataLike): TokenSpan[] {
-  const offsets = data.offsets
-  const spans: TokenSpan[] = []
+export function bytesToHexPairs(bytes: Uint8Array): Array<string> {
+  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0'))
+}
 
+function getBinaryTokenSpans(bytes: Uint8Array, data: TokenizeDataLike): Array<TokenSpan> {
+  const offsets = data.offsets
+  const spans: Array<TokenSpan> = []
   let byteStart = 0
   for (let i = 0; i < data.tokens.length; i++) {
     const byteEnd = i < offsets.length ? offsets[i] : bytes.length
     const tokenBytes = bytes.slice(byteStart, byteEnd)
-
     // Try to decode as text
     let text = ''
     let hexDisplay: string | null = null
@@ -70,25 +69,29 @@ function getBinaryTokenSpans(bytes: Uint8Array, data: TokenizeDataLike): TokenSp
       isNonRepresentable = true
       hexDisplay = bytesToHexPairs(tokenBytes).join(' ')
     }
-
-    spans.push({byteEnd, byteStart, hexDisplay, id: data.tokens[i], index: i, isNonRepresentable, text})
+    spans.push({
+      byteEnd,
+      byteStart,
+      hexDisplay,
+      id: data.tokens[i],
+      index: i,
+      isNonRepresentable,
+      text,
+    })
     byteStart = byteEnd
   }
   return spans
 }
-
-function getTextTokenSpans(input: string, data: TokenizeDataLike): TokenSpan[] {
+function getTextTokenSpans(input: string, data: TokenizeDataLike): Array<TokenSpan> {
   const bytes = encodeUtf8(input)
   const offsets = data.offsets
-  const spans: TokenSpan[] = []
-
+  const spans: Array<TokenSpan> = []
   let byteStart = 0
   for (let i = 0; i < data.tokens.length; i++) {
     const byteEnd = i < offsets.length ? offsets[i] : bytes.length
     const tokenBytes = bytes.slice(byteStart, byteEnd)
     const text = decodeUtf8(tokenBytes)
     const nonRep = !isVisuallyRepresentable(text)
-
     spans.push({
       byteEnd,
       byteStart,
@@ -98,12 +101,7 @@ function getTextTokenSpans(input: string, data: TokenizeDataLike): TokenSpan[] {
       isNonRepresentable: nonRep,
       text,
     })
-
     byteStart = byteEnd
   }
   return spans
-}
-
-export function bytesToHexPairs(bytes: Uint8Array): string[] {
-  return Array.from(bytes, byte => byte.toString(16).padStart(2, '0'))
 }

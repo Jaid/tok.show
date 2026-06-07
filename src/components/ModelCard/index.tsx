@@ -1,5 +1,7 @@
 import type {Model} from '#src/lib/models/index.ts'
+
 import clsx from 'clsx'
+
 import PulsatingNumber from '#component/PulsatingNumber'
 
 type Props = {
@@ -34,15 +36,8 @@ export default function ModelCard({model, count, isFocused, isLoading, error, on
         {model.subname && <div className="model-card-subname">{model.subname}</div>}
       </div>
       <div className="model-card-count">
-        {isLoading ? (
-          <span className="count-loading">…</span>
-        ) : error ? (
-          <span className="count-error">⚠</span>
-        ) : count !== null ? (
-          <PulsatingNumber value={count} />
-        ) : (
-          <span className="count-na">–</span>
-        )}
+        {isLoading ? <span className="count-loading">…</span> : error ? <span className="count-error">⚠</span> : count !== null ? <PulsatingNumber value={count} /> : <span className="count-na">–</span>
+        }
       </div>
       <style>{`
         .model-card {

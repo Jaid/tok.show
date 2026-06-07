@@ -1,16 +1,17 @@
 import type {ModelId} from 'token-vocabs'
-import {proxy} from 'valtio'
+
 import {modelIds} from 'token-vocabs'
+import {proxy} from 'valtio'
 
 import modelsMap from './models/index.ts'
 
 export type EntryId = string
 
 export interface TokenizeData {
-  inputText: string | Uint8Array
-  offsets: readonly number[]
-  processedInput?: string | Uint8Array
-  tokens: readonly number[]
+  inputText: Uint8Array | string
+  offsets: ReadonlyArray<number>
+  processedInput?: Uint8Array | string
+  tokens: ReadonlyArray<number>
 }
 
 export interface ModelState {
@@ -37,8 +38,8 @@ export const state = proxy({
   isBinary: false,
   binaryData: null as Uint8Array | null,
   focusedId: 'gpt' as ModelId | null,
-  visibleEntries: ['average', 'gpt', 'deepseek'] as EntryId[],
-  hiddenEntryIds: [] as EntryId[],
+  visibleEntries: ['average', 'gpt', 'deepseek'] as Array<EntryId>,
+  hiddenEntryIds: [] as Array<EntryId>,
   modelStates: initialModelStates,
   activeTab: 'tokenized' as 'ids' | 'mirror' | 'tokenized',
   hoveredTokenIndex: null as number | null,
@@ -46,13 +47,13 @@ export const state = proxy({
   averageExplicitlyHidden: false,
 })
 
-export function getVisibleModelIds(): ModelId[] {
+export function getVisibleModelIds(): Array<ModelId> {
   return state.visibleEntries.filter((id): id is ModelId => id !== 'average')
 }
 
-export function getHiddenModelIds(): ModelId[] {
+export function getHiddenModelIds(): Array<ModelId> {
   const visible = new Set(getVisibleModelIds())
-  return (modelIds as readonly ModelId[]).filter((id: ModelId) => !visible.has(id))
+  return (modelIds as ReadonlyArray<ModelId>).filter((id: ModelId) => !visible.has(id))
 }
 
 export function getShouldShowAverage(): boolean {
@@ -72,5 +73,5 @@ export function getAverageCount(): number | null {
     return null
   }
   const sum = counts.reduce((a, b) => a + b, 0)
-  return Math.round((sum / counts.length) * 10) / 10
+  return Math.round(sum / counts.length * 10) / 10
 }

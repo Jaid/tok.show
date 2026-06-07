@@ -1,21 +1,22 @@
 import type {ModelId, TokenizeInput} from 'token-vocabs'
+
 import {countLoaded, free, load, tokenizeLoaded} from 'token-vocabs'
 
 export type TokenizationResult = {
-  tokens: number[]
-  offsets: number[]
   count: number
-  processedInput?: string | Uint8Array
+  offsets: Array<number>
+  processedInput?: Uint8Array | string
+  tokens: Array<number>
 }
 
 export default abstract class Model {
   id: ModelId
+  initiallyVisible = false
+  isLoaded = false
+  isLoading = false
+  lastError: Error | null = null
   abstract name: string
   subname: string | undefined
-  initiallyVisible = false
-  isLoading = false
-  isLoaded = false
-  lastError: Error | null = null
 
   constructor(id: ModelId) {
     this.id = id
@@ -23,6 +24,25 @@ export default abstract class Model {
 
   get icon() {
     return `/${this.id}.svg`
+  }
+
+  async getTokenCount(input: TokenizeInput): Promise<number> {
+    if (!this.isLoaded) {
+      await this.load()
+    }
+    return this.getTokenCountSync(input)
+  }
+
+  getTokenCountSync(input: TokenizeInput): number {
+    if (!this.isLoaded) {
+      throw new Error(`Model ${this.id} is not loaded`)
+    }
+    try {
+      return countLoaded(input, this.id)
+    } catch (error) {
+      this.lastError = error instanceof Error ? error : new Error(String(error))
+      throw this.lastError
+    }
   }
 
   async load(): Promise<void> {
@@ -49,12 +69,17 @@ export default abstract class Model {
     }
   }
 
-  unload(): void {
-    if (this.isLoaded) {
-      free(this.id)
-      this.isLoaded = false
+  supportsInput(input: TokenizeInput): boolean {
+    // Most tokenizers require valid UTF-8 for string-like, but Uint8Array may fail for some
+    // We let the actual tokenize call fail and handle it in the UI
+    return true
+  }
+
+  async tokenize(input: TokenizeInput): Promise<TokenizationResult> {
+    if (!this.isLoaded) {
+      await this.load()
     }
-    this.isLoading = false
+    return this.tokenizeSync(input)
   }
 
   tokenizeSync(input: TokenizeInput): TokenizationResult {
@@ -75,35 +100,11 @@ export default abstract class Model {
     }
   }
 
-  async tokenize(input: TokenizeInput): Promise<TokenizationResult> {
-    if (!this.isLoaded) {
-      await this.load()
+  unload(): void {
+    if (this.isLoaded) {
+      free(this.id)
+      this.isLoaded = false
     }
-    return this.tokenizeSync(input)
-  }
-
-  getTokenCountSync(input: TokenizeInput): number {
-    if (!this.isLoaded) {
-      throw new Error(`Model ${this.id} is not loaded`)
-    }
-    try {
-      return countLoaded(input, this.id)
-    } catch (error) {
-      this.lastError = error instanceof Error ? error : new Error(String(error))
-      throw this.lastError
-    }
-  }
-
-  async getTokenCount(input: TokenizeInput): Promise<number> {
-    if (!this.isLoaded) {
-      await this.load()
-    }
-    return this.getTokenCountSync(input)
-  }
-
-  supportsInput(input: TokenizeInput): boolean {
-    // Most tokenizers require valid UTF-8 for string-like, but Uint8Array may fail for some
-    // We let the actual tokenize call fail and handle it in the UI
-    return true
+    this.isLoading = false
   }
 }

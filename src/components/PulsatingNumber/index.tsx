@@ -1,15 +1,14 @@
-import {useEffect, useRef} from 'react'
 import clsx from 'clsx'
+import {useEffect, useRef} from 'react'
 
 type Props = {
-  value: number | string
   className?: string
+  value: number | string
 }
 
 export default function PulsatingNumber({value, className}: Props) {
   const prevRef = useRef<number | string>(value)
   const spanRef = useRef<HTMLSpanElement>(null)
-
   useEffect(() => {
     if (prevRef.current !== value && spanRef.current) {
       spanRef.current.classList.remove('pulse')
@@ -18,7 +17,6 @@ export default function PulsatingNumber({value, className}: Props) {
     }
     prevRef.current = value
   }, [value])
-
   return (
     <span ref={spanRef} className={clsx('pulsating-number', className)}>
       {value}

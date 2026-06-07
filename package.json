@@ -1,21 +1,21 @@
 {
   "name": "tok.show",
-  "version": "0.1.0",
-  "description": "web app for offline LLM tokenization supporting a wide range of popular models",
   "displayName": "Tok·Show",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "web app for offline LLM tokenization supporting a wide range of popular models",
   "imports": {
     "#src/*": "./src/*",
     "#root/*": "./*",
     "#component/*": "./src/components/*/index.tsx"
   },
   "scripts": {
-    "lint": "tsc --noEmit --noUnusedLocals --pretty false ; knip-bun --reporter json",
-    "vite": "bun node_modules/vite/dist/node/cli.js --configLoader runner",
     "build": "bun run vite build --mode development",
     "build:production": "bun run vite build --mode production",
-    "test-live": "bun run build:production && target=dist bun test test/live.test.ts"
+    "lint": "tsc --noEmit --noUnusedLocals --pretty false ; knip-bun --reporter json",
+    "test-live": "bun run build:production && target=dist bun test test/live.test.ts",
+    "vite": "bun node_modules/vite/dist/node/cli.js --configLoader runner"
   },
-  "type": "module",
   "dependencies": {
     "@dnd-kit/react": "0.4.0",
     "@floating-ui/react": "0.27.19",

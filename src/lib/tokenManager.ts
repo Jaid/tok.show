@@ -1,10 +1,11 @@
 import type {ModelId, TokenizeInput} from 'token-vocabs'
+
 import {load, tokenizeLoaded} from 'token-vocabs'
 
-import {state, getVisibleModelIds} from '#src/lib/state.ts'
+import {getVisibleModelIds, state} from '#src/lib/state.ts'
 
-const loadedSet = new Set<ModelId>()
-const loadingPromises = new Map<ModelId, Promise<void>>()
+const loadedSet = new Set<ModelId>
+const loadingPromises = new Map<ModelId, Promise<void>>
 let tokenizeGeneration = 0
 
 export async function loadModel(modelId: ModelId): Promise<void> {
@@ -46,31 +47,9 @@ export function unloadModel(modelId: ModelId): void {
   }
 }
 
-function tokenizeModel(modelId: ModelId, input: TokenizeInput): boolean {
-  if (!loadedSet.has(modelId)) {
-    return false
-  }
-  try {
-    const result = tokenizeLoaded(input, modelId)
-    state.modelStates[modelId].tokenizeData = {
-      inputText: input,
-      offsets: result.offsets,
-      processedInput: result.processedInput,
-      tokens: result.tokens,
-    }
-    state.modelStates[modelId].tokenCount = result.tokens.length
-    state.modelStates[modelId].error = null
-    return true
-  } catch (error) {
-    state.modelStates[modelId].error = error instanceof Error ? error.message : String(error)
-    return false
-  }
-}
-
 export function runTokenization(input: TokenizeInput): void {
   const gen = ++tokenizeGeneration
   const focusedId = state.focusedId
-
   const doTokenize = async () => {
     // 1. Focused model first
     if (focusedId && loadedSet.has(focusedId)) {
@@ -79,7 +58,6 @@ export function runTokenization(input: TokenizeInput): void {
     if (gen !== tokenizeGeneration) {
       return
     }
-
     // 2. Other visible models in parallel
     const visibleIds = getVisibleModelIds().filter(id => id !== focusedId && loadedSet.has(id))
     const batchSize = 4
@@ -100,7 +78,6 @@ export function runTokenization(input: TokenizeInput): void {
 
 export async function initializeModels(): Promise<void> {
   const focusedId = state.focusedId
-
   // 1. Load focused model first, solo
   if (focusedId) {
     await loadModel(focusedId)
@@ -108,11 +85,9 @@ export async function initializeModels(): Promise<void> {
       tokenizeModel(focusedId, state.text)
     }
   }
-
   // 2. Load all other visible models in parallel
   const otherIds = getVisibleModelIds().filter(id => id !== focusedId)
   await Promise.allSettled(otherIds.map(id => loadModel(id)))
-
   // Tokenize with all loaded
   if (state.text) {
     const input = state.isBinary && state.binaryData ? state.binaryData : state.text
@@ -124,4 +99,25 @@ export async function initializeModels(): Promise<void> {
 
 export async function ensureModelLoaded(modelId: ModelId): Promise<void> {
   await loadModel(modelId)
+}
+
+function tokenizeModel(modelId: ModelId, input: TokenizeInput): boolean {
+  if (!loadedSet.has(modelId)) {
+    return false
+  }
+  try {
+    const result = tokenizeLoaded(input, modelId)
+    state.modelStates[modelId].tokenizeData = {
+      inputText: input,
+      offsets: result.offsets,
+      processedInput: result.processedInput,
+      tokens: result.tokens,
+    }
+    state.modelStates[modelId].tokenCount = result.tokens.length
+    state.modelStates[modelId].error = null
+    return true
+  } catch (error) {
+    state.modelStates[modelId].error = error instanceof Error ? error.message : String(error)
+    return false
+  }
 }

@@ -1,71 +1,71 @@
-import type {ModelId} from 'token-vocabs'
+import type {HiddenCardStashButtonHandle} from '#component/HiddenCardStashButton'
 import type {EntryId} from '#src/lib/state.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
-import type {HiddenCardStashButtonHandle} from '#component/HiddenCardStashButton'
-import {Group, Panel, Separator} from 'react-resizable-panels'
-import {useQueryState, parseAsBoolean, parseAsString} from 'nuqs'
-import {useHotkeys} from 'react-hotkeys-hook'
-import {FaRegCopy, FaArrowUpRightFromSquare} from 'react-icons/fa6'
-import {useState, useEffect, useMemo, useCallback, useRef} from 'react'
-import {useSnapshot} from 'valtio'
-import {modelIds} from 'token-vocabs'
-import clsx from 'clsx'
-
-import Editor from '#component/Editor'
-import TokenizedText from '#component/TokenizedText'
-import DraggableCardContainer from '#component/DraggableCardContainer'
-import HiddenCardStashButton from '#component/HiddenCardStashButton'
-import {state, getVisibleModelIds, getHiddenModelIds, getShouldShowAverage, getAverageCount, getModel} from '#src/lib/state.ts'
-import {getTokenSpans} from '#src/lib/tokenSpans.ts'
-import {initializeModels, runTokenization, ensureModelLoaded} from '#src/lib/tokenManager.ts'
-import modelsMap from '#src/lib/models/index.ts'
 import type {Node} from '@babel/core'
+import type {ModelId} from 'token-vocabs'
 
-const allModelIds = modelIds as readonly ModelId[]
+import clsx from 'clsx'
+import {parseAsBoolean, parseAsString, useQueryState} from 'nuqs'
+import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {useHotkeys} from 'react-hotkeys-hook'
+import {FaArrowUpRightFromSquare, FaRegCopy} from 'react-icons/fa6'
+import {Group, Panel, Separator} from 'react-resizable-panels'
+import {modelIds} from 'token-vocabs'
+import {useSnapshot} from 'valtio'
+
+import DraggableCardContainer from '#component/DraggableCardContainer'
+import Editor from '#component/Editor'
+import HiddenCardStashButton from '#component/HiddenCardStashButton'
+import TokenizedText from '#component/TokenizedText'
+import modelsMap from '#src/lib/models/index.ts'
+import {getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, state} from '#src/lib/state.ts'
+import {ensureModelLoaded, initializeModels, runTokenization} from '#src/lib/tokenManager.ts'
+import {getTokenSpans} from '#src/lib/tokenSpans.ts'
+
+const allModelIds = modelIds as ReadonlyArray<ModelId>
 
 type Tab = 'ids' | 'mirror' | 'tokenized'
 
-// Custom URL param parser for models array (comma-separated)
-function getModelsFromUrl(value: string | null): string[] {
-  if (!value) return ['gpt', 'deepseek', 'mimo', 'qwen']
-  return value.split(',').map(s => s.trim()).filter(Boolean)
-}
-
-function serializeModels(ids: string[]): string {
-  return ids.join(',')
-}
-
 export default function App() {
   const snap = useSnapshot(state)
-
   // URL params
   const [textParam, setTextParam] = useQueryState('text', parseAsString.withDefault(''))
   const [modelParam, setModelParam] = useQueryState('model', parseAsString.withDefault('gpt'))
   const [monacoParam] = useQueryState('monaco', parseAsBoolean.withDefault(true))
-
   // models param (handled manually)
   const [modelsRaw, setModelsRaw] = useQueryState('models', parseAsString.withDefault('gpt,deepseek,mimo,qwen'))
-
   // Local UI
   const [currentTab, setCurrentTab] = useState<Tab>('tokenized')
-  const [editorRange, setEditorRange] = useState<{end: number; start: number} | null>(null)
+  const [editorRange, setEditorRange] = useState<{end: number
+    start: number} | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const stashRef = useRef<HiddenCardStashButtonHandle>(null)
-  const pointerRef = useRef({x: 0, y: 0})
+  const pointerRef = useRef({
+    x: 0,
+    y: 0,
+  })
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
   // Track pointer position for stash-drag detection
   useEffect(() => {
-    const move = (e: PointerEvent) => { pointerRef.current = {x: e.clientX, y: e.clientY} }
-    window.addEventListener('pointermove', move, {passive: true})
-    return () => window.removeEventListener('pointermove', move)
+    const move = (e: PointerEvent) => {
+      pointerRef.current = {
+        x: e.clientX,
+        y: e.clientY,
+      }
+    }
+    globalThis.addEventListener('pointermove', move, {passive: true})
+    return () => globalThis.removeEventListener('pointermove', move)
   }, [])
-
   // Sync URL → valtio
-  useEffect(() => { state.text = textParam }, [textParam])
   useEffect(() => {
-    if (!modelParam || modelParam === '') state.focusedId = null
-    else if (allModelIds.includes(modelParam as ModelId)) state.focusedId = modelParam as ModelId
+    state.text = textParam
+  }, [textParam])
+  useEffect(() => {
+    if (!modelParam || modelParam === '') {
+      state.focusedId = null
+    } else if (allModelIds.includes(modelParam as ModelId)) {
+      state.focusedId = modelParam as ModelId
+    }
   }, [modelParam])
   useEffect(() => {
     const ids = getModelsFromUrl(modelsRaw)
@@ -74,27 +74,38 @@ export default function App() {
       state.visibleEntries.push('average')
     }
   }, [modelsRaw])
-  useEffect(() => { state.useMonaco = monacoParam }, [monacoParam])
-
+  useEffect(() => {
+    state.useMonaco = monacoParam
+  }, [monacoParam])
   // Initial load
-  useEffect(() => { void initializeModels() }, [])
-
+  useEffect(() => {
+    void initializeModels()
+  }, [])
   // Tokenization pipeline
   useEffect(() => {
-    if (timerRef.current) clearTimeout(timerRef.current)
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+    }
     timerRef.current = setTimeout(() => {
       const input = state.isBinary && state.binaryData ? state.binaryData : state.text
       runTokenization(input)
     }, 16)
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+      }
+    }
   }, [state.text, state.isBinary, state.binaryData, snap.focusedId, snap.visibleEntries])
-
   // Token spans
-  const focusedSpans = useMemo<TokenSpan[]>(() => {
+  const focusedSpans = useMemo<Array<TokenSpan>>(() => {
     const fid = state.focusedId
-    if (!fid) return []
+    if (!fid) {
+      return []
+    }
     const ms = snap.modelStates[fid]
-    if (!ms?.tokenizeData) return []
+    if (!ms?.tokenizeData) {
+      return []
+    }
     return getTokenSpans({
       offsets: ms.tokenizeData.offsets,
       originalInput: ms.tokenizeData.inputText,
@@ -102,42 +113,45 @@ export default function App() {
       tokens: ms.tokenizeData.tokens,
     })
   }, [snap.modelStates, snap.focusedId])
-
   // Loading set
   const loadingSet = useMemo(() => {
-    const s = new Set<string>()
+    const s = new Set<string>
     for (const id of getVisibleModelIds()) {
-      if (snap.modelStates[id]?.loading) s.add(id)
+      if (snap.modelStates[id]?.loading) {
+        s.add(id)
+      }
     }
     return s
   }, [snap.modelStates, snap.visibleEntries])
-
   // Counts & errors
   const tokenCounts = useMemo(() => {
     const c: Record<string, number> = {}
-    for (const [id, ms] of Object.entries(snap.modelStates) as [string, {tokenCount: number; loaded: boolean}][]) {
-      if (ms && (ms.tokenCount > 0 || ms.loaded)) c[id] = ms.tokenCount
+    for (const [id, ms] of Object.entries(snap.modelStates) as Array<[string, {loaded: boolean
+      tokenCount: number}]>) {
+      if (ms && (ms.tokenCount > 0 || ms.loaded)) {
+        c[id] = ms.tokenCount
+      }
     }
     return c
   }, [snap.modelStates])
-
   const modelErrors = useMemo(() => {
     const e: Record<string, string | null> = {}
-    for (const [id, ms] of Object.entries(snap.modelStates) as [string, {error: string | null}][]) {
+    for (const [id, ms] of Object.entries(snap.modelStates) as Array<[string, {error: string | null}]>) {
       e[id] = ms?.error ?? null
     }
     return e
   }, [snap.modelStates])
-
   // Handlers
   const onInput = useCallback((v: string) => {
-    if (state.isBinary) { state.isBinary = false; state.binaryData = null }
+    if (state.isBinary) {
+      state.isBinary = false; state.binaryData = null
+    }
     state.text = v; setTextParam(v)
   }, [setTextParam])
-
   const onFocus = useCallback((modelId: string) => {
-    if (state.focusedId === modelId) state.focusedId = null
-    else {
+    if (state.focusedId === modelId) {
+      state.focusedId = null
+    } else {
       state.focusedId = modelId as ModelId
       if (!getVisibleModelIds().includes(modelId as ModelId)) {
         state.visibleEntries = [...state.visibleEntries, modelId]
@@ -145,19 +159,20 @@ export default function App() {
       void ensureModelLoaded(modelId as ModelId)
     }
   }, [])
-
-  const onReorder = useCallback((order: EntryId[]) => {
+  const onReorder = useCallback((order: Array<EntryId>) => {
     state.visibleEntries = order
     setModelsRaw(serializeModels(order.filter(e => e !== 'average')))
   }, [setModelsRaw])
-
   const onHide = useCallback((entry: EntryId) => {
-    if (entry !== 'average' && getVisibleModelIds().length <= 1) return
+    if (entry !== 'average' && getVisibleModelIds().length <= 1) {
+      return
+    }
     state.visibleEntries = state.visibleEntries.filter(e => e !== entry)
     setModelsRaw(serializeModels(getVisibleModelIds()))
-    if (entry !== 'average' && state.focusedId === entry) state.focusedId = null
+    if (entry !== 'average' && state.focusedId === entry) {
+      state.focusedId = null
+    }
   }, [setModelsRaw])
-
   const onUnhide = useCallback((id: string) => {
     if (!state.visibleEntries.includes(id)) {
       state.visibleEntries = [...state.visibleEntries, id]
@@ -165,11 +180,14 @@ export default function App() {
       void ensureModelLoaded(id as ModelId)
     }
   }, [setModelsRaw])
-
   // Drag & drop
-  const onDragOver = useCallback((e: React.DragEvent) => { e.preventDefault(); setIsDragOver(true) }, [])
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault(); setIsDragOver(true)
+  }, [])
   const onDragLeave = useCallback((e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragOver(false)
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false)
+    }
   }, [])
   const onDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault(); setIsDragOver(false)
@@ -177,9 +195,13 @@ export default function App() {
     if (file) {
       const buf = await file.arrayBuffer(); const bytes = new Uint8Array(buf)
       let text = true
-      try { new TextDecoder('utf-8', {fatal: true}).decode(bytes) } catch { text = false }
+      try {
+        new TextDecoder('utf-8', {fatal: true}).decode(bytes)
+      } catch {
+        text = false
+      }
       if (text) {
-        const s = new TextDecoder().decode(bytes)
+        const s = (new TextDecoder).decode(bytes)
         state.isBinary = false; state.binaryData = null; state.text = s; setTextParam(s)
       } else {
         state.isBinary = true; state.binaryData = bytes; state.text = ''; setTextParam('')
@@ -191,25 +213,29 @@ export default function App() {
       state.isBinary = false; state.binaryData = null; state.text = t; setTextParam(t)
     }
   }, [setTextParam])
-
   // Copy
   const onCopy = useCallback(async () => {
-    const t = state.isBinary && state.binaryData
-      ? new TextDecoder('utf-8', {fatal: false}).decode(state.binaryData) : state.text
-    try { await navigator.clipboard.writeText(t) } catch {
+    const t = state.isBinary && state.binaryData ? new TextDecoder('utf-8', {fatal: false}).decode(state.binaryData) : state.text
+    try {
+      await navigator.clipboard.writeText(t)
+    } catch {
       const ta = document.body.appendChild(document.createElement('textarea'))
       ta.value = t; ta.select(); document.execCommand('copy'); ta.remove()
     }
   }, [])
-
   // Token interactions
   const onTokenHover = useCallback((span: TokenSpan | null) => {
-    setEditorRange(span ? {start: span.byteStart, end: span.byteEnd} : null)
+    setEditorRange(span ? {
+      start: span.byteStart,
+      end: span.byteEnd,
+    } : null)
   }, [])
   const onTokenClick = useCallback((span: TokenSpan) => {
-    setEditorRange({start: span.byteStart, end: span.byteEnd})
+    setEditorRange({
+      start: span.byteStart,
+      end: span.byteEnd,
+    })
   }, [])
-
   // Stash drag
   const onStashDrop = useCallback((entry: EntryId) => {
     const p = pointerRef.current
@@ -218,11 +244,12 @@ export default function App() {
       onHide(entry)
     }
   }, [onHide])
-
   // Share URL
   const shareUrl = useMemo(() => {
-    if (typeof window === 'undefined') return '#'
-    const u = new URL(window.location.href)
+    if (globalThis.window === undefined) {
+      return '#'
+    }
+    const u = new URL(globalThis.location.href)
     u.search = ''
     u.searchParams.set('text', state.text)
     u.searchParams.set('model', state.focusedId ?? '')
@@ -230,42 +257,44 @@ export default function App() {
     u.searchParams.set('monaco', String(state.useMonaco))
     return u.toString()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
   // Hotkeys 0-9
-  useHotkeys('0', () => { state.focusedId = null }, {preventDefault: true})
+  useHotkeys('0', () => {
+    state.focusedId = null
+  }, {preventDefault: true})
   useHotkeys('1,2,3,4,5,6,7,8,9', (event, handler) => {
-    const keys = (handler as Record<string, unknown>).keys as string[] | undefined
-    const key = keys?.[0] ?? (event as KeyboardEvent).key
-    const num = parseInt(String(key), 10)
-    if (!num || num < 1 || num > 9) return
+    const keys = (handler as Record<string, unknown>).keys as Array<string> | undefined
+    const key = keys?.[0] ?? event.key
+    const num = Number.parseInt(String(key), 10)
+    if (!num || num < 1 || num > 9) {
+      return
+    }
     const real = state.visibleEntries.filter((e): e is ModelId => e !== 'average')
     const target = real[num - 1]
-    if (target) onFocus(target)
-    else state.focusedId = null
+    if (target) {
+      onFocus(target)
+    } else {
+      state.focusedId = null
+    }
   }, {preventDefault: true})
-
   // Derived
   const showAvg = getShouldShowAverage()
   const avgCount = getAverageCount()
   const hidden = getHiddenModelIds().map((id: ModelId) => getModel(id)).filter(Boolean)
   const focusedModel = state.focusedId ? getModel(state.focusedId) : null
   const curInput = state.isBinary && state.binaryData ? state.binaryData : state.text
-
   const rightContent = () => {
     if (currentTab === 'mirror') {
-      const d = curInput instanceof Uint8Array
-        ? new TextDecoder('utf-8', {fatal: false}).decode(curInput)
-        : curInput as string
+      const d = curInput instanceof Uint8Array ? new TextDecoder('utf-8', {fatal: false}).decode(curInput) : curInput
       return <div className="mirror-view">{d || <span className="tok-empty">Start typing…</span>}</div>
     }
     if (currentTab === 'ids') {
       const td = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData : null
-      if (!td) return <div className="ids-view tok-empty">No tokens (focus a model)</div>
+      if (!td) {
+        return <div className="ids-view tok-empty">No tokens (focus a model)</div>
+      }
       return (
         <div className="ids-view">
-          {td.tokens.map((id: number, i: number) => (
-            <span key={i} className="token-id-chip">{id}</span>
-          ))}
+          {td.tokens.map((id: number, i: number) => <span key={i} className="token-id-chip">{id}</span>)}
         </div>
       )
     }
@@ -279,7 +308,6 @@ export default function App() {
       />
     )
   }
-
   return (
     <div className={clsx('app-root', isDragOver && 'drag-over')}
       onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
@@ -329,7 +357,7 @@ export default function App() {
                 onReorder={onReorder} onFocus={onFocus} onStashDrop={onStashDrop}
                 showAverage={showAvg} averageCount={avgCount} />
               <HiddenCardStashButton ref={stashRef} hiddenModels={hidden}
-                onUnhide={onUnhide} onHide={(id: string) => onHide(id as EntryId)} />
+                onUnhide={onUnhide} onHide={(id: string) => onHide(id)} />
             </div>
           </div>
         </Panel>
@@ -338,4 +366,15 @@ export default function App() {
       {isDragOver && <div className="drop-overlay">Drop text or file anywhere</div>}
     </div>
   )
+}
+
+// Custom URL param parser for models array (comma-separated)
+function getModelsFromUrl(value: string | null): Array<string> {
+  if (!value) {
+    return ['gpt', 'deepseek', 'mimo', 'qwen']
+  }
+  return value.split(',').map(s => s.trim()).filter(Boolean)
+}
+function serializeModels(ids: Array<string>): string {
+  return ids.join(',')
 }
