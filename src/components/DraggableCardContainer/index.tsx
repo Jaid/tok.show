@@ -8,6 +8,8 @@ import {isSortableOperation, useSortable} from '@dnd-kit/react/sortable'
 import {useCallback} from 'react'
 
 import DraggableCard from '#component/DraggableCard'
+import ModelProfile from '#component/ModelProfile'
+import PulsatingNumber from '#component/PulsatingNumber'
 
 import css from './style.module.sass'
 
@@ -101,16 +103,25 @@ function arrayMove<T>(array: Array<T>, from: number, to: number): Array<T> {
   next.splice(to, 0, item)
   return next
 }
-function AverageCard({count, subtext}: {count: number | null
-  subtext: string}) {
+const averageModel = {
+  icon: '/icon.svg',
+  name: 'Average',
+}
+function AverageCard({count, modelCount}: {count: number | null
+  modelCount: number}) {
+  const subname = modelCount >= 2 ? `of ${modelCount} models` : undefined
   return (
     <div className={css.averageCard}>
-      <div className={css.averageCardIcon}>⟲</div>
-      <div className={css.averageCardText}>
-        <div className={css.averageCardName}>Average</div>
-        <div className={css.averageCardSubname}>{subtext}</div>
+      <div className={css.triangle}>▲</div>
+      <div className={css.count}>
+        {count !== null ? <PulsatingNumber suffix="token" suffixPlural gluedSuffix className={css.countElement} suffixClassName={css.countLabel} value={count} /> : <span className={css.countNa}>–</span>}
       </div>
-      <div className={css.averageCardCount}>{count !== null ? count : '\u2013'}</div>
+      <div className={css.profile}>
+        <ModelProfile model={{
+          ...averageModel,
+          subname,
+        }} />
+      </div>
     </div>
   )
 }
@@ -129,11 +140,10 @@ function DraggableAverageCard({averageCount, index, showAverage, visibleModelCou
   if (isDragging) {
     return <div ref={ref} className={css.placeholder} />
   }
-  const subtext = visibleModelCount >= 2 ? `${visibleModelCount} visible models` : 'waiting for counts'
   return (
     <div ref={ref}>
       <div ref={handleRef} style={{display: 'contents'}}>
-        <AverageCard count={averageCount} subtext={subtext} />
+        <AverageCard count={averageCount} modelCount={visibleModelCount} />
       </div>
     </div>
   )

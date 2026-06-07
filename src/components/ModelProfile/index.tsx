@@ -1,9 +1,11 @@
-import type {Model} from '#src/lib/models/index.ts'
-
 import css from './style.module.sass'
 
 type Props = {
-  model: Model
+  model: {
+    icon: string
+    name: string
+    subname?: string
+  }
 }
 
 export default function ModelProfile({model}: Props) {

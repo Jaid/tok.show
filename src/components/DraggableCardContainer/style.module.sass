@@ -9,37 +9,36 @@
 .averageCard
   display: flex
   align-items: center
-  padding: 6px 10px
-  border-radius: 6px
-  user-select: none
-  min-width: 120px
+  flex-direction: column
 
-.averageCardIcon
-  font-size: 16px
-  color: #888
+.triangle
+  line-height: 0.8
+  color: transparent
+  margin-top: -4px
 
-.averageCardText
-  flex: 1
-  min-width: 0
+.profile
+  display: flex
+  flex-direction: column
+  align-items: center
+  align-self: stretch
 
-.averageCardName
-  font-size: 13px
-  font-weight: 600
-  line-height: 1.1
-  color: #ccc
+.count
+  font-size: 24px
+  text-align: center
+  margin-bottom: 16px
 
-.averageCardSubname
+.countElement
+  display: flex
+  flex-direction: column
+
+.countLabel
   font-size: 10px
-  color: #555
-  line-height: 1.1
+  line-height: 0.5
+  font-weight: 200
+  color: gray
 
-.averageCardCount
-  font-family: code, monospace
-  font-size: 14px
-  font-weight: 500
-  min-width: 2em
-  text-align: right
-  color: #aaa
+.countNa
+  color: #444
 
 .placeholder
   width: 120px
