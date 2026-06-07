@@ -30,7 +30,7 @@ export default function ModelCard({model, count, isFocused, isLoading, error, on
     }}
     title={error ?? undefined}
   >
-    <div className={css.triangle}>▲</div>
+    <div className={css.triangle}>⏶</div>
     <div className={css.count}>
       {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <PulsatingNumber suffix="token" suffixPlural gluedSuffix className={css.countElement} suffixClassName={css.countLabel} value={count} /> : <span className={css.countNa}>–</span>}
     </div>
