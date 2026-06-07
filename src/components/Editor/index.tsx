@@ -29,7 +29,6 @@ const ensureTheme = once((monaco: any) => {
       'editor.selectionBackground': '#333333',
       'editor.inactiveSelectionBackground': '#222222',
       'editorCursor.foreground': '#fff',
-      'editorLineNumber.foreground': '#333',
     },
     rules: [],
   })
@@ -79,54 +78,49 @@ export default function Editor({value, onChange, readOnly, useMonaco = true, isB
   }
   // Fallback textarea when Monaco disabled
   if (!useMonaco) {
-    return (
-      <textarea
-        aria-label='input text'
-        className={css.textarea}
-        value={value}
-        onChange={e => onChange(e.currentTarget.value)}
-        readOnly={readOnly}
-        spellCheck={false}
-      />
-    )
+    return <textarea
+      aria-label='input text'
+      className={css.textarea}
+      value={value}
+      onChange={e => onChange(e.currentTarget.value)}
+      readOnly={readOnly}
+      spellCheck={false}
+    />
   }
-  return (
-    <div className={css.editor}>
-      <MonacoEditor
-        value={value}
-        onChange={handleChange}
-        onMount={handleMount}
-        beforeMount={ensureTheme}
-        theme='black'
-        language='plaintext'
-        options={{
-          minimap: {enabled: false},
-          stickyScroll: {enabled: false},
-          lineNumbers: 'off',
-          fontFamily: 'code',
-          fontSize: 14,
-          tabSize: 2,
-          dragAndDrop: false,
-          accessibilitySupport: 'off',
-          guides: {indentation: false},
-          lineHeight: 1.3,
-          overviewRulerBorder: false,
-          renderWhitespace: 'trailing',
-          wordWrap: 'on',
-          contextmenu: true,
-          readOnly,
-          scrollbar: {
-            vertical: 'auto',
-            horizontal: 'auto',
-          },
-          renderLineHighlight: 'none',
-          folding: false,
-          links: false,
-          occurrencesHighlight: 'off',
-          selectionHighlight: false,
-          matchBrackets: 'never',
-        }}
-      />
-    </div>
-  )
+  return <div className={css.editor}>
+    <MonacoEditor
+      value={value}
+      onChange={handleChange}
+      onMount={handleMount}
+      beforeMount={ensureTheme}
+      theme='black'
+      language='plaintext'
+      options={{
+        minimap: {enabled: false},
+        stickyScroll: {enabled: false},
+        lineNumbers: 'off',
+        fontFamily: 'code, monospace',
+        fontSize: 14,
+        tabSize: 2,
+        dragAndDrop: false,
+        accessibilitySupport: 'off',
+        guides: {indentation: false},
+        lineHeight: 1.4,
+        overviewRulerBorder: false,
+        renderWhitespace: 'trailing',
+        wordWrap: 'on',
+        contextmenu: true,
+        readOnly,
+        scrollbar: {
+          vertical: 'auto',
+          horizontal: 'auto',
+        },
+        renderLineHighlight: 'none',
+        folding: false,
+        padding: {
+          top: 6,
+        },
+      }}
+    />
+  </div>
 }
