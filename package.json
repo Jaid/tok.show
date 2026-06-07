@@ -20,7 +20,7 @@
   "dependencies": {
     "@dnd-kit/react": "0.4.0",
     "@floating-ui/react": "0.27.19",
-    "@monaco-editor/react": "4.8.0-rc.3",
+    "@monaco-editor/react": "4.7.0",
     "clsx": "2.1.1",
     "es-toolkit": "1.47.0",
     "monaco-editor": "0.55.1",
@@ -31,7 +31,7 @@
     "react-icons": "5.6.0",
     "react-resizable-panels": "4.11.2",
     "token-vocabs": "0.5.0",
-    "valtio": "2.1.6"
+    "valtio": "2.3.2"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -49,7 +49,7 @@
     "cssnano-preset-advanced": "8.0.1",
     "eslint": "10.4.1",
     "fs-extra": "11.3.5",
-    "knip": "6.16.0",
+    "knip": "6.16.1",
     "optis": "0.1.0",
     "postcss-normalize": "13.0.1",
     "puppeteer-core": "25.1.0",
