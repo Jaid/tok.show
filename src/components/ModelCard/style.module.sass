@@ -1,15 +1,10 @@
 .card
   display: flex
   align-items: center
-  gap: 8px
+  gap: 12px
   padding: 6px 10px
-  border: 1px solid #222
   cursor: pointer
-  min-width: 120px
   flex-direction: column
-  &:hover
-    border-color: #444
-    background: #1a1a1a
 
 .focused
   border-color: #fff
@@ -17,31 +12,16 @@
 .loading
   opacity: .72
 
-.icon
-  height: 48px
-
-.name
-  font-size: 13px
-  font-weight: 600
-  line-height: 1.1
-  white-space: nowrap
-  overflow: hidden
-  text-overflow: ellipsis
-
-.subname
-  font-size: 10px
-  color: #555
-  line-height: 1.1
-  white-space: nowrap
-  overflow: hidden
-  text-overflow: ellipsis
+.profile
+  display: flex
+  flex-direction: column
+  align-items: center
+  cursor: grab
+  align-self: stretch
 
 .count
-  font-family: code, monospace
-  font-size: 14px
-  font-weight: 500
-  min-width: 2em
-  text-align: right
+  font-size: 24px
+  text-align: center
 
 .countLoading
   animation: blink 1s step-end infinite

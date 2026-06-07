@@ -2,6 +2,7 @@ import type {Model} from '#src/lib/models/index.ts'
 
 import clsx from 'clsx'
 
+import ModelProfile from '#component/ModelProfile'
 import PulsatingNumber from '#component/PulsatingNumber'
 
 import css from './style.module.sass'
@@ -9,13 +10,14 @@ import css from './style.module.sass'
 type Props = {
   count: number | null
   error?: string | null
+  handleRef?: (element: HTMLElement | null) => void
   isFocused?: boolean
   isLoading?: boolean
   model: Model
   onClick?: () => void
 }
 
-export default function ModelCard({model, count, isFocused, isLoading, error, onClick}: Props) {
+export default function ModelCard({model, count, isFocused, isLoading, error, onClick, handleRef}: Props) {
   return <div className={clsx(css.card, isFocused && css.focused, isLoading && css.loading)}
     onClick={onClick}
     role="button"
@@ -28,11 +30,11 @@ export default function ModelCard({model, count, isFocused, isLoading, error, on
     }}
     title={error ?? undefined}
   >
-    <img className={css.icon} src={model.icon} alt="" loading="lazy" />
-      <div className={css.name}>{model.name}</div>
-      {model.subname && <div className={css.subname}>{model.subname}</div>}
     <div className={css.count}>
       {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <PulsatingNumber value={count} /> : <span className={css.countNa}>–</span>}
+    </div>
+    <div ref={handleRef} className={css.profile}>
+      <ModelProfile model={model} />
     </div>
   </div>
 }

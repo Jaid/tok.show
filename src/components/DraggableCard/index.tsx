@@ -31,16 +31,15 @@ export default function DraggableCard({id, index, model, count, isFocused, isLoa
   }
   return (
     <div ref={ref}>
-      <div ref={handleRef} style={{display: 'contents'}}>
-        <ModelCard
-          model={model}
-          count={count}
-          isFocused={isFocused}
-          isLoading={isLoading}
-          error={error}
-          onClick={onClick}
-        />
-      </div>
+      <ModelCard
+        model={model}
+        count={count}
+        isFocused={isFocused}
+        isLoading={isLoading}
+        error={error}
+        onClick={onClick}
+        handleRef={handleRef}
+      />
     </div>
   )
 }
