@@ -35,8 +35,8 @@ const makeKeyframes = (color: string): Array<Keyframe> => [
     transform: 'scale(1)',
   },
 ]
-const greenFrames = makeKeyframes('#22c55ecc')
-const redFrames = makeKeyframes('#ff1717cc')
+const greenFrames = makeKeyframes('#22c55e')
+const redFrames = makeKeyframes('#ff1717')
 
 export default function PulsatingNumber({value}: Props) {
   const spanRef = useRef<HTMLSpanElement>(null)
@@ -48,11 +48,10 @@ export default function PulsatingNumber({value}: Props) {
     }
     const prev = prevRef.current
     prevRef.current = value
-    // No animation on first mount or non-numeric values
     if (typeof value !== 'number' || typeof prev !== 'number') {
       return
     }
-    const frames = value > prev ? redFrames : (value < prev ? greenFrames : undefined)
+    const frames = value > prev ? redFrames : greenFrames
     if (frames) {
       el.animate(frames, timing)
     }
