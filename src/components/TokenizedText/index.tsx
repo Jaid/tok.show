@@ -1,10 +1,12 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
+import type {ModelId} from 'token-vocabs'
 
 import {autoUpdate, flip, offset, shift, useClick, useDismiss, useFloating, useHover, useInteractions} from '@floating-ui/react'
 import {useCallback, useState} from 'react'
 
 import modelsMap from '#src/lib/models/index.ts'
+import {getVisibleModelIds} from '#src/lib/state.ts'
 import textDecoder from '#src/lib/textDecoder.ts'
 
 type Props = {
@@ -58,18 +60,23 @@ export default function TokenizedText({spans, input, focusedModel, onHoverSpan, 
     }
     const testInput = input instanceof Uint8Array ? input.slice(span.byteStart, span.byteEnd) : tokenStr
     const supported: Array<string> = []
-    // Check all loaded models concurrently
+    const visibleSet = new Set(getVisibleModelIds())
+    // Check all models concurrently, loading hidden ones temporarily
     const checks = [...modelsMap.entries()].map(async ([id, model]) => {
-      if (!model.isLoaded) {
-        return
-      }
+      const wasLoaded = model.loaded
       try {
-        const result = model.tokenizeSync(testInput)
-        if (result.count === 1) {
+        await model.load()
+        const result = model.tokenize(testInput)
+        if (result.tokens.length === 1) {
           supported.push(id)
         }
       } catch {
         // Model can't tokenize this input
+      } finally {
+        // Free models that weren't loaded before and aren't visible
+        if (!wasLoaded && !visibleSet.has(id as ModelId)) {
+          model.unload()
+        }
       }
     })
     await Promise.all(checks)

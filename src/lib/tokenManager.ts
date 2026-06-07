@@ -1,43 +1,36 @@
 import type {ModelId, TokenizeInput} from 'token-vocabs'
 
-import {load, tokenizeLoaded} from 'token-vocabs'
-
+import modelsMap from '#src/lib/models/index.ts'
 import {getVisibleModelIds, state} from '#src/lib/state.ts'
 
-const loadedSet = new Set<ModelId>
-const loadingPromises = new Map<ModelId, Promise<void>>
 let tokenizeGeneration = 0
 
 export async function loadModel(modelId: ModelId): Promise<void> {
-  if (loadedSet.has(modelId)) {
+  const model = modelsMap.get(modelId)
+  if (!model) {
     return
   }
-  const existing = loadingPromises.get(modelId)
-  if (existing) {
-    return existing
+  if (model.loaded) {
+    return
   }
   state.modelStates[modelId].loading = true
   state.modelStates[modelId].error = null
-  const promise = load(modelId).then(() => {
-    loadedSet.add(modelId)
+  try {
+    await model.load()
     state.modelStates[modelId].loaded = true
     state.modelStates[modelId].loading = false
-    loadingPromises.delete(modelId)
-  }).catch((error: Error) => {
+  } catch (error) {
     console.error(`Failed to load model ${modelId}:`, error)
-    state.modelStates[modelId].error = error.message
+    state.modelStates[modelId].error = error instanceof Error ? error.message : String(error)
     state.modelStates[modelId].loading = false
-    loadingPromises.delete(modelId)
-  })
-  loadingPromises.set(modelId, promise)
-  return promise
+  }
 }
 
 export function unloadModel(modelId: ModelId): void {
-  if (!loadedSet.has(modelId)) {
-    return
+  const model = modelsMap.get(modelId)
+  if (model) {
+    model.unload()
   }
-  loadedSet.delete(modelId)
   state.modelStates[modelId] = {
     error: null,
     loaded: false,
@@ -51,26 +44,21 @@ export function runTokenization(input: TokenizeInput): void {
   const gen = ++tokenizeGeneration
   const focusedId = state.focusedId
   const doTokenize = async () => {
-    // 1. Focused model first
-    if (focusedId && loadedSet.has(focusedId)) {
-      tokenizeModel(focusedId, input)
+    // 1. Focused model first — gives the user results ASAP for the model they care about
+    if (focusedId) {
+      const focusedModel = modelsMap.get(focusedId)
+      if (focusedModel?.loaded) {
+        tokenizeModel(focusedId, input)
+      }
     }
     if (gen !== tokenizeGeneration) {
       return
     }
     // 2. Other visible models in parallel
-    const visibleIds = getVisibleModelIds().filter(id => id !== focusedId && loadedSet.has(id))
-    const batchSize = 4
-    for (let i = 0; i < visibleIds.length; i += batchSize) {
-      if (gen !== tokenizeGeneration) {
-        return
-      }
-      const batch = visibleIds.slice(i, i + batchSize)
-      for (const id of batch) {
-        tokenizeModel(id, input)
-      }
-      // Yield to main thread between batches
-      await new Promise(resolve => setTimeout(resolve, 0))
+    const visibleIds = getVisibleModelIds().filter(id => id !== focusedId)
+    const otherLoaded = visibleIds.filter(id => modelsMap.get(id)?.loaded)
+    for (const id of otherLoaded) {
+      tokenizeModel(id, input)
     }
   }
   void doTokenize()
@@ -102,11 +90,12 @@ export async function ensureModelLoaded(modelId: ModelId): Promise<void> {
 }
 
 function tokenizeModel(modelId: ModelId, input: TokenizeInput): boolean {
-  if (!loadedSet.has(modelId)) {
+  const model = modelsMap.get(modelId)
+  if (!model?.loaded) {
     return false
   }
   try {
-    const result = tokenizeLoaded(input, modelId)
+    const result = model.tokenize(input)
     state.modelStates[modelId].tokenizeData = {
       inputText: input,
       offsets: result.offsets,

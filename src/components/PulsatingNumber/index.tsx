@@ -1,39 +1,65 @@
-import clsx from 'clsx'
 import {useEffect, useRef} from 'react'
 
+import css from './style.module.sass'
+
 type Props = {
-  className?: string
   value: number | string
 }
 
-export default function PulsatingNumber({value, className}: Props) {
-  const prevRef = useRef<number | string>(value)
+const timing: KeyframeAnimationOptions = {
+  duration: 1000,
+  easing: 'ease-out',
+}
+const makeKeyframes = (color: string): Array<Keyframe> => [
+  {
+    filter: 'none',
+    transform: 'scale(1)',
+  },
+  {
+    filter: `drop-shadow(0 0 0.2em ${color})`,
+    transform: 'scale(1.25)',
+    offset: 0.1,
+  },
+  {
+    filter: `drop-shadow(0 0 0.2em ${color})`,
+    transform: 'scale(.9)',
+    offset: 0.3,
+  },
+  {
+    filter: `drop-shadow(0 0 0.2em ${color})`,
+    transform: 'scale(1)',
+    offset: 0.5,
+  },
+  {
+    filter: 'none',
+    transform: 'scale(1)',
+  },
+]
+const greenFrames = makeKeyframes('#22c55ecc')
+const redFrames = makeKeyframes('#ff1717cc')
+
+export default function PulsatingNumber({value}: Props) {
   const spanRef = useRef<HTMLSpanElement>(null)
+  const prevRef = useRef(value)
   useEffect(() => {
-    if (prevRef.current !== value && spanRef.current) {
-      spanRef.current.classList.remove('pulse')
-      void spanRef.current.offsetWidth // force reflow to restart animation
-      spanRef.current.classList.add('pulse')
+    const el = spanRef.current
+    if (!el) {
+      return
     }
+    const prev = prevRef.current
     prevRef.current = value
+    // No animation on first mount or non-numeric values
+    if (typeof value !== 'number' || typeof prev !== 'number') {
+      return
+    }
+    const frames = value > prev ? redFrames : (value < prev ? greenFrames : undefined)
+    if (frames) {
+      el.animate(frames, timing)
+    }
   }, [value])
   return (
-    <span ref={spanRef} className={clsx('pulsating-number', className)}>
+    <span ref={spanRef} className={css.number}>
       {value}
-      <style>{`
-        .pulsating-number {
-          display: inline-block;
-          will-change: transform;
-        }
-        .pulsating-number.pulse {
-          animation: token-pulse 0.3s ease-out;
-        }
-        @keyframes token-pulse {
-          0%   { transform: scale(1); }
-          50%  { transform: scale(1.15); }
-          100% { transform: scale(1); }
-        }
-      `}</style>
     </span>
   )
 }

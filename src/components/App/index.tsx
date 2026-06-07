@@ -1,7 +1,6 @@
 import type {HiddenCardStashButtonHandle} from '#component/HiddenCardStashButton'
 import type {EntryId} from '#src/lib/state.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
-import type {Node} from '@babel/core'
 import type {ModelId} from 'token-vocabs'
 
 import clsx from 'clsx'
@@ -19,7 +18,7 @@ import HiddenCardStashButton from '#component/HiddenCardStashButton'
 import TokenizedText from '#component/TokenizedText'
 import modelsMap from '#src/lib/models/index.ts'
 import {getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, state} from '#src/lib/state.ts'
-import {ensureModelLoaded, initializeModels, runTokenization} from '#src/lib/tokenManager.ts'
+import {ensureModelLoaded, initializeModels, runTokenization, unloadModel} from '#src/lib/tokenManager.ts'
 import {getTokenSpans} from '#src/lib/tokenSpans.ts'
 
 const allModelIds = modelIds as ReadonlyArray<ModelId>
@@ -96,6 +95,15 @@ export default function App() {
       }
     }
   }, [state.text, state.isBinary, state.binaryData, snap.focusedId, snap.visibleEntries])
+  // Free memory for hidden model vocabularies
+  useEffect(() => {
+    const visibleSet = new Set(getVisibleModelIds())
+    for (const id of allModelIds) {
+      if (!visibleSet.has(id)) {
+        unloadModel(id)
+      }
+    }
+  }, [snap.visibleEntries])
   // Token spans
   const focusedSpans = useMemo<Array<TokenSpan>>(() => {
     const fid = state.focusedId
@@ -185,7 +193,7 @@ export default function App() {
     e.preventDefault(); setIsDragOver(true)
   }, [])
   const onDragLeave = useCallback((e: React.DragEvent) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+    if (!e.currentTarget.contains(e.relatedTarget as unknown as Node)) {
       setIsDragOver(false)
     }
   }, [])
@@ -279,6 +287,7 @@ export default function App() {
   // Derived
   const showAvg = getShouldShowAverage()
   const avgCount = getAverageCount()
+  const visibleCount = getVisibleModelIds().length
   const hidden = getHiddenModelIds().map((id: ModelId) => getModel(id)).filter(Boolean)
   const focusedModel = state.focusedId ? getModel(state.focusedId) : null
   const curInput = state.isBinary && state.binaryData ? state.binaryData : state.text
@@ -326,12 +335,20 @@ export default function App() {
             <div className="pane-footer">
               <div className="footer-info">
                 <span className="footer-icon">📝</span>
-                <span className="footer-title">Input</span>
+                <span className="footer-title">Tok·Show</span>
+                <span className="footer-size">{state.isBinary && state.binaryData ? `${state.binaryData.byteLength.toLocaleString('en-US')} bytes` : `${(new TextEncoder).encode(state.text).byteLength.toLocaleString('en-US')} bytes · ${state.text.length.toLocaleString('en-US')} chars`}</span>
               </div>
-              <a className="share-link" href={shareUrl} target="_blank" rel="noopener noreferrer"
-                title="Duplicate or share this session (right-click to copy link)">
-                <FaArrowUpRightFromSquare /><span>session</span>
-              </a>
+              <div className="footer-right">
+                <button className="mini-btn" onClick={() => {
+                  state.useMonaco = !state.useMonaco
+                }}>
+                  {state.useMonaco ? 'Monaco' : 'textarea'}
+                </button>
+                <a className="share-link" href={shareUrl} target="_blank" rel="noopener noreferrer"
+                  title="Duplicate or share this session (right-click to copy link)">
+                  <FaArrowUpRightFromSquare /><span>session URL</span>
+                </a>
+              </div>
             </div>
           </div>
         </Panel>
@@ -355,7 +372,7 @@ export default function App() {
                 counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
                 hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}
                 onReorder={onReorder} onFocus={onFocus} onStashDrop={onStashDrop}
-                showAverage={showAvg} averageCount={avgCount} />
+                showAverage={showAvg} averageCount={avgCount} visibleModelCount={visibleCount} />
               <HiddenCardStashButton ref={stashRef} hiddenModels={hidden}
                 onUnhide={onUnhide} onHide={(id: string) => onHide(id)} />
             </div>

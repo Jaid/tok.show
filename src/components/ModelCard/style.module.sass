@@ -1,0 +1,79 @@
+.card
+  display: flex
+  align-items: center
+  gap: 8px
+  padding: 6px 10px
+  background: #111
+  border: 1px solid #222
+  border-radius: 6px
+  cursor: pointer
+  user-select: none
+  min-width: 120px
+  transition: border-color 0.1s, background 0.1s
+
+  &:hover
+    border-color: #444
+    background: #1a1a1a
+
+.focused
+  border-color: #fff
+  background: #1f1f1f
+
+.loading
+  opacity: .72
+
+.icon
+  flex-shrink: 0
+  width: 20px
+  height: 20px
+  display: flex
+  align-items: center
+  justify-content: center
+
+  img
+    max-width: 100%
+    max-height: 100%
+    object-fit: contain
+
+.text
+  flex: 1
+  min-width: 0
+  overflow: hidden
+
+.name
+  font-size: 13px
+  font-weight: 600
+  line-height: 1.1
+  white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
+
+.subname
+  font-size: 10px
+  color: #555
+  line-height: 1.1
+  white-space: nowrap
+  overflow: hidden
+  text-overflow: ellipsis
+
+.count
+  font-family: code, monospace
+  font-size: 14px
+  font-weight: 500
+  min-width: 2em
+  text-align: right
+
+.countLoading
+  animation: blink 1s step-end infinite
+
+.countError
+  color: #e44
+
+.countNa
+  color: #444
+
+@keyframes blink
+  0%, 100%
+    opacity: 1
+  50%
+    opacity: 0.3

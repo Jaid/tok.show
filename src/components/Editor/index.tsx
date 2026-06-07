@@ -2,14 +2,17 @@ import type {OnChange, OnMount} from '@monaco-editor/react'
 
 import {Editor as MonacoEditor} from '@monaco-editor/react'
 import {once} from 'es-toolkit/function'
-import {useEffect, useMemo, useRef} from 'react'
+import {useCallback, useEffect, useRef} from 'react'
+
+import HexViewer from '#component/HexViewer'
+
+import css from './style.module.sass'
 
 type Props = {
   binaryData?: Uint8Array | null
   highlightRange?: {end: number
     start: number} | null
   isBinary?: boolean
-  onBinaryChange?: (data: Uint8Array) => void
   onChange: (value: string) => void
   readOnly?: boolean
   useMonaco?: boolean
@@ -31,21 +34,18 @@ const ensureTheme = once((monaco: any) => {
     rules: [],
   })
 })
-const bytesPerLine = 16
-export default function Editor({value, onChange, onBinaryChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange}: Props) {
+
+export default function Editor({value, onChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange}: Props) {
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<any>(null)
   const decorationsRef = useRef<Array<string>>([])
-  const handleMount: OnMount = (editor, monaco) => {
+  const handleMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor
     monacoRef.current = monaco
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-      // No-op: prevent save dialog
-    })
-  }
-  const handleChange: OnChange = val => {
+  }, [])
+  const handleChange: OnChange = useCallback(val => {
     onChange(val ?? '')
-  }
+  }, [onChange])
   // Highlight decoration sync
   useEffect(() => {
     const editor = editorRef.current
@@ -67,61 +67,38 @@ export default function Editor({value, onChange, onBinaryChange, readOnly, useMo
       {
         range: new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
         options: {
-          className: 'tok-highlight-decoration',
-          inlineClassName: 'tok-highlight-inline',
+          className: css.monacoTokenHighlight,
+          inlineClassName: css.monacoTokenInlineHighlight,
         },
       },
     ])
   }, [highlightRange])
   // Binary hex viewer
   if (isBinary && binaryData) {
-    const hex = useMemo(() => formatHexViewer(binaryData), [binaryData])
-    return (
-      <div className="hex-viewer">
-        <pre>{hex}</pre>
-        <style>{`
-          .hex-viewer {
-            font-family: code, monospace;
-            font-size: 12px;
-            line-height: 1.4;
-            padding: 12px;
-            color: #aaa;
-            overflow: auto;
-            height: 100%;
-            background: #000;
-            white-space: pre;
-          }
-          .hex-viewer pre {
-            margin: 0;
-          }
-        `}</style>
-      </div>
-    )
+    return <HexViewer bytes={binaryData} />
   }
   // Fallback textarea when Monaco disabled
   if (!useMonaco) {
     return (
       <textarea
-        className="basic-textarea"
+        aria-label='input text'
+        className={css.textarea}
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={e => onChange(e.currentTarget.value)}
         readOnly={readOnly}
         spellCheck={false}
-        autoComplete="off"
-        autoCorrect="off"
-        autoCapitalize="off"
       />
     )
   }
   return (
-    <div className="monaco-wrapper">
+    <div className={css.editor}>
       <MonacoEditor
         value={value}
         onChange={handleChange}
         onMount={handleMount}
         beforeMount={ensureTheme}
-        theme="black"
-        language="plaintext"
+        theme='black'
+        language='plaintext'
         options={{
           minimap: {enabled: false},
           stickyScroll: {enabled: false},
@@ -152,15 +129,4 @@ export default function Editor({value, onChange, onBinaryChange, readOnly, useMo
       />
     </div>
   )
-}
-
-function formatHexViewer(bytes: Uint8Array): string {
-  const lines: Array<string> = []
-  for (let i = 0; i < bytes.length; i += bytesPerLine) {
-    const chunk = bytes.slice(i, i + bytesPerLine)
-    const hex = Array.from(chunk, b => b.toString(16).padStart(2, '0')).join(' ')
-    const ascii = Array.from(chunk, b => b >= 0x20 && b < 0x7f ? String.fromCharCode(b) : '.').join('')
-    lines.push(`${i.toString(16).padStart(8, '0')}  ${hex.padEnd(48, ' ')}  |${ascii}|`)
-  }
-  return lines.join('\n') || '(empty)'
 }

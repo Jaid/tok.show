@@ -4,27 +4,30 @@ import {useSortable} from '@dnd-kit/react/sortable'
 
 import ModelCard from '#component/ModelCard'
 
+import css from './style.module.sass'
+
 type Props = {
   count: number | null
   error?: string | null
   id: string
+  index: number
   isFocused?: boolean
   isLoading?: boolean
   model: Model
   onClick?: () => void
 }
 
-export default function DraggableCard({id, model, count, isFocused, isLoading, error, onClick}: Props) {
+export default function DraggableCard({id, index, model, count, isFocused, isLoading, error, onClick}: Props) {
   const {ref, handleRef, isDragging} = useSortable({
     id,
-    index: 0,
+    index,
     data: {
       modelId: model.id,
       type: 'model',
     },
   })
   if (isDragging) {
-    return <div ref={ref} className="draggable-card-placeholder" />
+    return <div ref={ref} className={css.placeholder} />
   }
   return (
     <div ref={ref}>
@@ -38,16 +41,6 @@ export default function DraggableCard({id, model, count, isFocused, isLoading, e
           onClick={onClick}
         />
       </div>
-      <style>{`
-        .draggable-card-placeholder {
-          width: 120px;
-          height: 42px;
-          background: #0a0a0a;
-          border: 1px dashed #333;
-          border-radius: 6px;
-          opacity: 0.3;
-        }
-      `}</style>
     </div>
   )
 }
