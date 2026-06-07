@@ -1,5 +1,6 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {EntryId} from '#src/lib/state.ts'
+import type {ReactNode} from 'react'
 
 import {KeyboardSensor, PointerActivationConstraints, PointerSensor} from '@dnd-kit/dom'
 import {DragDropProvider} from '@dnd-kit/react'
@@ -14,6 +15,7 @@ const pointerSensor = PointerSensor.configure({
 
 type Props = {
   averageCount: number | null
+  children?: ReactNode
   counts: Record<string, number>
   entries: Array<EntryId>
   errors: Record<string, string | null>
@@ -23,12 +25,12 @@ type Props = {
   modelsById: Map<string, Model>
   onFocus: (modelId: string) => void
   onReorder: (newOrder: Array<EntryId>) => void
-  onStashDrop?: (entry: EntryId) => void
+  onStashDrop: (entry: EntryId) => void
   showAverage: boolean
   visibleModelCount: number
 }
 
-export default function DraggableCardContainer({entries, modelsById, counts, errors, focusedId, loadingSet,
+export default function DraggableCardContainer({children, entries, modelsById, counts, errors, focusedId, loadingSet,
   onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}: Props) {
   const handleDragEnd = useCallback((event: any) => {
     if (event.canceled) {
@@ -40,7 +42,7 @@ export default function DraggableCardContainer({entries, modelsById, counts, err
       return
     }
     if (targetId === 'stash-zone') {
-      onStashDrop?.(sourceId)
+      onStashDrop(sourceId)
       return
     }
     if (isSortableOperation(event.operation) && sourceId !== targetId) {
@@ -86,6 +88,7 @@ export default function DraggableCardContainer({entries, modelsById, counts, err
           )
         })}
       </div>
+      {children}
     </DragDropProvider>
   )
 }

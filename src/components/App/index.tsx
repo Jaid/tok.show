@@ -1,4 +1,3 @@
-import type {HiddenCardStashButtonHandle} from '#component/HiddenCardStashButton'
 import type {EntryId} from '#src/lib/state.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
 import type {ModelId} from 'token-vocabs'
@@ -38,23 +37,7 @@ export default function App() {
   const [editorRange, setEditorRange] = useState<{end: number
     start: number} | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
-  const stashRef = useRef<HiddenCardStashButtonHandle>(null)
-  const pointerRef = useRef({
-    x: 0,
-    y: 0,
-  })
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Track pointer position for stash-drag detection
-  useEffect(() => {
-    const move = (e: PointerEvent) => {
-      pointerRef.current = {
-        x: e.clientX,
-        y: e.clientY,
-      }
-    }
-    globalThis.addEventListener('pointermove', move, {passive: true})
-    return () => globalThis.removeEventListener('pointermove', move)
-  }, [])
   // Sync URL → valtio
   useEffect(() => {
     state.text = textParam
@@ -246,11 +229,7 @@ export default function App() {
   }, [])
   // Stash drag
   const onStashDrop = useCallback((entry: EntryId) => {
-    const p = pointerRef.current
-    const rect = stashRef.current?.getBoundingClientRect?.()
-    if (rect && p.x >= rect.left && p.x <= rect.right && p.y >= rect.top && p.y <= rect.bottom) {
-      onHide(entry)
-    }
+    onHide(entry)
   }, [onHide])
   // Share URL
   const shareUrl = useMemo(() => {
@@ -372,9 +351,10 @@ export default function App() {
                 counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
                 hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}
                 onReorder={onReorder} onFocus={onFocus} onStashDrop={onStashDrop}
-                showAverage={showAvg} averageCount={avgCount} visibleModelCount={visibleCount} />
-              <HiddenCardStashButton ref={stashRef} hiddenModels={hidden}
-                onUnhide={onUnhide} onHide={(id: string) => onHide(id)} />
+                showAverage={showAvg} averageCount={avgCount} visibleModelCount={visibleCount}>
+                <HiddenCardStashButton hiddenModels={hidden}
+                  onUnhide={onUnhide} onHide={(id: string) => onHide(id)} />
+              </DraggableCardContainer>
             </div>
           </div>
         </Panel>
