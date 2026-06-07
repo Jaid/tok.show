@@ -23,23 +23,21 @@
 .token
   display: inline
   border-radius: 2px
-  padding: 1px 2px
-  margin: 0 1px
+  padding-inline: 1px
   cursor: pointer
   transition: box-shadow 0.05s, filter 0.05s
   box-decoration-break: clone
   -webkit-box-decoration-break: clone
-
   &:hover
     filter: brightness(1.2)
 
 .tokenOdd
-  background: rgba(255, 224, 102, 0.18)
-  color: #ffe066
+  background: oklch(40% 0.06 98)
+  color: oklch(93% 0.13 93)
 
 .tokenEven
-  background: rgba(124, 199, 255, 0.18)
-  color: #7cc7ff
+  background: oklch(35% 0.07 261)
+  color: oklch(92% 0.08 210)
 
 .tokenHovered
   box-shadow: 0 0 0 1.5px rgb(255, 255, 255)
