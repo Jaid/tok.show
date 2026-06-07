@@ -15,6 +15,7 @@ import DraggableCardContainer from '#component/DraggableCardContainer'
 import Editor from '#component/Editor'
 import Footer from '#component/Footer'
 import HiddenCardStashButton from '#component/HiddenCardStashButton'
+import NumberDisplay from '#component/NumberDisplay'
 import TokenizedText from '#component/TokenizedText'
 import modelsMap from '#src/lib/models/index.ts'
 import {getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, state} from '#src/lib/state.ts'
@@ -306,6 +307,9 @@ export default function App() {
         <div className={css.pane}>
           <div className={css.paneHeader}>
             <div className={clsx(css.tab, css.active)}>input.txt</div>
+            <span className={css.paneHeaderSize}>
+              {state.isBinary && state.binaryData ? <NumberDisplay value={state.binaryData.byteLength} suffix='byte' suffixPlural/> : <><NumberDisplay value={(new TextEncoder).encode(state.text).byteLength} suffix='byte' suffixPlural/> · <NumberDisplay value={state.text.length} suffix='char' suffixPlural/></>}
+            </span>
             <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
           </div>
           <div className={css.paneBody}>
@@ -313,9 +317,6 @@ export default function App() {
               isBinary={state.isBinary} binaryData={state.binaryData} highlightRange={editorRange} />
           </div>
           <Footer
-            isBinary={state.isBinary && !!state.binaryData}
-            byteLength={state.isBinary && state.binaryData ? state.binaryData.byteLength : (new TextEncoder).encode(state.text).byteLength}
-            charLength={state.text.length}
             useMonaco={state.useMonaco}
             onToggleMonaco={() => {
               state.useMonaco = !state.useMonaco
