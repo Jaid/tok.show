@@ -1,21 +1,14 @@
 import '#src/style.sass'
 
-import {StrictMode} from 'react'
-import {createRoot} from 'react-dom/client'
+import mountRoot from 'mount-root'
+import {NuqsAdapter} from 'nuqs/adapters/react'
 
-import DecoratedApp from '#component/DecoratedApp'
+import App from '#component/App'
 
-if (import.meta.env.DEV) {
-  let rootNode = document.body.querySelector(':scope>div')
-  if (!rootNode) {
-    rootNode = document.createElement('div')
-    document.body.append(rootNode)
-  }
-  const root = createRoot(rootNode)
-  root.render(<StrictMode><DecoratedApp/></StrictMode>)
-} else {
-  const rootNode = document.createElement('div')
-  document.body.append(rootNode)
-  const root = createRoot(rootNode)
-  root.render(<DecoratedApp/>)
-}
+import css from './style.module.sass'
+
+mountRoot(App, {
+  id: css.container,
+  wrapper: NuqsAdapter,
+  strict: true,
+})

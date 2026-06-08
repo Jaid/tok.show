@@ -24,6 +24,7 @@
     "clsx": "2.1.1",
     "es-toolkit": "1.47.0",
     "monaco-editor": "0.55.1",
+    "mount-root": "^0.4.0",
     "nuqs": "2.8.9",
     "react": "19.2.7",
     "react-dom": "19.2.7",

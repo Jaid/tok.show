@@ -3,6 +3,7 @@ import type {FunctionComponent} from 'react'
 import {FaArrowUpRightFromSquare} from 'react-icons/fa6'
 
 import Icon from '#component/Icon'
+import ThemeToggle from '#component/ThemeToggle'
 
 import css from './style.module.sass'
 
@@ -21,6 +22,7 @@ const EditorFooter: FunctionComponent<Props> = ({onToggleMonaco, shareUrl, useMo
       </div>
     </div>
     <div className={css.footerRight}>
+      <ThemeToggle />
       <button className={css.miniBtn} onClick={onToggleMonaco}>
         {useMonaco ? 'Monaco' : 'textarea'}
       </button>
