@@ -11,6 +11,8 @@ import DraggableCard from '#component/DraggableCard'
 import ModelProfile from '#component/ModelProfile'
 import PulsatingNumber from '#component/PulsatingNumber'
 
+import averageIcon from './average.svg'
+
 import css from './style.module.sass'
 
 const pointerSensor = PointerSensor.configure({
@@ -34,8 +36,39 @@ type Props = {
   visibleModelCount: number
 }
 
+const getBestEntryId = (counts: Record<string, number>, entries: Array<EntryId>, averageCount: number | null): string | null => {
+  const allCounts = new Map<string, number>
+  for (const id of entries) {
+    if (id === 'average') {
+      if (averageCount !== null && averageCount > 0) {
+        allCounts.set(id, averageCount)
+      }
+    } else {
+      const c = counts[id]
+      if (c !== null && c !== undefined && c > 0) {
+        allCounts.set(id, c)
+      }
+    }
+  }
+  if (allCounts.size < 2) {
+    return null
+  }
+  const values = [...allCounts.values()]
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  if (min === max) {
+    return null
+  }
+  const winners = [...allCounts.entries()].filter(([, c]) => c === min).map(([id]) => id)
+  if (winners.length !== 1) {
+    return null
+  }
+  return winners[0]
+}
+
 export default function DraggableCardContainer({children, entries, modelsById, counts, errors, focusedId, loadingSet,
   onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}: Props) {
+  const bestEntryId = getBestEntryId(counts, entries, averageCount)
   const handleDragEnd = useCallback((event: any) => {
     if (event.canceled) {
       return
@@ -68,6 +101,7 @@ export default function DraggableCardContainer({children, entries, modelsById, c
                 key="average"
                 averageCount={averageCount}
                 index={index}
+                isBest={'average' === bestEntryId}
                 showAverage={showAverage}
                 visibleModelCount={visibleModelCount}
               />
@@ -85,6 +119,7 @@ export default function DraggableCardContainer({children, entries, modelsById, c
               model={model}
               count={counts[entry] ?? null}
               error={errors[entry] ?? null}
+              isBest={entry === bestEntryId}
               isFocused={focusedId === entry}
               isLoading={loadingSet.has(entry)}
               onClick={() => onFocus(entry)}
@@ -104,15 +139,15 @@ function arrayMove<T>(array: Array<T>, from: number, to: number): Array<T> {
   return next
 }
 const averageModel = {
-  icon: '/icon.svg',
+  icon: averageIcon,
   name: 'Average',
 }
-function AverageCard({count, modelCount}: {count: number | null
+function AverageCard({count, isBest, modelCount}: {count: number | null
+  isBest?: boolean
   modelCount: number}) {
   const subname = modelCount >= 2 ? `of ${modelCount} models` : undefined
   return (
     <div className={css.averageCard}>
-      <div className={css.triangle}>▲</div>
       <div className={css.count}>
         {count !== null ? <PulsatingNumber suffix="token" suffixPlural gluedSuffix className={css.countElement} suffixClassName={css.countLabel} value={count} /> : <span className={css.countNa}>–</span>}
       </div>
@@ -125,8 +160,9 @@ function AverageCard({count, modelCount}: {count: number | null
     </div>
   )
 }
-function DraggableAverageCard({averageCount, index, showAverage, visibleModelCount}: {averageCount: number | null
+function DraggableAverageCard({averageCount, index, isBest, showAverage, visibleModelCount}: {averageCount: number | null
   index: number
+  isBest?: boolean
   showAverage: boolean
   visibleModelCount: number}) {
   const {ref, handleRef, isDragging} = useSortable({
@@ -143,7 +179,7 @@ function DraggableAverageCard({averageCount, index, showAverage, visibleModelCou
   return (
     <div ref={ref}>
       <div ref={handleRef} style={{display: 'contents'}}>
-        <AverageCard count={averageCount} modelCount={visibleModelCount} />
+        <AverageCard count={averageCount} isBest={isBest} modelCount={visibleModelCount} />
       </div>
     </div>
   )

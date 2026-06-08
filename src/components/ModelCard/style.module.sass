@@ -5,7 +5,11 @@
   flex-direction: column
   &:hover
     .triangle
-      color: gray
+      opacity: 50%
+
+.best
+  .countNumber
+    color: oklch(90% 0.15 95)
 
 .loading
   opacity: .72
@@ -19,12 +23,13 @@
 
 .triangle
   line-height: 0.8
-  color: transparent
+  color: white
   margin-top: -4px
+  opacity: 0
 
 .focused
   .triangle
-    color: white
+    opacity: 80%
 
 .count
   font-size: 24px
@@ -36,8 +41,8 @@
   flex-direction: column
 
 .countLabel
-  font-size: 10px
-  line-height: 0.5
+  font-size: 12px
+  line-height: 0.6
   font-weight: 200
   color: gray
 

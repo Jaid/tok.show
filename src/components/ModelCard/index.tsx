@@ -11,14 +11,15 @@ type Props = {
   count: number | null
   error?: string | null
   handleRef?: (element: HTMLElement | null) => void
+  isBest?: boolean
   isFocused?: boolean
   isLoading?: boolean
   model: Model
   onClick?: () => void
 }
 
-export default function ModelCard({model, count, isFocused, isLoading, error, onClick, handleRef}: Props) {
-  return <div className={clsx(css.card, isLoading && css.loading, isFocused && css.focused)}
+export default function ModelCard({model, count, isBest, isFocused, isLoading, error, onClick, handleRef}: Props) {
+  return <div className={clsx(css.card, isLoading && css.loading, isFocused && css.focused, isBest && css.best)}
     onClick={onClick}
     role="button"
     tabIndex={0}
@@ -32,7 +33,7 @@ export default function ModelCard({model, count, isFocused, isLoading, error, on
   >
     <div className={css.triangle}>⏶</div>
     <div className={css.count}>
-      {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <PulsatingNumber suffix="token" suffixPlural gluedSuffix className={css.countElement} suffixClassName={css.countLabel} value={count} /> : <span className={css.countNa}>–</span>}
+      {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <PulsatingNumber suffix="token" suffixPlural gluedSuffix className={css.countElement} suffixClassName={css.countLabel} numberClassName={css.countNumber} value={count} /> : <span className={css.countNa}>–</span>}
     </div>
     <div ref={handleRef} className={css.profile}>
       <ModelProfile model={model} />

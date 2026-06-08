@@ -11,13 +11,14 @@ type Props = {
   error?: string | null
   id: string
   index: number
+  isBest?: boolean
   isFocused?: boolean
   isLoading?: boolean
   model: Model
   onClick?: () => void
 }
 
-export default function DraggableCard({id, index, model, count, isFocused, isLoading, error, onClick}: Props) {
+export default function DraggableCard({id, index, model, count, isBest, isFocused, isLoading, error, onClick}: Props) {
   const {ref, handleRef, isDragging} = useSortable({
     id,
     index,
@@ -34,6 +35,7 @@ export default function DraggableCard({id, index, model, count, isFocused, isLoa
       <ModelCard
         model={model}
         count={count}
+        isBest={isBest}
         isFocused={isFocused}
         isLoading={isLoading}
         error={error}
