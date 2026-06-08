@@ -15,7 +15,7 @@ type Props = {
 }
 
 const EditorHeader: FunctionComponent<Props> = ({sizeInBytes, charCount, isBinary, binaryByteCount, onCopy}) => {
-  return <div className={css.header}>
+  return <div className={css.container}>
     <div className={css.tab}>input.txt</div>
     <span className={css.size}>
       {isBinary && binaryByteCount !== null && binaryByteCount !== undefined ? <NumberDisplay value={binaryByteCount} suffix="byte" suffixPlural /> : <><NumberDisplay value={sizeInBytes} suffix="byte" suffixPlural /> · <NumberDisplay value={charCount} suffix="char" suffixPlural /></>

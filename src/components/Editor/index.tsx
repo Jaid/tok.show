@@ -66,8 +66,8 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
       {
         range: new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
         options: {
-          className: css.monacoTokenHighlight,
-          inlineClassName: css.monacoTokenInlineHighlight,
+          className: css.tokenHighlight,
+          inlineClassName: css.tokenInlineHighlight,
         },
       },
     ])
@@ -87,7 +87,7 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
       spellCheck={false}
     />
   }
-  return <div className={css.editor}>
+  return <div className={css.container}>
     <MonacoEditor
       value={value}
       onChange={handleChange}

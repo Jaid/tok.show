@@ -27,7 +27,7 @@ const OutputHeader: FunctionComponent<Props> = ({currentTab, onTabChange}) => {
       label: 'IDs',
     },
   ]
-  return <div className={css.header}>
+  return <div className={css.container}>
     {tabs.map(tab => <button
       key={tab.id}
       className={clsx(css.tab, currentTab === tab.id && css.active)}

@@ -1,14 +1,7 @@
 $borderColor: #222
 
-div:has(>.root)
+.container
   height: stretch
-  &.dragOver::after
-    content: ''
-    position: absolute
-    inset: 0
-    background: rgba(255, 255, 255, 0.04)
-    pointer-events: none
-    z-index: 10
 
 .dropOverlay
   position: absolute
@@ -57,7 +50,7 @@ div:has(>.root)
   align-content: flex-start
   overflow: auto
   height: 100%
-  &.tokEmpty
+  &.empty
     display: flex
     align-items: center
     justify-content: center

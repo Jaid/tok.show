@@ -288,7 +288,7 @@ const App: FunctionComponent = () => {
     if (currentTab === 'ids') {
       const td = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData : null
       if (!td) {
-        return <div className={clsx(css.idsView, css.tokEmpty)}>No tokens (focus a model)</div>
+        return <div className={clsx(css.idsView, css.empty)}>No tokens (focus a model)</div>
       }
       return (
         <div className={css.idsView}>
@@ -307,7 +307,7 @@ const App: FunctionComponent = () => {
     )
   }
   return <>
-    <Group orientation="horizontal" className={clsx(css.root, css.mainPanels)}>
+    <Group orientation="horizontal" className={css.container}>
       {/* LEFT */}
       <Panel defaultSize={50} minSize={20}>
         <div className={css.pane}>

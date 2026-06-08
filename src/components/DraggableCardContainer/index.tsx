@@ -92,7 +92,7 @@ const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, mo
   }, [entries, onReorder, onStashDrop])
   return (
     <DragDropProvider onDragEnd={handleDragEnd} sensors={[pointerSensor, KeyboardSensor.configure({})]}>
-      <div className={css.cardList}>
+      <div className={css.container}>
         {entries.map((entry, index) => {
           if (entry === 'average') {
             return (

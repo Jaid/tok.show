@@ -13,7 +13,7 @@ type Props = {
 }
 
 const EditorFooter: FunctionComponent<Props> = ({onToggleMonaco, shareUrl, useMonaco}) => {
-  return <div className={css.footer}>
+  return <div className={css.container}>
     <div className={css.info}>
       <Icon />
       <div className={css.titleContainer}>

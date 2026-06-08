@@ -15,7 +15,7 @@ const HiddenCardStash: FunctionComponent<Props> = ({models, onUnhide}) => {
     return <div className={css.empty}>All models visible</div>
   }
   return (
-    <div className={css.list}>
+    <div className={css.container}>
       {models.map(model => <ModelCard
         key={model.id}
         model={model}

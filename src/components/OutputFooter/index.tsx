@@ -27,7 +27,7 @@ type Props = {
 }
 
 const OutputFooter: FunctionComponent<Props> = ({entries, modelsById, counts, errors, focusedId, hiddenEntryIds, loadingSet, onReorder, onFocus, onStashDrop, showAverage, averageCount, visibleModelCount, hiddenModels, onUnhide, onHide}) => {
-  return <div className={css.footer}>
+  return <div className={css.container}>
     <DraggableCardContainer entries={entries} modelsById={modelsById}
       counts={counts} errors={errors} focusedId={focusedId}
       hiddenEntryIds={hiddenEntryIds} loadingSet={loadingSet}

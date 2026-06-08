@@ -111,7 +111,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
     )
   }
   return (
-    <div className={css.text}>
+    <div className={css.container}>
       {spans.map((span, i) => {
         const isOdd = i % 2 === 0
         const isHovered = hoveredId === span.id

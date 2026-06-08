@@ -20,7 +20,7 @@ type Props = {
 }
 
 const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, isLoading, error, onClick, handleRef}) => {
-  return <div className={clsx(css.card, isLoading && css.loading, isFocused && css.focused, isBest && css.best)}
+  return <div className={clsx(css.container, isLoading && css.loading, isFocused && css.focused, isBest && css.best)}
     onClick={onClick}
     role="button"
     tabIndex={0}
