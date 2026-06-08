@@ -9,7 +9,7 @@ import {useCallback} from 'react'
 
 import DraggableCard from '#component/DraggableCard'
 import ModelProfile from '#component/ModelProfile'
-import PulsatingNumber from '#component/PulsatingNumber'
+import TokenCount from '#component/TokenCount'
 
 import averageIcon from './average.svg'
 
@@ -149,7 +149,7 @@ function AverageCard({count, isBest, modelCount}: {count: number | null
   return (
     <div className={css.averageCard}>
       <div className={css.count}>
-        {count !== null ? <PulsatingNumber suffix="token" suffixPlural gluedSuffix className={css.countElement} suffixClassName={css.countLabel} value={count} /> : <span className={css.countNa}>–</span>}
+        {count !== null ? <TokenCount value={count} /> : <span className={css.countNa}>–</span>}
       </div>
       <div className={css.profile}>
         <ModelProfile model={{

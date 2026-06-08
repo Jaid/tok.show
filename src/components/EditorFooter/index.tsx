@@ -10,7 +10,7 @@ type Props = {
   useMonaco: boolean
 }
 
-export default function Footer({onToggleMonaco, shareUrl, useMonaco}: Props) {
+export default function EditorFooter({onToggleMonaco, shareUrl, useMonaco}: Props) {
   return <div className={css.footer}>
     <div className={css.info}>
       <Icon />

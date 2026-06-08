@@ -33,72 +33,10 @@ div:has(>.root)
   flex-direction: column
   overflow: hidden
 
-.paneHeader
-  display: flex
-  align-items: center
-  gap: 6px
-  border-bottom: 1px solid $borderColor
-  flex-shrink: 0
-  height: 28px
-  &.tabsRow
-    gap: 2px
-
 .paneBody
   flex: 1
   overflow: hidden
   min-height: 0
-
-.paneFooter
-  display: flex
-  align-items: center
-  justify-content: space-between
-  border-top: 1px solid $borderColor
-  flex-shrink: 0
-  font-size: 12px
-
-.tab
-  font-size: 12px
-  padding: 2px 8px
-  background: transparent
-  border: 1px solid transparent
-  color: #888
-  cursor: pointer
-  border-radius: 3px
-  transition: all 0.1s
-  align-self: stretch
-  border-radius: 10px 10px 0 0
-  corner-shape: squircle
-  align-content: center
-  &:hover
-    color: white
-    border-color: #333
-  &.active
-    color: white
-    margin-bottom: -1px
-    border: 1px solid $borderColor
-    border-bottom-color: black
-    &:first-child
-      border-left-color: transparent
-      border-top-left-radius: 0
-
-.paneHeaderSize
-  margin-left: auto
-  color: #888
-  font-size: 11px
-
-.iconBtn
-  background: transparent
-  border: none
-  color: #888
-  border-radius: 4px
-  cursor: pointer
-  display: flex
-  align-items: center
-  font-size: 14px
-  padding-block: 4px
-
-  &:hover
-    color: white
 
 .mirrorView
   font-family: code, monospace
@@ -132,11 +70,6 @@ div:has(>.root)
   font-size: 12px
   color: #888
   font-family: code, monospace
-
-.modelBar
-  display: flex
-  align-items: center
-  padding: 4px
 
 .empty
   color: #444

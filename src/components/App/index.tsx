@@ -1,3 +1,4 @@
+import type {OutputTab} from '#component/OutputHeader'
 import type {EntryId} from '#src/lib/state.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
 import type {ModelId} from 'token-vocabs'
@@ -6,16 +7,15 @@ import clsx from 'clsx'
 import {parseAsBoolean, parseAsString, useQueryState} from 'nuqs'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useHotkeys} from 'react-hotkeys-hook'
-import {FaRegCopy} from 'react-icons/fa6'
 import {Group, Panel, Separator} from 'react-resizable-panels'
 import {modelIds} from 'token-vocabs'
 import {useSnapshot} from 'valtio'
 
-import DraggableCardContainer from '#component/DraggableCardContainer'
 import Editor from '#component/Editor'
-import Footer from '#component/Footer'
-import HiddenCardStashButton from '#component/HiddenCardStashButton'
-import NumberDisplay from '#component/NumberDisplay'
+import EditorFooter from '#component/EditorFooter'
+import EditorHeader from '#component/EditorHeader'
+import OutputFooter from '#component/OutputFooter'
+import OutputHeader from '#component/OutputHeader'
 import TokenizedText from '#component/TokenizedText'
 import modelsMap from '#src/lib/models/index.ts'
 import {getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, state} from '#src/lib/state.ts'
@@ -26,8 +26,6 @@ import css from './style.module.sass'
 
 const allModelIds = modelIds as ReadonlyArray<ModelId>
 
-type Tab = 'ids' | 'mirror' | 'tokenized'
-
 export default function App() {
   const snap = useSnapshot(state)
   // URL params
@@ -37,7 +35,7 @@ export default function App() {
   // models param (handled manually)
   const [modelsRaw, setModelsRaw] = useQueryState('models', parseAsString.withDefault('gpt,deepseek'))
   // Local UI
-  const [currentTab, setCurrentTab] = useState<Tab>('tokenized')
+  const [currentTab, setCurrentTab] = useState<OutputTab>('tokenized')
   const [editorRange, setEditorRange] = useState<{end: number
     start: number} | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
@@ -305,18 +303,18 @@ export default function App() {
       {/* LEFT */}
       <Panel defaultSize={50} minSize={20}>
         <div className={css.pane}>
-          <div className={css.paneHeader}>
-            <div className={clsx(css.tab, css.active)}>input.txt</div>
-            <span className={css.paneHeaderSize}>
-              {state.isBinary && state.binaryData ? <NumberDisplay value={state.binaryData.byteLength} suffix='byte' suffixPlural/> : <><NumberDisplay value={(new TextEncoder).encode(state.text).byteLength} suffix='byte' suffixPlural/> · <NumberDisplay value={state.text.length} suffix='char' suffixPlural/></>}
-            </span>
-            <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
-          </div>
+          <EditorHeader
+            sizeInBytes={(new TextEncoder).encode(state.text).byteLength}
+            charCount={state.text.length}
+            isBinary={state.isBinary}
+            binaryByteCount={state.binaryData?.byteLength ?? null}
+            onCopy={onCopy}
+          />
           <div className={css.paneBody}>
             <Editor value={state.text} onChange={onInput} useMonaco={state.useMonaco}
               isBinary={state.isBinary} binaryData={state.binaryData} highlightRange={editorRange} />
           </div>
-          <Footer
+          <EditorFooter
             useMonaco={state.useMonaco}
             onToggleMonaco={() => {
               state.useMonaco = !state.useMonaco
@@ -331,25 +329,15 @@ export default function App() {
       {/* RIGHT */}
       <Panel defaultSize={50} minSize={20}>
         <div className={css.pane}>
-          <div className={clsx(css.paneHeader, css.tabsRow)}>
-            <button className={clsx(css.tab, currentTab === 'mirror' && css.active)}
-              onClick={() => setCurrentTab('mirror')}>mirror</button>
-            <button className={clsx(css.tab, currentTab === 'tokenized' && css.active)}
-              onClick={() => setCurrentTab('tokenized')}>tokenized</button>
-            <button className={clsx(css.tab, currentTab === 'ids' && css.active)}
-              onClick={() => setCurrentTab('ids')}>IDs</button>
-          </div>
+          <OutputHeader currentTab={currentTab} onTabChange={setCurrentTab} />
           <div className={css.paneBody}>{rightContent()}</div>
-          <div className={clsx(css.paneFooter, css.modelBar)}>
-            <DraggableCardContainer entries={state.visibleEntries} modelsById={modelsMap}
-              counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
-              hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}
-              onReorder={onReorder} onFocus={onFocus} onStashDrop={onStashDrop}
-              showAverage={showAvg} averageCount={avgCount} visibleModelCount={visibleCount}>
-              <HiddenCardStashButton hiddenModels={hidden}
-                onUnhide={onUnhide} onHide={(id: string) => onHide(id)} />
-            </DraggableCardContainer>
-          </div>
+          <OutputFooter entries={state.visibleEntries} modelsById={modelsMap}
+            counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
+            hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}
+            onReorder={onReorder} onFocus={onFocus} onStashDrop={onStashDrop}
+            showAverage={showAvg} averageCount={avgCount} visibleModelCount={visibleCount}
+            hiddenModels={hidden}
+            onUnhide={onUnhide} onHide={(id: EntryId) => onHide(id)} />
         </div>
       </Panel>
     </Group>
