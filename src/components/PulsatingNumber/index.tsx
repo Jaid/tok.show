@@ -1,3 +1,5 @@
+import type {FunctionComponent} from 'react'
+
 import clsx from 'clsx'
 import {useEffect, useMemo, useRef} from 'react'
 
@@ -41,8 +43,7 @@ const makeKeyframes = (color: string): Array<Keyframe> => [
     transform: 'scale(1)',
   },
 ]
-
-export default function PulsatingNumber({colorNegative = '#ff1717', colorPositive = '#22c55e', numberClassName, ...numberDisplayProps}: Props) {
+const PulsatingNumber: FunctionComponent<Props> = ({colorNegative = '#ff1717', colorPositive = '#22c55e', numberClassName, ...numberDisplayProps}) => {
   const spanRef = useRef<HTMLSpanElement | null>(null)
   const prevRef = useRef(numberDisplayProps.value)
   const greenFrames = useMemo(() => makeKeyframes(colorPositive), [colorPositive])
@@ -71,3 +72,5 @@ export default function PulsatingNumber({colorNegative = '#ff1717', colorPositiv
     />
   )
 }
+
+export default PulsatingNumber

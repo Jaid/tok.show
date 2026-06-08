@@ -1,3 +1,5 @@
+import type {FunctionComponent} from 'react'
+
 import clsx from 'clsx'
 
 import css from './style.module.sass'
@@ -20,7 +22,7 @@ type Props = {
 }
 
 const defaultSplitMinimum = 10_000
-const NumberDisplay = (props: Props) => {
+const NumberDisplay: FunctionComponent<Props> = props => {
   if (Number.isNaN(props.value)) {
     return
   }

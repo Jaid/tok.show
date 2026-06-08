@@ -1,3 +1,5 @@
+import type {FunctionComponent} from 'react'
+
 import clsx from 'clsx'
 
 import css from './style.module.sass'
@@ -9,7 +11,7 @@ type Props = {
   onTabChange: (tab: OutputTab) => void
 }
 
-export default function OutputHeader({currentTab, onTabChange}: Props) {
+const OutputHeader: FunctionComponent<Props> = ({currentTab, onTabChange}) => {
   const tabs: Array<{id: OutputTab
     label: string}> = [
     {
@@ -35,3 +37,5 @@ export default function OutputHeader({currentTab, onTabChange}: Props) {
     </button>)}
   </div>
 }
+
+export default OutputHeader

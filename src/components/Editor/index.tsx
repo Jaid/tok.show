@@ -1,4 +1,5 @@
 import type {OnChange, OnMount} from '@monaco-editor/react'
+import type {FunctionComponent} from 'react'
 
 import {Editor as MonacoEditor} from '@monaco-editor/react'
 import {once} from 'es-toolkit/function'
@@ -33,8 +34,7 @@ const ensureTheme = once((monaco: any) => {
     rules: [],
   })
 })
-
-export default function Editor({value, onChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange}: Props) {
+const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange}) => {
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<any>(null)
   const decorationsRef = useRef<Array<string>>([])
@@ -124,3 +124,5 @@ export default function Editor({value, onChange, readOnly, useMonaco = true, isB
     />
   </div>
 }
+
+export default Editor

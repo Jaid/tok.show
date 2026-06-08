@@ -1,5 +1,6 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {EntryId} from '#src/lib/state.ts'
+import type {FunctionComponent} from 'react'
 
 import DraggableCardContainer from '#component/DraggableCardContainer'
 import HiddenCardStashButton from '#component/HiddenCardStashButton'
@@ -25,7 +26,7 @@ type Props = {
   visibleModelCount: number
 }
 
-export default function OutputFooter({entries, modelsById, counts, errors, focusedId, hiddenEntryIds, loadingSet, onReorder, onFocus, onStashDrop, showAverage, averageCount, visibleModelCount, hiddenModels, onUnhide, onHide}: Props) {
+const OutputFooter: FunctionComponent<Props> = ({entries, modelsById, counts, errors, focusedId, hiddenEntryIds, loadingSet, onReorder, onFocus, onStashDrop, showAverage, averageCount, visibleModelCount, hiddenModels, onUnhide, onHide}) => {
   return <div className={css.footer}>
     <DraggableCardContainer entries={entries} modelsById={modelsById}
       counts={counts} errors={errors} focusedId={focusedId}
@@ -37,3 +38,5 @@ export default function OutputFooter({entries, modelsById, counts, errors, focus
     </DraggableCardContainer>
   </div>
 }
+
+export default OutputFooter

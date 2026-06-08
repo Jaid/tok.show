@@ -1,3 +1,5 @@
+import type {FunctionComponent} from 'react'
+
 import {FaArrowUpRightFromSquare} from 'react-icons/fa6'
 
 import Icon from '#component/Icon'
@@ -10,7 +12,7 @@ type Props = {
   useMonaco: boolean
 }
 
-export default function EditorFooter({onToggleMonaco, shareUrl, useMonaco}: Props) {
+const EditorFooter: FunctionComponent<Props> = ({onToggleMonaco, shareUrl, useMonaco}) => {
   return <div className={css.footer}>
     <div className={css.info}>
       <Icon />
@@ -29,3 +31,5 @@ export default function EditorFooter({onToggleMonaco, shareUrl, useMonaco}: Prop
     </div>
   </div>
 }
+
+export default EditorFooter

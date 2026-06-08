@@ -1,4 +1,5 @@
 import type {Model} from '#src/lib/models/index.ts'
+import type {FunctionComponent} from 'react'
 
 import {useSortable} from '@dnd-kit/react/sortable'
 
@@ -18,7 +19,7 @@ type Props = {
   onClick?: () => void
 }
 
-export default function DraggableCard({id, index, model, count, isBest, isFocused, isLoading, error, onClick}: Props) {
+const DraggableCard: FunctionComponent<Props> = ({id, index, model, count, isBest, isFocused, isLoading, error, onClick}) => {
   const {ref, handleRef, isDragging} = useSortable({
     id,
     index,
@@ -45,3 +46,5 @@ export default function DraggableCard({id, index, model, count, isBest, isFocuse
     </div>
   )
 }
+
+export default DraggableCard

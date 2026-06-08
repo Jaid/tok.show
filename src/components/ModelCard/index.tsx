@@ -1,4 +1,5 @@
 import type {Model} from '#src/lib/models/index.ts'
+import type {FunctionComponent} from 'react'
 
 import clsx from 'clsx'
 
@@ -18,7 +19,7 @@ type Props = {
   onClick?: () => void
 }
 
-export default function ModelCard({model, count, isBest, isFocused, isLoading, error, onClick, handleRef}: Props) {
+const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, isLoading, error, onClick, handleRef}) => {
   return <div className={clsx(css.card, isLoading && css.loading, isFocused && css.focused, isBest && css.best)}
     onClick={onClick}
     role="button"
@@ -40,3 +41,5 @@ export default function ModelCard({model, count, isBest, isFocused, isLoading, e
     </div>
   </div>
 }
+
+export default ModelCard

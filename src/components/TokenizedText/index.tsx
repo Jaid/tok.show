@@ -1,5 +1,6 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
+import type {FunctionComponent} from 'react'
 import type {ModelId} from 'token-vocabs'
 
 import {autoUpdate, flip, offset, shift, useClick, useDismiss, useFloating, useHover, useInteractions} from '@floating-ui/react'
@@ -20,7 +21,7 @@ type Props = {
   spans: Array<TokenSpan>
 }
 
-export default function TokenizedText({spans, input, focusedModel, onHoverSpan, onClickSpan}: Props) {
+const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, onHoverSpan, onClickSpan}) => {
   const [hoveredId, setHoveredId] = useState<number | null>(null)
   const [clickedSpan, setClickedSpan] = useState<TokenSpan | null>(null)
   const [tooltipOpen, setTooltipOpen] = useState(false)
@@ -175,6 +176,8 @@ export default function TokenizedText({spans, input, focusedModel, onHoverSpan, 
     </div>
   )
 }
+
+export default TokenizedText
 
 function getSpanText(input: Uint8Array | string, span: TokenSpan): string {
   if (span.isNonRepresentable && span.hexDisplay) {

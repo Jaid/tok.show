@@ -1,3 +1,5 @@
+import type {FunctionComponent} from 'react'
+
 import {FaRegCopy} from 'react-icons/fa6'
 
 import NumberDisplay from '#component/NumberDisplay'
@@ -12,7 +14,7 @@ type Props = {
   sizeInBytes: number
 }
 
-export default function EditorHeader({sizeInBytes, charCount, isBinary, binaryByteCount, onCopy}: Props) {
+const EditorHeader: FunctionComponent<Props> = ({sizeInBytes, charCount, isBinary, binaryByteCount, onCopy}) => {
   return <div className={css.header}>
     <div className={css.tab}>input.txt</div>
     <span className={css.size}>
@@ -22,3 +24,5 @@ export default function EditorHeader({sizeInBytes, charCount, isBinary, binaryBy
     <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
   </div>
 }
+
+export default EditorHeader

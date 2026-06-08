@@ -1,6 +1,6 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {EntryId} from '#src/lib/state.ts'
-import type {ReactNode} from 'react'
+import type {FunctionComponent, ReactNode} from 'react'
 
 import {KeyboardSensor, PointerActivationConstraints, PointerSensor} from '@dnd-kit/dom'
 import {DragDropProvider} from '@dnd-kit/react'
@@ -65,9 +65,8 @@ const getBestEntryId = (counts: Record<string, number>, entries: Array<EntryId>,
   }
   return winners[0]
 }
-
-export default function DraggableCardContainer({children, entries, modelsById, counts, errors, focusedId, loadingSet,
-  onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}: Props) {
+const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, modelsById, counts, errors, focusedId, loadingSet,
+  onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}) => {
   const bestEntryId = getBestEntryId(counts, entries, averageCount)
   const handleDragEnd = useCallback((event: any) => {
     if (event.canceled) {
@@ -132,6 +131,8 @@ export default function DraggableCardContainer({children, entries, modelsById, c
   )
 }
 
+export default DraggableCardContainer
+
 function arrayMove<T>(array: Array<T>, from: number, to: number): Array<T> {
   const next = [...array]
   const [item] = next.splice(from, 1)
@@ -142,9 +143,9 @@ const averageModel = {
   icon: averageIcon,
   name: 'Average',
 }
-function AverageCard({count, isBest, modelCount}: {count: number | null
+const AverageCard: FunctionComponent<{count: number | null
   isBest?: boolean
-  modelCount: number}) {
+  modelCount: number}> = ({count, isBest, modelCount}) => {
   const subname = modelCount >= 2 ? `of ${modelCount} models` : undefined
   return (
     <div className={css.averageCard}>
@@ -160,11 +161,11 @@ function AverageCard({count, isBest, modelCount}: {count: number | null
     </div>
   )
 }
-function DraggableAverageCard({averageCount, index, isBest, showAverage, visibleModelCount}: {averageCount: number | null
+const DraggableAverageCard: FunctionComponent<{averageCount: number | null
   index: number
   isBest?: boolean
   showAverage: boolean
-  visibleModelCount: number}) {
+  visibleModelCount: number}> = ({averageCount, index, isBest, showAverage, visibleModelCount}) => {
   const {ref, handleRef, isDragging} = useSortable({
     id: 'average',
     index,

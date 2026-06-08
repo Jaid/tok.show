@@ -1,12 +1,14 @@
+import type {FunctionComponent} from 'react'
+
 import {bytesToHexPairs} from '#src/lib/tokenization.ts'
 
 import css from './style.module.sass'
 
-type HexViewerProperties = {
+type Props = {
   bytes: Uint8Array
 }
 
-export default function HexViewer({bytes}: HexViewerProperties) {
+const HexViewer: FunctionComponent<Props> = ({bytes}) => {
   const rows: Array<Uint8Array> = []
   for (let index = 0; index < bytes.length; index += 16) {
     rows.push(bytes.slice(index, index + 16))
@@ -18,3 +20,5 @@ export default function HexViewer({bytes}: HexViewerProperties) {
     </div>)}
   </div>
 }
+
+export default HexViewer

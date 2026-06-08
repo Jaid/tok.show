@@ -1,4 +1,5 @@
 import type {Model} from '#src/lib/models/index.ts'
+import type {FunctionComponent} from 'react'
 
 import ModelCard from '#component/ModelCard'
 
@@ -9,7 +10,7 @@ type Props = {
   onUnhide: (modelId: string) => void
 }
 
-export default function HiddenCardStash({models, onUnhide}: Props) {
+const HiddenCardStash: FunctionComponent<Props> = ({models, onUnhide}) => {
   if (models.length === 0) {
     return <div className={css.empty}>All models visible</div>
   }
@@ -24,3 +25,5 @@ export default function HiddenCardStash({models, onUnhide}: Props) {
     </div>
   )
 }
+
+export default HiddenCardStash

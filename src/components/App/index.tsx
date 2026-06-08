@@ -1,6 +1,7 @@
 import type {OutputTab} from '#component/OutputHeader'
 import type {EntryId} from '#src/lib/state.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
+import type {FunctionComponent} from 'react'
 import type {ModelId} from 'token-vocabs'
 
 import clsx from 'clsx'
@@ -25,8 +26,15 @@ import {getTokenSpans} from '#src/lib/tokenSpans.ts'
 import css from './style.module.sass'
 
 const allModelIds = modelIds as ReadonlyArray<ModelId>
-
-export default function App() {
+// Custom URL param parser for models array (comma-separated)
+const getModelsFromUrl = (value: string | null): Array<string> => {
+  if (!value) {
+    return ['gpt', 'deepseek']
+  }
+  return value.split(',').map(s => s.trim()).filter(Boolean)
+}
+const serializeModels = (ids: Array<string>): string => ids.join(',')
+const App: FunctionComponent = () => {
   const snap = useSnapshot(state)
   // URL params
   const [textParam, setTextParam] = useQueryState('text', parseAsString.withDefault(''))
@@ -346,13 +354,4 @@ export default function App() {
   </>
 }
 
-// Custom URL param parser for models array (comma-separated)
-function getModelsFromUrl(value: string | null): Array<string> {
-  if (!value) {
-    return ['gpt', 'deepseek']
-  }
-  return value.split(',').map(s => s.trim()).filter(Boolean)
-}
-function serializeModels(ids: Array<string>): string {
-  return ids.join(',')
-}
+export default App
