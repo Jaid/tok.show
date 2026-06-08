@@ -79,7 +79,6 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
   // Fallback textarea when Monaco disabled
   if (!useMonaco) {
     return <textarea
-      aria-label='input text'
       className={css.textarea}
       value={value}
       onChange={e => onChange(e.currentTarget.value)}

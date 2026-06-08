@@ -49,7 +49,6 @@ const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(({h
         ref={setRefs}
         className={clsx(css.element, isDropTarget && css.dropTarget)}
         {...getReferenceProps()}
-        aria-label={count > 0 ? `${count} more models hidden` : 'Hidden models'}
       >
         {`+ ${count}`}
       </button>
