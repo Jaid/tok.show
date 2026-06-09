@@ -9,6 +9,6 @@ import css from './style.module.sass'
 
 mountRoot(App, {
   id: css.container,
-  wrapper: NuqsAdapter,
-  strict: true,
+  wrapper: [NuqsAdapter],
+  strict: import.meta.env.DEV,
 })
