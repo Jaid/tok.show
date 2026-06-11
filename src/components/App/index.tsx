@@ -5,7 +5,7 @@ import type {FunctionComponent} from 'react'
 import type {ModelId} from 'token-vocabs'
 
 import clsx from 'clsx'
-import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {useEffect, useRef, useState} from 'react'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Group, Panel, Separator} from 'react-resizable-panels'
 import {modelIds} from 'token-vocabs'
@@ -35,8 +35,7 @@ const getModelsFromUrl = (value: string | null): Array<string> => {
 const serializeModels = (ids: Array<string>): string => ids.join(',')
 const App: FunctionComponent = () => {
   const snap = useSnapshot(state)
-  const {
-    model: modelParam,
+  const {model: modelParam,
     models: modelsRaw,
     monaco: monacoParam,
     setModel: setModelParam,
@@ -44,8 +43,7 @@ const App: FunctionComponent = () => {
     setMonaco: setMonacoParam,
     setText: setTextParam,
     shareUrl,
-    text: textParam,
-  } = useUrlParameters()
+    text: textParam} = useUrlParameters()
   const [currentTab, setCurrentTab] = useState<OutputTab>('tokenized')
   const [editorRange, setEditorRange] = useState<{end: number
     start: number} | null>(null)
@@ -96,7 +94,7 @@ const App: FunctionComponent = () => {
       }
     }
   }, [snap.visibleEntries])
-  const focusedSpans = useMemo<Array<TokenSpan>>(() => {
+  const focusedSpans: Array<TokenSpan> = (() => {
     const fid = state.focusedId
     if (!fid) {
       return []
@@ -111,8 +109,8 @@ const App: FunctionComponent = () => {
       processedInput: ms.tokenizeData.processedInput,
       tokens: ms.tokenizeData.tokens,
     })
-  }, [snap.modelStates, snap.focusedId])
-  const loadingSet = useMemo(() => {
+  })()
+  const loadingSet = (() => {
     const s = new Set<string>
     for (const id of getVisibleModelIds()) {
       if (snap.modelStates[id]?.loading) {
@@ -120,8 +118,8 @@ const App: FunctionComponent = () => {
       }
     }
     return s
-  }, [snap.modelStates, snap.visibleEntries])
-  const tokenCounts = useMemo(() => {
+  })()
+  const tokenCounts = (() => {
     const c: Record<string, number> = {}
     for (const [id, ms] of Object.entries(snap.modelStates) as Array<[string, {loaded: boolean
       tokenCount: number}]>) {
@@ -130,21 +128,21 @@ const App: FunctionComponent = () => {
       }
     }
     return c
-  }, [snap.modelStates])
-  const modelErrors = useMemo(() => {
+  })()
+  const modelErrors = (() => {
     const e: Record<string, string | null> = {}
     for (const [id, ms] of Object.entries(snap.modelStates) as Array<[string, {error: string | null}]>) {
       e[id] = ms?.error ?? null
     }
     return e
-  }, [snap.modelStates])
-  const onInput = useCallback((v: string) => {
+  })()
+  const onInput = (v: string) => {
     if (state.isBinary) {
       state.isBinary = false; state.binaryData = null
     }
     state.text = v; setTextParam(v)
-  }, [setTextParam])
-  const onFocus = useCallback((modelId: string) => {
+  }
+  const onFocus = (modelId: string) => {
     if (state.focusedId === modelId) {
       state.focusedId = null
       setModelParam('')
@@ -157,12 +155,12 @@ const App: FunctionComponent = () => {
       }
       void ensureModelLoaded(modelId as ModelId)
     }
-  }, [setModelParam, setModelsRaw])
-  const onReorder = useCallback((order: Array<EntryId>) => {
+  }
+  const onReorder = (order: Array<EntryId>) => {
     state.visibleEntries = order
     setModelsRaw(serializeModels(order.filter(e => e !== 'average')))
-  }, [setModelsRaw])
-  const onHide = useCallback((entry: EntryId) => {
+  }
+  const onHide = (entry: EntryId) => {
     if (entry !== 'average' && getVisibleModelIds().length <= 1) {
       return
     }
@@ -172,23 +170,23 @@ const App: FunctionComponent = () => {
       state.focusedId = null
       setModelParam('')
     }
-  }, [setModelParam, setModelsRaw])
-  const onUnhide = useCallback((id: string) => {
+  }
+  const onUnhide = (id: string) => {
     if (!state.visibleEntries.includes(id)) {
       state.visibleEntries = [...state.visibleEntries, id]
       setModelsRaw(serializeModels(getVisibleModelIds()))
       void ensureModelLoaded(id as ModelId)
     }
-  }, [setModelsRaw])
-  const onDragOver = useCallback((e: React.DragEvent) => {
+  }
+  const onDragOver = (e: React.DragEvent) => {
     e.preventDefault(); setIsDragOver(true)
-  }, [])
-  const onDragLeave = useCallback((e: React.DragEvent) => {
+  }
+  const onDragLeave = (e: React.DragEvent) => {
     if (!e.currentTarget.contains(e.relatedTarget as unknown as Node)) {
       setIsDragOver(false)
     }
-  }, [])
-  const onDrop = useCallback(async (e: React.DragEvent) => {
+  }
+  const onDrop = async (e: React.DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
     const file = e.dataTransfer.files[0]
@@ -212,8 +210,8 @@ const App: FunctionComponent = () => {
     if (t) {
       state.isBinary = false; state.binaryData = null; state.text = t; setTextParam(t)
     }
-  }, [setTextParam])
-  const onCopy = useCallback(async () => {
+  }
+  const onCopy = async () => {
     const t = state.isBinary && state.binaryData ? new TextDecoder('utf-8', {fatal: false}).decode(state.binaryData) : state.text
     try {
       await navigator.clipboard.writeText(t)
@@ -221,22 +219,22 @@ const App: FunctionComponent = () => {
       const ta = document.body.appendChild(document.createElement('textarea'))
       ta.value = t; ta.select(); document.execCommand('copy'); ta.remove()
     }
-  }, [])
-  const onTokenHover = useCallback((span: TokenSpan | null) => {
+  }
+  const onTokenHover = (span: TokenSpan | null) => {
     setEditorRange(span ? {
       start: span.byteStart,
       end: span.byteEnd,
     } : null)
-  }, [])
-  const onTokenClick = useCallback((span: TokenSpan) => {
+  }
+  const onTokenClick = (span: TokenSpan) => {
     setEditorRange({
       start: span.byteStart,
       end: span.byteEnd,
     })
-  }, [])
-  const onStashDrop = useCallback((entry: EntryId) => {
+  }
+  const onStashDrop = (entry: EntryId) => {
     onHide(entry)
-  }, [onHide])
+  }
   useHotkeys('0', () => {
     state.focusedId = null
     setModelParam('')
@@ -273,7 +271,7 @@ const App: FunctionComponent = () => {
       if (!td) {
         return <div className={clsx(css.idsView, css.empty)}>No tokens (focus a model)</div>
       }
-      const elements = td.tokens.map((id: number, i: number) =>  {
+      const elements = td.tokens.map((id: number, i: number) => {
         return <span key={i} className={css.tokenIdChip}>{id}</span>
       })
       return <div className={css.idsView} children={elements}/>

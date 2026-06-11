@@ -1,4 +1,4 @@
-import {useCallback, useMemo, useState} from 'react'
+import {useState} from 'react'
 
 type UrlParameters = {
   model: string
@@ -15,14 +15,12 @@ const defaults: UrlParameters = {
   monaco: true,
   text: '',
 }
-
 const parseBoolean = (value: string | null): boolean => {
   if (value === null) {
     return defaults.monaco
   }
   return value !== 'false'
 }
-
 const readUrlParameters = (): UrlParameters => {
   if (globalThis.window === undefined) {
     return defaults
@@ -38,13 +36,13 @@ const readUrlParameters = (): UrlParameters => {
 
 export function useUrlParameters() {
   const [parameters, setParameters] = useState<UrlParameters>(readUrlParameters)
-  const setParameter = useCallback(<Name extends UrlParameterName>(name: Name, value: UrlParameters[Name]) => {
+  const setParameter = <Name extends UrlParameterName>(name: Name, value: UrlParameters[Name]) => {
     setParameters(current => ({
       ...current,
       [name]: value,
     }))
-  }, [])
-  const shareUrl = useMemo(() => {
+  }
+  const shareUrl = (() => {
     if (globalThis.window === undefined) {
       return '#'
     }
@@ -55,13 +53,13 @@ export function useUrlParameters() {
     url.searchParams.set('models', parameters.models)
     url.searchParams.set('monaco', String(parameters.monaco))
     return url.toString()
-  }, [parameters])
+  })()
   return {
     ...parameters,
-    setModel: useCallback((value: string) => setParameter('model', value), [setParameter]),
-    setModels: useCallback((value: string) => setParameter('models', value), [setParameter]),
-    setMonaco: useCallback((value: boolean) => setParameter('monaco', value), [setParameter]),
-    setText: useCallback((value: string) => setParameter('text', value), [setParameter]),
+    setModel: (value: string) => setParameter('model', value),
+    setModels: (value: string) => setParameter('models', value),
+    setMonaco: (value: boolean) => setParameter('monaco', value),
+    setText: (value: string) => setParameter('text', value),
     shareUrl,
   }
 }

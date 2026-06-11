@@ -5,7 +5,6 @@ import type {FunctionComponent, ReactNode} from 'react'
 import {KeyboardSensor, PointerActivationConstraints, PointerSensor} from '@dnd-kit/dom'
 import {DragDropProvider} from '@dnd-kit/react'
 import {isSortableOperation} from '@dnd-kit/react/sortable'
-import {useCallback} from 'react'
 
 import DraggableAverageCard from '#component/DraggableAverageCard'
 import DraggableCard from '#component/DraggableCard'
@@ -65,7 +64,7 @@ const getBestEntryId = (counts: Record<string, number>, entries: Array<EntryId>,
 const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, modelsById, counts, errors, focusedId, loadingSet,
   onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}) => {
   const bestEntryId = getBestEntryId(counts, entries, averageCount)
-  const handleDragEnd = useCallback((event: any) => {
+  const handleDragEnd = (event: any) => {
     if (event.canceled) {
       return
     }
@@ -86,7 +85,7 @@ const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, mo
       }
       onReorder(arrayMove(entries, from, to))
     }
-  }, [entries, onReorder, onStashDrop])
+  }
   return (
     <DragDropProvider onDragEnd={handleDragEnd} sensors={[pointerSensor, KeyboardSensor.configure({})]}>
       <div className={css.container}>

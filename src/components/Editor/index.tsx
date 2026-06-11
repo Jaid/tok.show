@@ -3,7 +3,7 @@ import type {FunctionComponent} from 'react'
 
 import {Editor as MonacoEditor} from '@monaco-editor/react'
 import {once} from 'es-toolkit/function'
-import {useCallback, useEffect, useRef} from 'react'
+import {useEffect, useRef} from 'react'
 
 import HexViewer from '#component/HexViewer'
 
@@ -38,13 +38,13 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<any>(null)
   const decorationsRef = useRef<Array<string>>([])
-  const handleMount: OnMount = useCallback((editor, monaco) => {
+  const handleMount: OnMount = (editor, monaco) => {
     editorRef.current = editor
     monacoRef.current = monaco
-  }, [])
-  const handleChange: OnChange = useCallback(val => {
+  }
+  const handleChange: OnChange = val => {
     onChange(val ?? '')
-  }, [onChange])
+  }
   // Highlight decoration sync
   useEffect(() => {
     const editor = editorRef.current

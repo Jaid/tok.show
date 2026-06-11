@@ -5,7 +5,7 @@ import type {ModelId} from 'token-vocabs'
 
 import {autoUpdate, flip, offset, shift, useClick, useDismiss, useFloating, useHover, useInteractions} from '@floating-ui/react'
 import clsx from 'clsx'
-import {useCallback, useState} from 'react'
+import {useState} from 'react'
 
 import modelsMap from '#src/lib/models/index.ts'
 import {getVisibleModelIds} from '#src/lib/state.ts'
@@ -55,7 +55,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
   const dismiss = useDismiss(context)
   const {getReferenceProps, getFloatingProps} = useInteractions([click, dismiss])
   // Compute supported models when a span is clicked
-  const computeSupported = useCallback(async (span: TokenSpan) => {
+  const computeSupported = async (span: TokenSpan) => {
     const decoder = new globalThis.TextDecoder('utf-8', {fatal: false})
     const tokenStr = typeof input === 'string' ? input.slice(span.byteStart, span.byteEnd) : decoder.decode(input.slice(span.byteStart, span.byteEnd))
     if (!tokenStr) {
@@ -85,22 +85,22 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
     })
     await Promise.all(checks)
     setSupportedModels(supported)
-  }, [input])
-  const handleSpanClick = useCallback((span: TokenSpan, event: React.MouseEvent) => {
+  }
+  const handleSpanClick = (span: TokenSpan, event: React.MouseEvent) => {
     setClickedSpan(span)
     setTooltipOpen(true)
     refs.setReference(event.currentTarget)
     onClickSpan?.(span)
     void computeSupported(span)
-  }, [refs, onClickSpan, computeSupported])
-  const handleMouseEnter = useCallback((span: TokenSpan) => {
+  }
+  const handleMouseEnter = (span: TokenSpan) => {
     setHoveredId(span.id)
     onHoverSpan?.(span)
-  }, [onHoverSpan])
-  const handleMouseLeave = useCallback(() => {
+  }
+  const handleMouseLeave = () => {
     setHoveredId(null)
     onHoverSpan?.(null)
-  }, [onHoverSpan])
+  }
   // Plain text when no focused model or no spans
   if (!focusedModel || spans.length === 0) {
     const displayText = input instanceof Uint8Array ? textDecoder.decode(input) : input
