@@ -820,7 +820,7 @@
 
     "vite": ["vite@8.0.16", "", { "dependencies": { "lightningcss": "^1.32.0", "picomatch": "^4.0.4", "postcss": "^8.5.15", "rolldown": "1.0.3", "tinyglobby": "^0.2.17" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "peerDependencies": { "@types/node": "^20.19.0 || >=22.12.0", "@vitejs/devtools": "^0.1.18", "esbuild": "^0.27.0 || ^0.28.0", "jiti": ">=1.21.0", "less": "^4.0.0", "sass": "^1.70.0", "sass-embedded": "^1.70.0", "stylus": ">=0.54.8", "sugarss": "^5.0.0", "terser": "^5.16.0", "tsx": "^4.8.1", "yaml": "^2.4.2" }, "optionalPeers": ["@types/node", "@vitejs/devtools", "esbuild", "jiti", "less", "sass", "sass-embedded", "stylus", "sugarss", "terser", "tsx", "yaml"], "bin": { "vite": "bin/vite.js" } }, "sha512-h9bXPmJichP5fLmVQo3PyaGSDE2n3aPuomeAlVRm0JLmt4rY6zmPKd59HYI4LNW8oTK7tlTsuC7l/m7awx9Jcw=="],
 
-    "vite-plugin-media-mixins": ["vite-plugin-media-mixins@0.5.2", "", { "peerDependencies": { "vite": "^8.0.16" } }, "sha512-kbBmLlXF+aozDdh7gYbBa0R3R3e4V1oTEtAEujO/UFwTxqGVi4kccXXT1ESaI9na987onrTOosrauLxC4Plb+g=="],
+    "vite-plugin-media-mixins": ["vite-plugin-media-mixins@0.9.0", "", { "peerDependencies": { "vite": "^8.0.16" } }, "sha512-JP/78XPBdAbB3G+VfjMmVPAJ8YY9DBkmUGlUH5KBpkyPY8PQZ3r+lBpEOuDpptkv8zdgk0bFAcux1utb5LyYsQ=="],
 
     "vite-plugin-title": ["vite-plugin-title@0.5.0", "", { "peerDependencies": { "vite": "^8" } }, "sha512-+HDyeixryiV6g2TNDJNoI0XoPdUdCxxz9pJdAO0ebxvrxCJlceiTfsutzzocQRYcUTS6ZZF/EH5MU/4AdN2MJw=="],
 
