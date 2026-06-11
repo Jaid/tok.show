@@ -32,7 +32,7 @@ const DraggableCard: FunctionComponent<Props> = ({id, index, model, count, isBes
     return <div ref={ref} className={css.placeholder} />
   }
   return (
-    <div ref={ref}>
+    <div ref={ref} className={css.container}>
       <ModelCard
         model={model}
         count={count}
