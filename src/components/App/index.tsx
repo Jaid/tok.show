@@ -26,7 +26,6 @@ import {getTokenSpans} from '#src/lib/tokenSpans.ts'
 import css from './style.module.sass'
 
 const allModelIds = modelIds as ReadonlyArray<ModelId>
-// Custom URL param parser for models array (comma-separated)
 const getModelsFromUrl = (value: string | null): Array<string> => {
   if (!value) {
     return ['gpt', 'deepseek']
@@ -36,19 +35,15 @@ const getModelsFromUrl = (value: string | null): Array<string> => {
 const serializeModels = (ids: Array<string>): string => ids.join(',')
 const App: FunctionComponent = () => {
   const snap = useSnapshot(state)
-  // URL params
   const [textParam, setTextParam] = useQueryState('text', parseAsString.withDefault(''))
   const [modelParam, setModelParam] = useQueryState('model', parseAsString.withDefault('gpt'))
   const [monacoParam] = useQueryState('monaco', parseAsBoolean.withDefault(true))
-  // models param (handled manually)
   const [modelsRaw, setModelsRaw] = useQueryState('models', parseAsString.withDefault('gpt,deepseek'))
-  // Local UI
   const [currentTab, setCurrentTab] = useState<OutputTab>('tokenized')
   const [editorRange, setEditorRange] = useState<{end: number
     start: number} | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Sync URL → valtio
   useEffect(() => {
     state.text = textParam
   }, [textParam])
@@ -69,11 +64,9 @@ const App: FunctionComponent = () => {
   useEffect(() => {
     state.useMonaco = monacoParam
   }, [monacoParam])
-  // Initial load
   useEffect(() => {
     void initializeModels()
   }, [])
-  // Tokenization pipeline
   useEffect(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current)
@@ -88,7 +81,6 @@ const App: FunctionComponent = () => {
       }
     }
   }, [state.text, state.isBinary, state.binaryData, snap.focusedId, snap.visibleEntries])
-  // Free memory for hidden model vocabularies
   useEffect(() => {
     const visibleSet = new Set(getVisibleModelIds())
     for (const id of allModelIds) {
@@ -97,7 +89,6 @@ const App: FunctionComponent = () => {
       }
     }
   }, [snap.visibleEntries])
-  // Token spans
   const focusedSpans = useMemo<Array<TokenSpan>>(() => {
     const fid = state.focusedId
     if (!fid) {
@@ -114,7 +105,6 @@ const App: FunctionComponent = () => {
       tokens: ms.tokenizeData.tokens,
     })
   }, [snap.modelStates, snap.focusedId])
-  // Loading set
   const loadingSet = useMemo(() => {
     const s = new Set<string>
     for (const id of getVisibleModelIds()) {
@@ -124,7 +114,6 @@ const App: FunctionComponent = () => {
     }
     return s
   }, [snap.modelStates, snap.visibleEntries])
-  // Counts & errors
   const tokenCounts = useMemo(() => {
     const c: Record<string, number> = {}
     for (const [id, ms] of Object.entries(snap.modelStates) as Array<[string, {loaded: boolean
@@ -142,7 +131,6 @@ const App: FunctionComponent = () => {
     }
     return e
   }, [snap.modelStates])
-  // Handlers
   const onInput = useCallback((v: string) => {
     if (state.isBinary) {
       state.isBinary = false; state.binaryData = null
@@ -181,7 +169,6 @@ const App: FunctionComponent = () => {
       void ensureModelLoaded(id as ModelId)
     }
   }, [setModelsRaw])
-  // Drag & drop
   const onDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault(); setIsDragOver(true)
   }, [])
@@ -191,7 +178,8 @@ const App: FunctionComponent = () => {
     }
   }, [])
   const onDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault(); setIsDragOver(false)
+    e.preventDefault()
+    setIsDragOver(false)
     const file = e.dataTransfer.files[0]
     if (file) {
       const buf = await file.arrayBuffer(); const bytes = new Uint8Array(buf)
@@ -214,7 +202,6 @@ const App: FunctionComponent = () => {
       state.isBinary = false; state.binaryData = null; state.text = t; setTextParam(t)
     }
   }, [setTextParam])
-  // Copy
   const onCopy = useCallback(async () => {
     const t = state.isBinary && state.binaryData ? new TextDecoder('utf-8', {fatal: false}).decode(state.binaryData) : state.text
     try {
@@ -224,7 +211,6 @@ const App: FunctionComponent = () => {
       ta.value = t; ta.select(); document.execCommand('copy'); ta.remove()
     }
   }, [])
-  // Token interactions
   const onTokenHover = useCallback((span: TokenSpan | null) => {
     setEditorRange(span ? {
       start: span.byteStart,
@@ -237,11 +223,9 @@ const App: FunctionComponent = () => {
       end: span.byteEnd,
     })
   }, [])
-  // Stash drag
   const onStashDrop = useCallback((entry: EntryId) => {
     onHide(entry)
   }, [onHide])
-  // Share URL
   const shareUrl = useMemo(() => {
     if (globalThis.window === undefined) {
       return '#'
@@ -253,8 +237,7 @@ const App: FunctionComponent = () => {
     u.searchParams.set('models', getVisibleModelIds().join(','))
     u.searchParams.set('monaco', String(state.useMonaco))
     return u.toString()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-  // Hotkeys 0-9
+  }, [])
   useHotkeys('0', () => {
     state.focusedId = null
   }, {preventDefault: true})
@@ -273,7 +256,6 @@ const App: FunctionComponent = () => {
       state.focusedId = null
     }
   }, {preventDefault: true})
-  // Derived
   const showAvg = getShouldShowAverage()
   const avgCount = getAverageCount()
   const visibleCount = getVisibleModelIds().length
@@ -290,25 +272,14 @@ const App: FunctionComponent = () => {
       if (!td) {
         return <div className={clsx(css.idsView, css.empty)}>No tokens (focus a model)</div>
       }
-      return (
-        <div className={css.idsView}>
-          {td.tokens.map((id: number, i: number) => <span key={i} className={css.tokenIdChip}>{id}</span>)}
-        </div>
-      )
+      return <div className={css.idsView}>
+        {td.tokens.map((id: number, i: number) => <span key={i} className={css.tokenIdChip}>{id}</span>)}
+      </div>
     }
-    return (
-      <TokenizedText
-        input={curInput}
-        spans={focusedSpans}
-        focusedModel={focusedModel}
-        onHoverSpan={onTokenHover}
-        onClickSpan={onTokenClick}
-      />
-    )
+    return <TokenizedText input={curInput} spans={focusedSpans} focusedModel={focusedModel} onHoverSpan={onTokenHover} onClickSpan={onTokenClick} />
   }
   return <>
     <Group orientation="horizontal" className={css.container}>
-      {/* LEFT */}
       <Panel defaultSize={50} minSize={20}>
         <div className={css.pane}>
           <EditorHeader
@@ -331,10 +302,7 @@ const App: FunctionComponent = () => {
           />
         </div>
       </Panel>
-
       <Separator className={css.paneSeparator} />
-
-      {/* RIGHT */}
       <Panel defaultSize={50} minSize={20}>
         <div className={css.pane}>
           <OutputHeader currentTab={currentTab} onTabChange={setCurrentTab} />
@@ -349,7 +317,6 @@ const App: FunctionComponent = () => {
         </div>
       </Panel>
     </Group>
-
     {isDragOver && <div className={css.dropOverlay}>Drop text or file anywhere</div>}
   </>
 }
