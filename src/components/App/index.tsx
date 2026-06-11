@@ -5,7 +5,6 @@ import type {FunctionComponent} from 'react'
 import type {ModelId} from 'token-vocabs'
 
 import clsx from 'clsx'
-import {parseAsBoolean, parseAsString, useQueryState} from 'nuqs'
 import {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {useHotkeys} from 'react-hotkeys-hook'
 import {Group, Panel, Separator} from 'react-resizable-panels'
@@ -22,6 +21,7 @@ import modelsMap from '#src/lib/models/index.ts'
 import {getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, state} from '#src/lib/state.ts'
 import {ensureModelLoaded, initializeModels, runTokenization, unloadModel} from '#src/lib/tokenManager.ts'
 import {getTokenSpans} from '#src/lib/tokenSpans.ts'
+import {useUrlParameters} from '#src/lib/useUrlParameters.ts'
 
 import css from './style.module.sass'
 
@@ -35,10 +35,17 @@ const getModelsFromUrl = (value: string | null): Array<string> => {
 const serializeModels = (ids: Array<string>): string => ids.join(',')
 const App: FunctionComponent = () => {
   const snap = useSnapshot(state)
-  const [textParam, setTextParam] = useQueryState('text', parseAsString.withDefault(''))
-  const [modelParam, setModelParam] = useQueryState('model', parseAsString.withDefault('gpt'))
-  const [monacoParam] = useQueryState('monaco', parseAsBoolean.withDefault(true))
-  const [modelsRaw, setModelsRaw] = useQueryState('models', parseAsString.withDefault('gpt,deepseek'))
+  const {
+    model: modelParam,
+    models: modelsRaw,
+    monaco: monacoParam,
+    setModel: setModelParam,
+    setModels: setModelsRaw,
+    setMonaco: setMonacoParam,
+    setText: setTextParam,
+    shareUrl,
+    text: textParam,
+  } = useUrlParameters()
   const [currentTab, setCurrentTab] = useState<OutputTab>('tokenized')
   const [editorRange, setEditorRange] = useState<{end: number
     start: number} | null>(null)
@@ -140,14 +147,17 @@ const App: FunctionComponent = () => {
   const onFocus = useCallback((modelId: string) => {
     if (state.focusedId === modelId) {
       state.focusedId = null
+      setModelParam('')
     } else {
       state.focusedId = modelId as ModelId
+      setModelParam(modelId)
       if (!getVisibleModelIds().includes(modelId as ModelId)) {
         state.visibleEntries = [...state.visibleEntries, modelId]
+        setModelsRaw(serializeModels(getVisibleModelIds()))
       }
       void ensureModelLoaded(modelId as ModelId)
     }
-  }, [])
+  }, [setModelParam, setModelsRaw])
   const onReorder = useCallback((order: Array<EntryId>) => {
     state.visibleEntries = order
     setModelsRaw(serializeModels(order.filter(e => e !== 'average')))
@@ -160,8 +170,9 @@ const App: FunctionComponent = () => {
     setModelsRaw(serializeModels(getVisibleModelIds()))
     if (entry !== 'average' && state.focusedId === entry) {
       state.focusedId = null
+      setModelParam('')
     }
-  }, [setModelsRaw])
+  }, [setModelParam, setModelsRaw])
   const onUnhide = useCallback((id: string) => {
     if (!state.visibleEntries.includes(id)) {
       state.visibleEntries = [...state.visibleEntries, id]
@@ -226,20 +237,9 @@ const App: FunctionComponent = () => {
   const onStashDrop = useCallback((entry: EntryId) => {
     onHide(entry)
   }, [onHide])
-  const shareUrl = useMemo(() => {
-    if (globalThis.window === undefined) {
-      return '#'
-    }
-    const u = new URL(globalThis.location.href)
-    u.search = ''
-    u.searchParams.set('text', state.text)
-    u.searchParams.set('model', state.focusedId ?? '')
-    u.searchParams.set('models', getVisibleModelIds().join(','))
-    u.searchParams.set('monaco', String(state.useMonaco))
-    return u.toString()
-  }, [])
   useHotkeys('0', () => {
     state.focusedId = null
+    setModelParam('')
   }, {preventDefault: true})
   useHotkeys('1,2,3,4,5,6,7,8,9', (event, handler) => {
     const keys = (handler as Record<string, unknown>).keys as Array<string> | undefined
@@ -254,6 +254,7 @@ const App: FunctionComponent = () => {
       onFocus(target)
     } else {
       state.focusedId = null
+      setModelParam('')
     }
   }, {preventDefault: true})
   const showAvg = getShouldShowAverage()
@@ -298,6 +299,7 @@ const App: FunctionComponent = () => {
             useMonaco={state.useMonaco}
             onToggleMonaco={() => {
               state.useMonaco = !state.useMonaco
+              setMonacoParam(state.useMonaco)
             }}
             shareUrl={shareUrl}
           />
