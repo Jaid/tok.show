@@ -4,14 +4,11 @@ import type {FunctionComponent, ReactNode} from 'react'
 
 import {KeyboardSensor, PointerActivationConstraints, PointerSensor} from '@dnd-kit/dom'
 import {DragDropProvider} from '@dnd-kit/react'
-import {isSortableOperation, useSortable} from '@dnd-kit/react/sortable'
+import {isSortableOperation} from '@dnd-kit/react/sortable'
 import {useCallback} from 'react'
 
+import DraggableAverageCard from '#component/DraggableAverageCard'
 import DraggableCard from '#component/DraggableCard'
-import ModelProfile from '#component/ModelProfile'
-import TokenCount from '#component/TokenCount'
-
-import averageIcon from './average.svg'
 
 import css from './style.module.sass'
 
@@ -138,50 +135,4 @@ function arrayMove<T>(array: Array<T>, from: number, to: number): Array<T> {
   const [item] = next.splice(from, 1)
   next.splice(to, 0, item)
   return next
-}
-const averageModel = {
-  icon: averageIcon,
-  name: 'Average',
-}
-const AverageCard: FunctionComponent<{count: number | null
-  isBest?: boolean
-  modelCount: number}> = ({count, isBest, modelCount}) => {
-  const subname = modelCount >= 2 ? `of ${modelCount} models` : undefined
-  return (
-    <div className={css.averageCard}>
-      <div className={css.count}>
-        {count !== null ? <TokenCount value={count} /> : <span className={css.countNa}>–</span>}
-      </div>
-      <div className={css.profile}>
-        <ModelProfile model={{
-          ...averageModel,
-          subname,
-        }} />
-      </div>
-    </div>
-  )
-}
-const DraggableAverageCard: FunctionComponent<{averageCount: number | null
-  index: number
-  isBest?: boolean
-  showAverage: boolean
-  visibleModelCount: number}> = ({averageCount, index, isBest, showAverage, visibleModelCount}) => {
-  const {ref, handleRef, isDragging} = useSortable({
-    id: 'average',
-    index,
-    data: {type: 'average'},
-  })
-  if (!showAverage) {
-    return null
-  }
-  if (isDragging) {
-    return <div ref={ref} className={css.placeholder} />
-  }
-  return (
-    <div ref={ref}>
-      <div ref={handleRef} style={{display: 'contents'}}>
-        <AverageCard count={averageCount} isBest={isBest} modelCount={visibleModelCount} />
-      </div>
-    </div>
-  )
 }

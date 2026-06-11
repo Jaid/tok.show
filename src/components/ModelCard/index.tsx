@@ -15,7 +15,7 @@ type Props = {
   isBest?: boolean
   isFocused?: boolean
   isLoading?: boolean
-  model: Model
+  model: Pick<Model, 'icon' | 'name' | 'subname'>
   onClick?: () => void
   ref?: React.Ref<HTMLDivElement>
 }
@@ -23,14 +23,14 @@ type Props = {
 const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, isLoading, error, onClick, handleRef, ref}) => {
   return <div ref={ref} className={clsx(css.container, isLoading && css.loading, isFocused && css.focused, isBest && css.best)}
     onClick={onClick}
-    role="button"
-    tabIndex={0}
-    onKeyDown={e => {
+    role={onClick ? 'button' : undefined}
+    tabIndex={onClick ? 0 : undefined}
+    onKeyDown={onClick ? e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
-        onClick?.()
+        onClick()
       }
-    }}
+    } : undefined}
     title={error ?? undefined}
   >
     <div className={css.triangle}>⏶</div>
