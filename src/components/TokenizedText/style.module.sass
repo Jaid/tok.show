@@ -1,15 +1,14 @@
 .container
-  font-family: code, monospace
+  font-family: code
   font-size: 14px
   line-height: 1.4
   white-space: pre-wrap
   word-break: break-all
   overflow-wrap: anywhere
   padding: 6px
-  min-height: 100px
 
 .plain
-  font-family: code, monospace
+  font-family: code
   font-size: 14px
   padding: 6px
   color: #ccc
@@ -19,47 +18,46 @@
 
 .token
   display: inline
-  border-radius: 2px
+  corner-shape: squircle
+  border-radius: 6px
   padding-inline: 1px
   cursor: pointer
-  transition: box-shadow 0.05s, filter 0.05s
   box-decoration-break: clone
   -webkit-box-decoration-break: clone
-  &:hover
-    filter: brightness(1.2)
-
-.tokenOdd
-  background: oklch(40% 0.06 98)
   color: oklch(95% 0.1 94)
-
-.tokenEven
-  background: oklch(35% 0.07 261)
-  color: oklch(92% 0.08 210)
+  background: oklch(from currentColor 30% 0.05 h)
+  transition-duration: 1s
+  transition-delay: 0.3s
+  transition-property: filter
+  transition-timing-function: ease
+  &:nth-child(even)
+    color: oklch(90% 0.15 250)
 
 .tokenHovered
-  box-shadow: 0 0 0 1.5px rgb(255, 255, 255)
-  filter: brightness(1.15)
+  box-shadow: 0 0 0 2px oklch(from currentColor 90% 0.1 calc(h))
+  filter: brightness(150%)
   z-index: 1
   position: relative
+  transition: none
 
 .tokenClicked
-  box-shadow: 0 0 0 2px rgb(255, 255, 255)
+  box-shadow: 0 0 0 2px white
   z-index: 2
   position: relative
 
 .tokenHex
-  font-size: 11px
+  filter: none
 
 .hexByte
   display: inline-block
-  background: #1a1a1a
-  color: #aaa
-  padding: 0 2px
-  border: 1px solid #333
-  border-radius: 1px
-  margin: 0 1px
-  font-family: code, monospace
-  font-size: 10px
+  border: 1px solid currentColor
+  padding: 1px
+  margin: 1px
+  vertical-align: middle
+  aspect-ratio: 1 / 1
+  font-family: main
+  font-size: 50%
+  text-transform: uppercase
 
 .tooltip
   background: #181818
@@ -111,7 +109,6 @@
   display: inline-flex
   width: 16px
   height: 16px
-
   img
     max-width: 100%
     max-height: 100%

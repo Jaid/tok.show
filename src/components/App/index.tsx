@@ -272,9 +272,10 @@ const App: FunctionComponent = () => {
       if (!td) {
         return <div className={clsx(css.idsView, css.empty)}>No tokens (focus a model)</div>
       }
-      return <div className={css.idsView}>
-        {td.tokens.map((id: number, i: number) => <span key={i} className={css.tokenIdChip}>{id}</span>)}
-      </div>
+      const elements = td.tokens.map((id: number, i: number) =>  {
+        return <span key={i} className={css.tokenIdChip}>{id}</span>
+      })
+      return <div className={css.idsView} children={elements}/>
     }
     return <TokenizedText input={curInput} spans={focusedSpans} focusedModel={focusedModel} onHoverSpan={onTokenHover} onClickSpan={onTokenClick} />
   }
