@@ -30,8 +30,9 @@
   transition-delay: 0.3s
   transition-property: filter
   transition-timing-function: ease
-  &:nth-child(even)
-    color: oklch(90% 0.15 250)
+
+.tokenEven
+  color: oklch(90% 0.15 250)
 
 .tokenHovered
   box-shadow: 0 0 0 2px oklch(from currentColor 90% 0.1 calc(h))
@@ -48,15 +49,14 @@
 .tokenHex
   text-transform: uppercase
   font-family: main
-  font-size: 50%
-
-.hexByte
-  display: inline-block
-  border: 1px solid currentColor
-  padding: 1px
-  margin: 1px
-  vertical-align: middle
-  aspect-ratio: 1 / 1
+  &>*
+    display: inline-block
+    border: 1px solid currentColor
+    padding: 1px
+    margin: 1px
+    vertical-align: middle
+    aspect-ratio: 1 / 1
+    font-size: 50%
 
 .tooltip
   background: #181818

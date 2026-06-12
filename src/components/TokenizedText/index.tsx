@@ -5,7 +5,7 @@ import type {ModelId} from 'token-vocabs'
 
 import {autoUpdate, flip, offset, shift, useClick, useDismiss, useFloating, useInteractions} from '@floating-ui/react'
 import clsx from 'clsx'
-import {useLayoutEffect, useRef, useState} from 'react'
+import {Fragment, useLayoutEffect, useRef, useState} from 'react'
 
 import modelsMap from '#src/lib/models/index.ts'
 import {getVisibleModelIds} from '#src/lib/state.ts'
@@ -131,19 +131,23 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
       {spans.map((span, i) => {
         const isOdd = i % 2 === 0
         const isClicked = clickedSpan?.index === i
+        const lineBreaksCount = getArtificialLineBreaks(span)
+        const lineBreaks = Array.from({length: lineBreaksCount}, (_, i) => <br key={i} />)
         return (
-          <span
-            key={i}
-            className={clsx(css.token, isOdd ? css.tokenOdd : css.tokenEven, isClicked && css.tokenClicked, span.isNonRepresentable && css.tokenHex)}
-            onMouseEnter={() => handleMouseEnter(span)}
-            onMouseLeave={handleMouseLeave}
-            onClick={e => handleSpanClick(span, e)}
-            {...(isClicked ? getReferenceProps() : {})}
-            data-token-id={span.id}
-            data-token-index={span.index}
-          >
-            {span.isNonRepresentable && span.hexDisplay ? span.hexDisplay.split(' ').map((hexByte, hi) => <span key={hi} className={css.hexByte}>{hexByte}</span>) : getSpanText(input, span) || '\u2423'}
-          </span>
+          <Fragment key={i}>
+            <span
+              className={clsx(css.token, !isOdd && css.tokenEven, isClicked && css.tokenClicked, span.isNonRepresentable && css.tokenHex)}
+              onMouseEnter={() => handleMouseEnter(span)}
+              onMouseLeave={handleMouseLeave}
+              onClick={e => handleSpanClick(span, e)}
+              {...(isClicked ? getReferenceProps() : {})}
+              data-token-id={span.id}
+              data-token-index={span.index}
+            >
+              {span.isNonRepresentable && span.hexDisplay ? span.hexDisplay.split(' ').map((hexByte, hi) => <span key={hi} className={css.hexByte}>{hexByte}</span>) : getSpanText(input, span) || '\u2423'}
+            </span>
+            {lineBreaks}
+          </Fragment>
         )
       })}
 
@@ -207,4 +211,22 @@ function getSpanText(input: Uint8Array | string, span: TokenSpan): string {
     return span.hexDisplay
   }
   return span.text || '\u2423'
+}
+function getArtificialLineBreaks(span: TokenSpan) {
+  if (!span.isNonRepresentable || !span.hexDisplay) {
+    return 0
+  }
+  if (span.text === '\n') {
+    return 1
+  }
+  if (/^(?:\n+)$/.test(span.text)) {
+    return span.text.length
+  }
+  if (span.text === '\r\n') {
+    return 1
+  }
+  if (/^(?:\r\n)+$/.test(span.text)) {
+    return span.text.length / 2
+  }
+  return 0
 }
