@@ -3,9 +3,9 @@ import type {TokenSpan} from '#src/lib/tokenSpans.ts'
 import type {FunctionComponent} from 'react'
 import type {ModelId} from 'token-vocabs'
 
-import {autoUpdate, flip, offset, shift, useClick, useDismiss, useFloating, useHover, useInteractions} from '@floating-ui/react'
+import {autoUpdate, flip, offset, shift, useClick, useDismiss, useFloating, useInteractions} from '@floating-ui/react'
 import clsx from 'clsx'
-import {useState} from 'react'
+import {useLayoutEffect, useRef, useState} from 'react'
 
 import modelsMap from '#src/lib/models/index.ts'
 import {getVisibleModelIds} from '#src/lib/state.ts'
@@ -22,7 +22,8 @@ type Props = {
 }
 
 const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, onHoverSpan, onClickSpan}) => {
-  const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const hoveredIdRef = useRef<number | null>(null)
   const [clickedSpan, setClickedSpan] = useState<TokenSpan | null>(null)
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const [supportedModels, setSupportedModels] = useState<Array<string>>([])
@@ -39,19 +40,6 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
     whileElementsMounted: autoUpdate,
   })
   const click = useClick(context)
-  const hoverContext = useFloating({
-    open: tooltipOpen,
-    onOpenChange: setTooltipOpen,
-    placement: 'top',
-    middleware: [offset(8), flip(), shift({padding: 8})],
-    whileElementsMounted: autoUpdate,
-  })
-  const hover = useHover(hoverContext.context, {
-    delay: {
-      open: 0,
-      close: 100,
-    },
-  })
   const dismiss = useDismiss(context)
   const {getReferenceProps, getFloatingProps} = useInteractions([click, dismiss])
   // Compute supported models when a span is clicked
@@ -93,12 +81,40 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
     onClickSpan?.(span)
     void computeSupported(span)
   }
+  const setHoveredTokenId = (id: number | null) => {
+    const oldId = hoveredIdRef.current
+    if (oldId === id) {
+      return
+    }
+    const container = containerRef.current
+    if (container && oldId !== null) {
+      for (const token of container.querySelectorAll<HTMLElement>(`[data-token-id="${CSS.escape(String(oldId))}"]`)) {
+        token.classList.remove(css.tokenHovered)
+      }
+    }
+    hoveredIdRef.current = id
+    if (container && id !== null) {
+      for (const token of container.querySelectorAll<HTMLElement>(`[data-token-id="${CSS.escape(String(id))}"]`)) {
+        token.classList.add(css.tokenHovered)
+      }
+    }
+  }
+  useLayoutEffect(() => {
+    const id = hoveredIdRef.current
+    const container = containerRef.current
+    if (!container || id === null) {
+      return
+    }
+    for (const token of container.querySelectorAll<HTMLElement>(`[data-token-id="${CSS.escape(String(id))}"]`)) {
+      token.classList.add(css.tokenHovered)
+    }
+  })
   const handleMouseEnter = (span: TokenSpan) => {
-    setHoveredId(span.id)
+    setHoveredTokenId(span.id)
     onHoverSpan?.(span)
   }
   const handleMouseLeave = () => {
-    setHoveredId(null)
+    setHoveredTokenId(null)
     onHoverSpan?.(null)
   }
   // Plain text when no focused model or no spans
@@ -111,15 +127,14 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
     )
   }
   return (
-    <div className={css.container}>
+    <div ref={containerRef} className={css.container}>
       {spans.map((span, i) => {
         const isOdd = i % 2 === 0
-        const isHovered = hoveredId === span.id
         const isClicked = clickedSpan?.index === i
         return (
           <span
             key={i}
-            className={clsx(css.token, isOdd ? css.tokenOdd : css.tokenEven, isHovered && css.tokenHovered, isClicked && css.tokenClicked, span.isNonRepresentable && css.tokenHex)}
+            className={clsx(css.token, isOdd ? css.tokenOdd : css.tokenEven, isClicked && css.tokenClicked, span.isNonRepresentable && css.tokenHex)}
             onMouseEnter={() => handleMouseEnter(span)}
             onMouseLeave={handleMouseLeave}
             onClick={e => handleSpanClick(span, e)}

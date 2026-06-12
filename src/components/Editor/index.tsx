@@ -1,21 +1,28 @@
 import type {OnChange, OnMount} from '@monaco-editor/react'
-import type {FunctionComponent} from 'react'
+import type {FunctionComponent, Ref} from 'react'
 
 import {Editor as MonacoEditor} from '@monaco-editor/react'
 import {once} from 'es-toolkit/function'
-import {useEffect, useRef} from 'react'
+import {useCallback, useEffect, useImperativeHandle, useRef} from 'react'
 
 import HexViewer from '#component/HexViewer'
 
 import css from './style.module.sass'
 
+export type EditorHighlightRange = {end: number
+  start: number}
+
+export type EditorHandle = {
+  setHighlightRange: (range: EditorHighlightRange | null) => void
+}
+
 type Props = {
   binaryData?: Uint8Array | null
-  highlightRange?: {end: number
-    start: number} | null
+  highlightRange?: EditorHighlightRange | null
   isBinary?: boolean
   onChange: (value: string) => void
   readOnly?: boolean
+  ref?: Ref<EditorHandle>
   useMonaco?: boolean
   value: string
 }
@@ -34,7 +41,7 @@ const ensureTheme = once((monaco: any) => {
     rules: [],
   })
 })
-const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange}) => {
+const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange, ref}) => {
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<any>(null)
   const decorationsRef = useRef<Array<string>>([])
@@ -45,14 +52,13 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
   const handleChange: OnChange = val => {
     onChange(val ?? '')
   }
-  // Highlight decoration sync
-  useEffect(() => {
+  const setHighlightRange = useCallback((range: EditorHighlightRange | null) => {
     const editor = editorRef.current
     const monaco = monacoRef.current
     if (!editor || !monaco) {
       return
     }
-    if (!highlightRange) {
+    if (!range) {
       decorationsRef.current = editor.deltaDecorations(decorationsRef.current, [])
       return
     }
@@ -60,8 +66,8 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
     if (!model) {
       return
     }
-    const startPos = model.getPositionAt(highlightRange.start)
-    const endPos = model.getPositionAt(highlightRange.end)
+    const startPos = model.getPositionAt(range.start)
+    const endPos = model.getPositionAt(range.end)
     decorationsRef.current = editor.deltaDecorations(decorationsRef.current, [
       {
         range: new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
@@ -71,7 +77,14 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
         },
       },
     ])
-  }, [highlightRange])
+  }, [])
+  useImperativeHandle(ref, () => ({setHighlightRange}), [setHighlightRange])
+  // Highlight decoration sync for declarative callers. Hover uses the imperative handle to avoid rerendering the whole app.
+  useEffect(() => {
+    if (highlightRange !== undefined) {
+      setHighlightRange(highlightRange)
+    }
+  }, [highlightRange, setHighlightRange])
   // Binary hex viewer
   if (isBinary && binaryData) {
     return <HexViewer bytes={binaryData} />
@@ -98,7 +111,7 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
         minimap: {enabled: false},
         stickyScroll: {enabled: false},
         lineNumbers: 'off',
-        fontFamily: 'code, monospace',
+        fontFamily: 'code',
         fontSize: 14,
         tabSize: 2,
         dragAndDrop: false,

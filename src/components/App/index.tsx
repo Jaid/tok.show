@@ -1,3 +1,4 @@
+import type {EditorHandle} from '#component/Editor'
 import type {OutputTab} from '#component/OutputHeader'
 import type {EntryId} from '#src/lib/state.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
@@ -45,8 +46,7 @@ const App: FunctionComponent = () => {
     shareUrl,
     text: textParam} = useUrlParameters()
   const [currentTab, setCurrentTab] = useState<OutputTab>('tokenized')
-  const [editorRange, setEditorRange] = useState<{end: number
-    start: number} | null>(null)
+  const editorRef = useRef<EditorHandle>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
@@ -221,13 +221,13 @@ const App: FunctionComponent = () => {
     }
   }
   const onTokenHover = (span: TokenSpan | null) => {
-    setEditorRange(span ? {
+    editorRef.current?.setHighlightRange(span ? {
       start: span.byteStart,
       end: span.byteEnd,
     } : null)
   }
   const onTokenClick = (span: TokenSpan) => {
-    setEditorRange({
+    editorRef.current?.setHighlightRange({
       start: span.byteStart,
       end: span.byteEnd,
     })
@@ -290,8 +290,8 @@ const App: FunctionComponent = () => {
             onCopy={onCopy}
           />
           <div className={css.paneBody}>
-            <Editor value={state.text} onChange={onInput} useMonaco={state.useMonaco}
-              isBinary={state.isBinary} binaryData={state.binaryData} highlightRange={editorRange} />
+            <Editor ref={editorRef} value={state.text} onChange={onInput} useMonaco={state.useMonaco}
+              isBinary={state.isBinary} binaryData={state.binaryData} />
           </div>
           <EditorFooter
             useMonaco={state.useMonaco}
