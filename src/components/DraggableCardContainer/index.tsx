@@ -32,38 +32,28 @@ type Props = {
   visibleModelCount: number
 }
 
-const getBestEntryId = (counts: Record<string, number>, entries: Array<EntryId>, averageCount: number | null): string | null => {
+const getBestEntryIds = (counts: Record<string, number>, entries: Array<EntryId>): Set<string> => {
   const allCounts = new Map<string, number>
   for (const id of entries) {
     if (id === 'average') {
-      if (averageCount !== null && averageCount > 0) {
-        allCounts.set(id, averageCount)
-      }
-    } else {
-      const c = counts[id]
-      if (c !== null && c !== undefined && c > 0) {
-        allCounts.set(id, c)
-      }
+      continue
+    }
+    const c = counts[id]
+    if (c !== null && c !== undefined && c > 0) {
+      allCounts.set(id, c)
     }
   }
   if (allCounts.size < 2) {
-    return null
+    return new Set<string>
   }
   const values = [...allCounts.values()]
   const min = Math.min(...values)
-  const max = Math.max(...values)
-  if (min === max) {
-    return null
-  }
   const winners = [...allCounts.entries()].filter(([, c]) => c === min).map(([id]) => id)
-  if (winners.length !== 1) {
-    return null
-  }
-  return winners[0]
+  return new Set(winners)
 }
 const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, modelsById, counts, errors, focusedId, loadingSet,
   onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}) => {
-  const bestEntryId = getBestEntryId(counts, entries, averageCount)
+  const bestEntryIds = getBestEntryIds(counts, entries)
   const handleDragEnd = (event: any) => {
     if (event.canceled) {
       return
@@ -96,7 +86,7 @@ const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, mo
                 key="average"
                 averageCount={averageCount}
                 index={index}
-                isBest={'average' === bestEntryId}
+                isBest={bestEntryIds.has('average')}
                 showAverage={showAverage}
                 visibleModelCount={visibleModelCount}
               />
@@ -114,7 +104,7 @@ const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, mo
               model={model}
               count={counts[entry] ?? null}
               error={errors[entry] ?? null}
-              isBest={entry === bestEntryId}
+              isBest={bestEntryIds.has(entry)}
               isFocused={focusedId === entry}
               isLoading={loadingSet.has(entry)}
               onClick={() => onFocus(entry)}
