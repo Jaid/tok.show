@@ -2,7 +2,7 @@ import type {EditorHandle} from '#component/Editor'
 import type {OutputTab} from '#component/OutputHeader'
 import type {EntryId} from '#src/lib/state.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
-import type {FunctionComponent} from 'react'
+import type {DragEvent, FunctionComponent} from 'react'
 import type {ModelId} from 'token-vocabs'
 
 import clsx from 'clsx'
@@ -19,7 +19,7 @@ import OutputFooter from '#component/OutputFooter'
 import OutputHeader from '#component/OutputHeader'
 import TokenizedText from '#component/TokenizedText'
 import modelsMap from '#src/lib/models/index.ts'
-import {getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, state} from '#src/lib/state.ts'
+import {createInputTab, getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, setActiveInputTab, state, syncInputStateFromActiveTab, updateActiveInputTab} from '#src/lib/state.ts'
 import {ensureModelLoaded, initializeModels, runTokenization, unloadModel} from '#src/lib/tokenManager.ts'
 import {getTokenSpans} from '#src/lib/tokenSpans.ts'
 import {useUrlParameters} from '#src/lib/useUrlParameters.ts'
@@ -50,7 +50,16 @@ const App: FunctionComponent = () => {
   const [isDragOver, setIsDragOver] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
-    state.text = textParam
+    const inputTab = state.inputTabs.find(tab => tab.id === 'input')
+    if (!inputTab) {
+      return
+    }
+    inputTab.text = textParam
+    inputTab.isBinary = false
+    inputTab.binaryData = null
+    if (state.activeInputTabId === inputTab.id) {
+      syncInputStateFromActiveTab()
+    }
   }, [textParam])
   useEffect(() => {
     if (!modelParam || modelParam === '') {
@@ -137,10 +146,14 @@ const App: FunctionComponent = () => {
     return e
   })()
   const onInput = (v: string) => {
-    if (state.isBinary) {
-      state.isBinary = false; state.binaryData = null
+    updateActiveInputTab({
+      text: v,
+      isBinary: false,
+      binaryData: null,
+    })
+    if (state.activeInputTabId === 'input') {
+      setTextParam(v)
     }
-    state.text = v; setTextParam(v)
   }
   const onFocus = (modelId: string) => {
     if (state.focusedId === modelId) {
@@ -178,37 +191,54 @@ const App: FunctionComponent = () => {
       void ensureModelLoaded(id as ModelId)
     }
   }
-  const onDragOver = (e: React.DragEvent) => {
-    e.preventDefault(); setIsDragOver(true)
+  const onDragOver = (e: DragEvent) => {
+    e.preventDefault()
+    setIsDragOver(true)
   }
-  const onDragLeave = (e: React.DragEvent) => {
+  const onDragLeave = (e: DragEvent) => {
     if (!e.currentTarget.contains(e.relatedTarget as unknown as Node)) {
       setIsDragOver(false)
     }
   }
-  const onDrop = async (e: React.DragEvent) => {
+  const onDrop = async (e: DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
     const file = e.dataTransfer.files[0]
     if (file) {
-      const buf = await file.arrayBuffer(); const bytes = new Uint8Array(buf)
-      let text = true
+      const buffer = await file.arrayBuffer()
+      const bytes = new Uint8Array(buffer)
+      let isUtf8 = true
       try {
         new TextDecoder('utf-8', {fatal: true}).decode(bytes)
       } catch {
-        text = false
+        isUtf8 = false
       }
-      if (text) {
-        const s = (new TextDecoder).decode(bytes)
-        state.isBinary = false; state.binaryData = null; state.text = s; setTextParam(s)
+      if (isUtf8) {
+        const text = new TextDecoder().decode(bytes)
+        createInputTab({
+          name: file.name || 'dropped.txt',
+          text,
+          isBinary: false,
+          binaryData: null,
+        })
       } else {
-        state.isBinary = true; state.binaryData = bytes; state.text = ''; setTextParam('')
+        createInputTab({
+          name: file.name || 'dropped.bin',
+          text: '',
+          isBinary: true,
+          binaryData: bytes,
+        })
       }
       return
     }
     const t = e.dataTransfer.getData('text/plain')
     if (t) {
-      state.isBinary = false; state.binaryData = null; state.text = t; setTextParam(t)
+      createInputTab({
+        name: 'dropped.txt',
+        text: t,
+        isBinary: false,
+        binaryData: null,
+      })
     }
   }
   const onCopy = async () => {
@@ -281,13 +311,21 @@ const App: FunctionComponent = () => {
   return <>
     <Group orientation="horizontal" className={css.container}>
       <Panel defaultSize={50} minSize={20}>
-        <div className={css.pane}>
+        <div className={css.pane} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
           <EditorHeader
+            tabs={snap.inputTabs}
+            activeTabId={snap.activeInputTabId}
             sizeInBytes={(new TextEncoder).encode(state.text).byteLength}
             charCount={state.text.length}
             isBinary={state.isBinary}
             binaryByteCount={state.binaryData?.byteLength ?? null}
             onCopy={onCopy}
+            onTabSelect={id => {
+              setActiveInputTab(id)
+              if (id === 'input') {
+                setTextParam(state.text)
+              }
+            }}
           />
           <div className={css.paneBody}>
             <Editor ref={editorRef} value={state.text} onChange={onInput} useMonaco={state.useMonaco}
@@ -301,6 +339,7 @@ const App: FunctionComponent = () => {
             }}
             shareUrl={shareUrl}
           />
+          {isDragOver && <div className={css.dropOverlay}>Drop text or file here</div>}
         </div>
       </Panel>
       <Separator className={css.paneSeparator} />
@@ -318,7 +357,6 @@ const App: FunctionComponent = () => {
         </div>
       </Panel>
     </Group>
-    {isDragOver && <div className={css.dropOverlay}>Drop text or file anywhere</div>}
   </>
 }
 
