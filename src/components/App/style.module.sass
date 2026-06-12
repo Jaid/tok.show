@@ -30,7 +30,7 @@ $borderColor: #222
   min-height: 0
 
 .mirrorView
-  font-family: code, monospace
+  font-family: code
   padding: 12px
   white-space: pre-wrap
   word-break: break-all
@@ -40,27 +40,29 @@ $borderColor: #222
   height: 100%
 
 .idsView
-  font-family: code, monospace
-  padding: 12px
+  font-family: main
+  font-size: 90%
+  padding: 6px
   display: flex
   flex-wrap: wrap
   gap: 2px
   align-content: flex-start
-  overflow: auto
+  overflow-y: auto
   height: 100%
+  color: oklch(95% 0.1 94)
+  place-content: start
   &.empty
     display: flex
     align-items: center
     justify-content: center
-
-.tokenIdChip
-  display: inline-block
-  background: #111
-  padding: 1px 5px
-  border-radius: 3px
-  font-size: 12px
-  color: #888
-  font-family: code, monospace
+  >*
+    padding-inline: 4px
+    border-radius: 4px
+    corner-shape: squircle
+    background: oklch(from currentColor 30% 0.05 h)
+    text-align: right
+    &:nth-child(even)
+      color: oklch(90% 0.15 250)
 
 .empty
   color: #444
