@@ -1,3 +1,4 @@
+import type {Theme} from '#src/components/ThemeToggle/useTheme.ts'
 import type {OnChange, OnMount} from '@monaco-editor/react'
 import type {FunctionComponent, Ref} from 'react'
 
@@ -6,6 +7,7 @@ import {once} from 'es-toolkit/function'
 import {useCallback, useEffect, useImperativeHandle, useRef} from 'react'
 
 import HexViewer from '#component/HexViewer'
+import {useTheme} from '#src/components/ThemeToggle/useTheme.ts'
 
 import css from './style.module.sass'
 
@@ -27,7 +29,11 @@ type Props = {
   value: string
 }
 
-const ensureTheme = once((monaco: any) => {
+const monacoThemeByTheme = {
+  dark: 'black',
+  light: 'vs',
+} satisfies Record<Theme, string>
+const ensureTheme = once((monaco: Parameters<OnMount>[1]) => {
   monaco.editor.defineTheme('black', {
     base: 'vs-dark',
     inherit: true,
@@ -42,6 +48,7 @@ const ensureTheme = once((monaco: any) => {
   })
 })
 const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange, ref}) => {
+  const theme = useTheme()
   const editorRef = useRef<any>(null)
   const monacoRef = useRef<any>(null)
   const decorationsRef = useRef<Array<string>>([])
@@ -105,7 +112,7 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
       onChange={handleChange}
       onMount={handleMount}
       beforeMount={ensureTheme}
-      theme='black'
+      theme={monacoThemeByTheme[theme]}
       language='plaintext'
       options={{
         minimap: {enabled: false},

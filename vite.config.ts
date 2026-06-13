@@ -24,6 +24,10 @@ const getDevelopmentConfig = (context: ConfigEnv) => {
 const getProductionConfig = () => {
   const cssnanoPlugins = cssnano().plugins.map(([createPlugin, options]) => createPlugin(options))
   const config: UserConfig = {
+    server: {
+      allowedHosts: true,
+      host: '0.0.0.0',
+    },
     build: {
       assetsDir: '',
       reportCompressedSize: false,
