@@ -55,4 +55,33 @@ describe('components', () => {
       expect(html).toContain('</span><br/><span')
     }
   })
+  test('TokenizedText renders byte-ranged non-ASCII spans as the original characters', async () => {
+    const html = await render('TokenizedText', {
+      focusedModel: {},
+      input: 'ÄÄ',
+      spans: [
+        {
+          byteEnd: 2,
+          byteStart: 0,
+          hexDisplay: null,
+          id: 12_921,
+          index: 0,
+          isNonRepresentable: false,
+          text: 'Ä',
+        },
+        {
+          byteEnd: 4,
+          byteStart: 2,
+          hexDisplay: null,
+          id: 12_921,
+          index: 1,
+          isNonRepresentable: false,
+          text: 'Ä',
+        },
+      ],
+    })
+    expect(html).toContain('>Ä</span><span')
+    expect(html).not.toContain('ÄÄ')
+    expect(html).not.toContain('␣')
+  })
 })

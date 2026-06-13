@@ -8,6 +8,7 @@ import {useCallback, useEffect, useImperativeHandle, useRef} from 'react'
 
 import HexViewer from '#component/HexViewer'
 import {useTheme} from '#src/components/ThemeToggle/useTheme.ts'
+import {getTextRangeFromByteRange} from '#src/lib/tokenization.ts'
 
 import css from './style.module.sass'
 
@@ -73,11 +74,10 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
     if (!model) {
       return
     }
-    const startPos = model.getPositionAt(range.start)
-    const endPos = model.getPositionAt(range.end)
+    const textRange = getTextRangeFromByteRange(model.getValue(), range)
     decorationsRef.current = editor.deltaDecorations(decorationsRef.current, [
       {
-        range: new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column),
+        range: new monaco.Range(textRange.startLineNumber, textRange.startColumn, textRange.endLineNumber, textRange.endColumn),
         options: {
           className: css.tokenHighlight,
           inlineClassName: css.tokenInlineHighlight,

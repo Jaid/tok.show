@@ -12,7 +12,11 @@ import titlePlugin from 'vite-plugin-title'
 const getCommonConfig = () => {
   const config: UserConfig = {
     build: {target: 'chrome147'},
-    plugins: [titlePlugin(), reactPlugin(), babelPlugin({presets: [reactCompilerPreset()]}), mediaMixinsPlugin()],
+    plugins: [
+      titlePlugin(), reactPlugin(), babelPlugin({presets: [reactCompilerPreset()]}), mediaMixinsPlugin({
+        schemeSource: ['attribute'],
+      }),
+    ],
     css: {postcss: {plugins: [postcssNormalize() as any, postcssAutoprefixer]}},
   }
   return config

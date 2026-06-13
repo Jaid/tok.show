@@ -44,13 +44,11 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
   const {getReferenceProps, getFloatingProps} = useInteractions([click, dismiss])
   // Compute supported models when a span is clicked
   const computeSupported = async (span: TokenSpan) => {
-    const decoder = new globalThis.TextDecoder('utf-8', {fatal: false})
-    const tokenStr = typeof input === 'string' ? input.slice(span.byteStart, span.byteEnd) : decoder.decode(input.slice(span.byteStart, span.byteEnd))
-    if (!tokenStr) {
+    const testInput = input instanceof Uint8Array ? input.slice(span.byteStart, span.byteEnd) : span.text
+    if (testInput.length === 0) {
       setSupportedModels([])
       return
     }
-    const testInput = input instanceof Uint8Array ? input.slice(span.byteStart, span.byteEnd) : tokenStr
     const supported: Array<string> = []
     const visibleSet = new Set(getVisibleModelIds())
     // Check all models concurrently, loading hidden ones temporarily
@@ -144,7 +142,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
               data-token-id={span.id}
               data-token-index={span.index}
             >
-              {span.isNonRepresentable && span.hexDisplay ? span.hexDisplay.split(' ').map((hexByte, hi) => <span key={hi} className={css.hexByte}>{hexByte}</span>) : getSpanText(input, span) || '\u2423'}
+              {span.isNonRepresentable && span.hexDisplay ? span.hexDisplay.split(' ').map((hexByte, hi) => <span key={hi} className={css.hexByte}>{hexByte}</span>) : getSpanText(span)}
             </span>
             {lineBreaks}
           </Fragment>
@@ -198,15 +196,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
 
 export default TokenizedText
 
-function getSpanText(input: Uint8Array | string, span: TokenSpan): string {
-  if (span.isNonRepresentable && span.hexDisplay) {
-    return span.hexDisplay
-  }
-  // For text, return the actual text slice
-  if (typeof input === 'string') {
-    return input.slice(span.byteStart, span.byteEnd) || '\u2423' // visible space
-  }
-  // Binary input - return text or hex
+function getSpanText(span: TokenSpan): string {
   if (span.isNonRepresentable && span.hexDisplay) {
     return span.hexDisplay
   }

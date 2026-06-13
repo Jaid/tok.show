@@ -69,17 +69,28 @@ export const buildDisplayTokens = (input: TokenizeInput, tokenizeResult: RawToke
   })
 }
 
-const getByteOffsetToStringIndex = (text: string) => {
-  const map = new Map<number, number>
+const getStringIndexFromByteOffset = (text: string, offset: number, bias: 'end' | 'start') => {
+  if (offset <= 0) {
+    return 0
+  }
   let byteOffset = 0
   let stringIndex = 0
-  map.set(0, 0)
   for (const character of text) {
-    byteOffset += encodeUtf8(character).byteLength
-    stringIndex += character.length
-    map.set(byteOffset, stringIndex)
+    const nextByteOffset = byteOffset + encodeUtf8(character).byteLength
+    const nextStringIndex = stringIndex + character.length
+    if (byteOffset <= offset && offset <= nextByteOffset) {
+      if (offset === byteOffset) {
+        return stringIndex
+      }
+      if (offset === nextByteOffset || bias === 'end') {
+        return nextStringIndex
+      }
+      return stringIndex
+    }
+    byteOffset = nextByteOffset
+    stringIndex = nextStringIndex
   }
-  return (offset: number) => map.get(offset) ?? text.length
+  return text.length
 }
 const getLineColumnFromIndex = (text: string, index: number) => {
   const segment = text.slice(0, index)
@@ -91,9 +102,8 @@ const getLineColumnFromIndex = (text: string, index: number) => {
 }
 
 export const getTextRangeFromByteRange = (text: string, range: ByteRange) => {
-  const toStringIndex = getByteOffsetToStringIndex(text)
-  const start = getLineColumnFromIndex(text, toStringIndex(range.start))
-  const end = getLineColumnFromIndex(text, toStringIndex(range.end))
+  const start = getLineColumnFromIndex(text, getStringIndexFromByteOffset(text, range.start, 'start'))
+  const end = getLineColumnFromIndex(text, getStringIndexFromByteOffset(text, range.end, 'end'))
   return {
     endColumn: end.column,
     endLineNumber: end.lineNumber,
