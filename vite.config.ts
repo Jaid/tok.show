@@ -7,6 +7,7 @@ import cssnano from 'cssnano-preset-advanced'
 import postcssNormalize from 'postcss-normalize'
 import {mergeConfig} from 'vite'
 import mediaMixinsPlugin from 'vite-plugin-media-mixins'
+import svgrPlugin from 'vite-plugin-svgr'
 import titlePlugin from 'vite-plugin-title'
 
 const getCommonConfig = () => {
@@ -15,23 +16,25 @@ const getCommonConfig = () => {
     plugins: [
       titlePlugin(), reactPlugin(), babelPlugin({presets: [reactCompilerPreset()]}), mediaMixinsPlugin({
         schemeSource: ['attribute'],
-      }),
+      }), svgrPlugin(),
     ],
     css: {postcss: {plugins: [postcssNormalize() as any, postcssAutoprefixer]}},
   }
   return config
 }
 const getDevelopmentConfig = (context: ConfigEnv) => {
-  const config: UserConfig = {build: {outDir: `out/build/${context.mode}`}}
-  return config
-}
-const getProductionConfig = () => {
-  const cssnanoPlugins = cssnano().plugins.map(([createPlugin, options]) => createPlugin(options))
   const config: UserConfig = {
     server: {
       allowedHosts: true,
       host: '0.0.0.0',
     },
+    build: {outDir: `out/build/${context.mode}`},
+  }
+  return config
+}
+const getProductionConfig = () => {
+  const cssnanoPlugins = cssnano().plugins.map(([createPlugin, options]) => createPlugin(options))
+  const config: UserConfig = {
     build: {
       assetsDir: '',
       reportCompressedSize: false,
