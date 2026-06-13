@@ -10,13 +10,49 @@ import mediaMixinsPlugin from 'vite-plugin-media-mixins'
 import svgrPlugin from 'vite-plugin-svgr'
 import titlePlugin from 'vite-plugin-title'
 
+const svgPaths: Array<string> = []
 const getCommonConfig = () => {
   const config: UserConfig = {
     build: {target: 'chrome147'},
     plugins: [
-      titlePlugin(), reactPlugin(), babelPlugin({presets: [reactCompilerPreset()]}), mediaMixinsPlugin({
+      titlePlugin(),
+      reactPlugin(),
+      babelPlugin({presets: [reactCompilerPreset()]}),
+      mediaMixinsPlugin({
         schemeSource: ['attribute'],
-      }), svgrPlugin(),
+      }),
+      svgrPlugin({
+        include: '**/*.svg?react',
+        svgrOptions: {
+          dimensions: false,
+          plugins: ['@svgr/plugin-svgo', '@svgr/plugin-jsx'],
+          svgoConfig: {
+            plugins: [
+              {
+                name: 'preset-default',
+              },
+              {
+                name: 'prefixIds',
+                params: {
+                  delim: '',
+                  prefix: (element, context) => {
+                    void element
+                    if (!context.path) {
+                      return ''
+                    }
+                    let pathIndex = svgPaths.indexOf(context.path)
+                    if (pathIndex === -1) {
+                      pathIndex = svgPaths.length
+                      svgPaths.push(context.path)
+                    }
+                    return String(pathIndex)
+                  },
+                },
+              },
+            ],
+          },
+        },
+      }),
     ],
     css: {postcss: {plugins: [postcssNormalize() as any, postcssAutoprefixer]}},
   }
@@ -71,11 +107,13 @@ const getProductionConfig = () => {
                 name: 'react',
                 test: /\/node_modules\/react(-dom)?\//,
                 priority: 2,
-              }, {
+              },
+              {
                 name: 'vendor',
                 test: /node_modules/,
                 priority: 1,
-              }, {name: 'main'},
+              },
+              {name: 'main'},
             ],
           },
         },

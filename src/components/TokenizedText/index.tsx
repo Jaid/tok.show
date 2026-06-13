@@ -180,8 +180,8 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
                     return null
                   }
                   return (
-                    <span key={id} className={css.supportedIcon} title={m.name}>
-                      <img src={m.icon} alt={m.name} width={16} height={16} />
+                    <span key={id} className={css.supportedIcon} title={m.name} role="img" aria-label={m.name}>
+                      {m.getIcon()}
                     </span>
                   )
                 })}

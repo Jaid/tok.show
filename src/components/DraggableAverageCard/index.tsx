@@ -4,7 +4,7 @@ import {useSortable} from '@dnd-kit/react/sortable'
 
 import ModelCard from '#component/ModelCard'
 
-import averageIcon from './average.svg'
+import AverageIcon from './average.svg?react'
 
 import css from './style.module.sass'
 
@@ -33,7 +33,7 @@ const DraggableAverageCard: FunctionComponent<Props> = ({averageCount, index, is
     <div ref={ref}>
       <ModelCard
         model={{
-          icon: averageIcon,
+          getIcon: () => <AverageIcon />,
           name: 'Average',
           subname,
         }}
