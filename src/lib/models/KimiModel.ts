@@ -4,7 +4,7 @@ import Model from './base/Model.ts'
 
 export default class KimiModel extends Model {
   override name = 'Kimi'
-  override subname = 'K2.6'
+  override subname = 'K2.7-Coder'
   override getIcon() {
     return this.renderIcon(icon)
   }
