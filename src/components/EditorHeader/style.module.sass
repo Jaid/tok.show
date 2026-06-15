@@ -1,64 +1,6 @@
-.container
-  display: flex
-  // align-items: center
-  place-content: space-between
-  gap: 6px
-  border-bottom: 1px solid #222
-  flex-shrink: 0
-  height: 28px
-
-.tabs
-  display: flex
-  min-width: 0
-  overflow: auto hidden
-  align-self: stretch
-
-.tab
-  background: transparent
-  border: 1px solid currentColor
-  border-bottom-color: transparent
-  border-radius: 10px 10px 0 0
-  opacity: 50%
-  corner-shape: squircle
-  font-size: 12px
-  max-width: 180px
-  min-width: 80px
-  overflow: hidden
-  padding-block: 4px
-  padding-inline: 12px
-  text-overflow: ellipsis
-  white-space: nowrap
-  &:first-child
-    border-left-color: transparent
-    border-top-left-radius: 0
-  &:hover
-    color: white
-    @include light
-      color: black
-
-.decoration
-  display: flex
-  align-items: center
-  color: #888
-  font-size: 11px
-  >*:not(:first-child)
-    border-left: 1px solid #888
-    padding-left: 8px
-  >*:not(:last-child)
-    padding-right: 8px
-
-.activeTab
-  margin-bottom: -1px
-  color: white
-  border-bottom-color: black
-  @include light
-    color: black
-    border-bottom-color: white
-
 .iconBtn
   border: none
   color: #888
-  // cursor: pointer
   display: flex
   align-items: center
   font-size: 14px

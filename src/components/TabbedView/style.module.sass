@@ -1,0 +1,54 @@
+.container
+  display: flex
+  flex-shrink: 0
+  gap: 6px
+  place-content: space-between
+  border-bottom: 1px solid #222
+
+.tabs
+  display: flex
+  align-self: stretch
+  margin-bottom: -1px
+
+.tab
+  max-width: 180px
+  min-width: 80px
+  padding-block: 8px
+  padding-inline: 12px
+  border-left: 1px solid transparent
+  border-right: 1px solid transparent
+  border-radius: 10px 10px 0 0
+  font-size: 12px
+  text-overflow: ellipsis
+  white-space: nowrap
+  color: #888
+  &:first-child
+    border-left-color: transparent
+    border-top-left-radius: 0
+  &:hover
+    color: white
+    @include light
+      color: black
+
+.activeTab
+  cursor: default
+  color: white
+  border-left-color: #222
+  border-right-color: #222
+  background: black
+  @include light
+    color: black
+    background: white
+    border-left-color: black
+    border-right-color: black
+
+.decoration
+  display: flex
+  align-items: center
+  color: #888
+  font-size: 11px
+  >*:not(:first-child)
+    border-left: 1px solid #888
+    padding-left: 8px
+  >*:not(:last-child)
+    padding-right: 8px

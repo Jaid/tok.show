@@ -1,5 +1,6 @@
 import type {EditorHandle} from '#component/Editor'
 import type {OutputTab} from '#component/OutputHeader'
+import type {Model} from '#src/lib/models/index.ts'
 import type {EntryId} from '#src/lib/state.ts'
 import type {TokenSpan} from '#src/lib/tokenSpans.ts'
 import type {DragEvent, FunctionComponent} from 'react'
@@ -17,6 +18,7 @@ import EditorFooter from '#component/EditorFooter'
 import EditorHeader from '#component/EditorHeader'
 import OutputFooter from '#component/OutputFooter'
 import OutputHeader from '#component/OutputHeader'
+import {useTabbedView} from '#component/TabbedView'
 import TokenizedText from '#component/TokenizedText'
 import modelsMap from '#src/lib/models/index.ts'
 import {createInputTab, getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, setActiveInputTab, state, syncInputStateFromActiveTab, updateActiveInputTab} from '#src/lib/state.ts'
@@ -34,6 +36,33 @@ const getModelsFromUrl = (value: string | null): Array<string> => {
   return value.split(',').map(s => s.trim()).filter(Boolean)
 }
 const serializeModels = (ids: Array<string>): string => ids.join(',')
+
+type OutputPaneContentProps = {
+  focusedModel: Model | null
+  focusedSpans: Array<TokenSpan>
+  input: Uint8Array | string
+  onTokenClick: (span: TokenSpan) => void
+  onTokenHover: (span: TokenSpan | null) => void
+  tokenIds: ReadonlyArray<number> | null
+}
+
+const OutputPaneContent: FunctionComponent<OutputPaneContentProps> = ({focusedModel, focusedSpans, input, onTokenClick, onTokenHover, tokenIds}) => {
+  const {tabKey: currentTab} = useTabbedView<OutputTab>()
+  if (currentTab === 'mirror') {
+    const displayInput = input instanceof Uint8Array ? new TextDecoder('utf-8', {fatal: false}).decode(input) : input
+    return <div className={css.mirrorView}>{displayInput || <span className={css.empty}>Start typing…</span>}</div>
+  }
+  if (currentTab === 'ids') {
+    if (!tokenIds) {
+      return <div className={clsx(css.idsView, css.empty)}>No tokens (focus a model)</div>
+    }
+    const elements = tokenIds.map((id: number, i: number) => {
+      return <span key={i} className={css.tokenIdChip}>{id}</span>
+    })
+    return <div className={css.idsView} children={elements}/>
+  }
+  return <TokenizedText input={input} spans={focusedSpans} focusedModel={focusedModel} onHoverSpan={onTokenHover} onClickSpan={onTokenClick} />
+}
 const App: FunctionComponent = () => {
   const snap = useSnapshot(state)
   const {model: modelParam,
@@ -41,7 +70,6 @@ const App: FunctionComponent = () => {
     monaco: monacoParam,
     setModel: setModelParam,
     setModels: setModelsRaw,
-    setMonaco: setMonacoParam,
     setText: setTextParam,
     shareUrl,
     text: textParam} = useUrlParameters()
@@ -291,23 +319,7 @@ const App: FunctionComponent = () => {
   const hidden = getHiddenModelIds().map((id: ModelId) => getModel(id)).filter(Boolean)
   const focusedModel = state.focusedId ? getModel(state.focusedId) : null
   const curInput = state.isBinary && state.binaryData ? state.binaryData : state.text
-  const rightContent = () => {
-    if (currentTab === 'mirror') {
-      const d = curInput instanceof Uint8Array ? new TextDecoder('utf-8', {fatal: false}).decode(curInput) : curInput
-      return <div className={css.mirrorView}>{d || <span className={css.empty}>Start typing…</span>}</div>
-    }
-    if (currentTab === 'ids') {
-      const td = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData : null
-      if (!td) {
-        return <div className={clsx(css.idsView, css.empty)}>No tokens (focus a model)</div>
-      }
-      const elements = td.tokens.map((id: number, i: number) => {
-        return <span key={i} className={css.tokenIdChip}>{id}</span>
-      })
-      return <div className={css.idsView} children={elements}/>
-    }
-    return <TokenizedText input={curInput} spans={focusedSpans} focusedModel={focusedModel} onHoverSpan={onTokenHover} onClickSpan={onTokenClick} />
-  }
+  const tokenIds = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData?.tokens ?? null : null
   return <>
     <Group orientation="horizontal" className={css.container}>
       <Panel defaultSize={50} minSize={20}>
@@ -338,8 +350,12 @@ const App: FunctionComponent = () => {
       <Separator className={css.paneSeparator} />
       <Panel defaultSize={50} minSize={20}>
         <div className={css.pane}>
-          <OutputHeader currentTab={currentTab} onTabChange={setCurrentTab} />
-          <div className={css.paneBody}>{rightContent()}</div>
+          <OutputHeader currentTab={currentTab} onTabChange={setCurrentTab}>
+            <div className={css.paneBody}>
+              <OutputPaneContent focusedModel={focusedModel} focusedSpans={focusedSpans} input={curInput}
+                onTokenClick={onTokenClick} onTokenHover={onTokenHover} tokenIds={tokenIds} />
+            </div>
+          </OutputHeader>
           <OutputFooter entries={state.visibleEntries} modelsById={modelsMap}
             counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
             hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}

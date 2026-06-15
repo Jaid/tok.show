@@ -1,17 +1,16 @@
-import type {FunctionComponent} from 'react'
+import type {FunctionComponent, ReactNode} from 'react'
 
-import clsx from 'clsx'
-
-import css from './style.module.sass'
+import {Tab, TabbedView} from '#component/TabbedView'
 
 export type OutputTab = 'ids' | 'mirror' | 'tokenized'
 
 type Props = {
+  children?: ReactNode
   currentTab: OutputTab
   onTabChange: (tab: OutputTab) => void
 }
 
-const OutputHeader: FunctionComponent<Props> = ({currentTab, onTabChange}) => {
+const OutputHeader: FunctionComponent<Props> = ({children, currentTab, onTabChange}) => {
   const tabs: Array<{id: OutputTab
     label: string}> = [
     {
@@ -27,15 +26,10 @@ const OutputHeader: FunctionComponent<Props> = ({currentTab, onTabChange}) => {
       label: 'IDs',
     },
   ]
-  return <div className={css.container}>
-    {tabs.map(tab => <button
-      key={tab.id}
-      className={clsx(css.tab, currentTab === tab.id && css.active)}
-      onClick={() => onTabChange(tab.id)}
-    >
-      {tab.label}
-    </button>)}
-  </div>
+  return <TabbedView<OutputTab> activeTabKey={currentTab} onTabChange={onTabChange}>
+    {tabs.map(tab => <Tab key={tab.id}>{tab.label}</Tab>)}
+    {children}
+  </TabbedView>
 }
 
 export default OutputHeader
