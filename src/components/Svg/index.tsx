@@ -21,6 +21,7 @@ type Props = {
   height?: ComponentProps<'img'>['height']
   imgClassName?: ClassValue
   imgProps?: Omit<ComponentProps<'img'>, 'alt' | 'className' | 'height' | 'src' | 'width'>
+  lineHeight?: boolean | number | string
   pictureClassName?: ClassValue
   shouldUseTheme?: boolean
   src?: SvgSource
@@ -44,6 +45,23 @@ const Svg: FunctionComponent<Props> = props => {
     ...props.imgProps,
     ...pick(props, ['alt', 'height', 'width']),
   }
+  const elementClassNames = [
+    css.element,
+    props.imgClassName,
+  ]
+  if (props.lineHeight === true) {
+    elementClassNames.push(css.normalHeight)
+  } else if (typeof props.lineHeight === 'string') {
+    imgProps.style = {
+      height: props.lineHeight,
+    }
+  } else if (props.lineHeight) {
+    const excessHeight = (props.lineHeight - 1) / 2
+    imgProps.style = {
+      height: `${props.lineHeight}em`,
+      marginBlock: `-${excessHeight}em`,
+    }
+  }
   let src = props.src
   if (!src) {
     src = {
@@ -65,7 +83,7 @@ const Svg: FunctionComponent<Props> = props => {
     }
   }
   if (!isThemed) {
-    const className = clsx(css.element, props.className, props.imgClassName)
+    const className = clsx(props.className, elementClassNames)
     const normalizedSrc = normalizeSvgSrc(src as string)
     return <img {...imgProps} src={normalizedSrc} className={className} />
   }
@@ -77,7 +95,7 @@ const Svg: FunctionComponent<Props> = props => {
   const defaultSrc = normalizeSvgSrc((src as ThemedSource)[defaultColorScheme])
   return <picture className={clsx(props.className, props.pictureClassName)}>
     {catcherElement}
-    <img {...imgProps} src={defaultSrc} className={clsx(css.element, props.imgClassName)} />
+    <img {...imgProps} src={defaultSrc} className={clsx(elementClassNames)} />
   </picture>
 }
 

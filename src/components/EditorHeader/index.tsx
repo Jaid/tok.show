@@ -7,7 +7,7 @@ import NumberDisplay from '#component/NumberDisplay'
 import PulsatingNumber from '#component/PulsatingNumber'
 import Svg from '#component/Svg'
 import {Tab, TabbedView} from '#component/TabbedView'
-import textIcon from '#root/node_modules/material-icon-theme/icons/prompt.svg?url'
+import textIcon from '#root/node_modules/material-icon-theme/icons/prompt.svg'
 
 import css from './style.module.sass'
 
@@ -36,7 +36,7 @@ const EditorHeader: FunctionComponent<Props> = ({tabs, activeTabId, sizeInBytes,
     <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
   </>
   const tabElements = tabs.map(tab => {
-    const icon = <Svg src={textIcon} height='20px'/>
+    const icon = <Svg src={textIcon} lineHeight/>
     return <Tab key={tab.id} title={tab.name}>{icon}{tab.name}</Tab>
   })
   return <TabbedView tabClassName={css.tab} activeTabKey={activeTabId} decoration={decoration} onTabChange={onTabSelect}>
