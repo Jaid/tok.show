@@ -29,9 +29,36 @@ import {useUrlParameters} from '#src/lib/useUrlParameters.ts'
 import css from './style.module.sass'
 
 const numberHotkeys = '1,2,3,4,5,6,7,8,9'
+const modelHotkeyOptions = {
+  enableOnContentEditable: true,
+  enableOnFormTags: true,
+  eventListenerOptions: {capture: true},
+  preventDefault: true,
+} as const
 const allModelIds = modelIds as ReadonlyArray<ModelId>
 const isModelId = (value: string): value is ModelId => allModelIds.includes(value as ModelId)
-const getModelIdsFromEntries = (entries: ReadonlyArray<EntryId>): Array<ModelId> => entries.filter(isModelId)
+const getModelIdAtVisualIndex = (entries: ReadonlyArray<EntryId>, targetIndex: number): ModelId | null => {
+  let currentIndex = 1
+  for (const entry of entries) {
+    if (entry === 'average') {
+      if (getShouldShowAverage()) {
+        if (currentIndex === targetIndex) {
+          return null
+        }
+        currentIndex++
+      }
+      continue
+    }
+    if (!isModelId(entry)) {
+      continue
+    }
+    if (currentIndex === targetIndex) {
+      return entry
+    }
+    currentIndex++
+  }
+  return null
+}
 const getNumberHotkey = (event: KeyboardEvent): number | null => {
   const digit = event.code.replace(/^(?:Digit|Numpad)/, '')
   const key = /^\d$/.test(digit) ? digit : event.key
@@ -305,23 +332,25 @@ const App: FunctionComponent = () => {
   const onStashDrop = (entry: EntryId) => {
     onHide(entry)
   }
-  useHotkeys('0', () => {
+  const clearFocus = () => {
     state.focusedId = null
     setModelParam('')
-  }, {preventDefault: true})
+  }
+  useHotkeys('0', () => {
+    clearFocus()
+  }, modelHotkeyOptions)
   useHotkeys(numberHotkeys, event => {
     const num = getNumberHotkey(event)
     if (num === null) {
       return
     }
-    const target = getModelIdsFromEntries(state.visibleEntries)[num - 1]
+    const target = getModelIdAtVisualIndex(state.visibleEntries, num)
     if (target) {
       onFocus(target)
     } else {
-      state.focusedId = null
-      setModelParam('')
+      clearFocus()
     }
-  }, {preventDefault: true})
+  }, modelHotkeyOptions)
   const showAvg = getShouldShowAverage()
   const avgCount = getAverageCount()
   const visibleCount = getVisibleModelIds().length

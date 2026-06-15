@@ -1,5 +1,6 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {EntryId} from '#src/lib/state.ts'
+import type {DragEndEvent} from '@dnd-kit/react'
 import type {FunctionComponent, ReactNode} from 'react'
 
 import {KeyboardSensor, PointerActivationConstraints, PointerSensor} from '@dnd-kit/dom'
@@ -54,23 +55,27 @@ const getBestEntryIds = (counts: Record<string, number>, entries: Array<EntryId>
 const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, modelsById, counts, errors, focusedId, loadingSet,
   onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}) => {
   const bestEntryIds = getBestEntryIds(counts, entries)
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = (event: DragEndEvent) => {
     if (event.canceled) {
       return
     }
     const sourceId = event.operation.source?.id as EntryId | undefined
     const targetId = event.operation.target?.id as EntryId | undefined
-    if (!sourceId || !targetId) {
+    if (!sourceId) {
       return
     }
     if (targetId === 'stash-zone') {
       onStashDrop(sourceId)
       return
     }
-    if (isSortableOperation(event.operation) && sourceId !== targetId) {
-      const from = entries.indexOf(sourceId)
-      const to = entries.indexOf(targetId)
-      if (from === -1 || to === -1) {
+    if (isSortableOperation(event.operation)) {
+      const source = event.operation.source
+      if (!source) {
+        return
+      }
+      const from = source.initialIndex
+      const to = source.index
+      if (from === to || from < 0 || to < 0 || from >= entries.length || to >= entries.length) {
         return
       }
       onReorder(arrayMove(entries, from, to))
