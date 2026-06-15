@@ -5,7 +5,9 @@ import {FaRegCopy} from 'react-icons/fa6'
 
 import NumberDisplay from '#component/NumberDisplay'
 import PulsatingNumber from '#component/PulsatingNumber'
+import Svg from '#component/Svg'
 import {Tab, TabbedView} from '#component/TabbedView'
+import textIcon from '#root/node_modules/material-icon-theme/icons/prompt.svg?url'
 
 import css from './style.module.sass'
 
@@ -33,8 +35,12 @@ const EditorHeader: FunctionComponent<Props> = ({tabs, activeTabId, sizeInBytes,
     {charsDisplay}
     <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
   </>
-  return <TabbedView activeTabKey={activeTabId} decoration={decoration} onTabChange={onTabSelect}>
-    {tabs.map(tab => <Tab key={tab.id} title={tab.name}>{tab.name}</Tab>)}
+  const tabElements = tabs.map(tab => {
+    const icon = <Svg src={textIcon} height='20px'/>
+    return <Tab key={tab.id} title={tab.name}>{icon}{tab.name}</Tab>
+  })
+  return <TabbedView tabClassName={css.tab} activeTabKey={activeTabId} decoration={decoration} onTabChange={onTabSelect}>
+    {tabElements}
   </TabbedView>
 }
 
