@@ -58,7 +58,7 @@ export const state = proxy({
   visibleEntries: ['average', 'gpt', 'deepseek'] as Array<EntryId>,
   hiddenEntryIds: [] as Array<EntryId>,
   modelStates: initialModelStates,
-  activeTab: 'tokenized' as 'ids' | 'mirror' | 'tokenized',
+  activeTab: 'tokenized' as 'ids' | 'preprocessed' | 'tokenized',
   hoveredTokenIndex: null as number | null,
   useMonaco: true,
   averageExplicitlyHidden: false,

@@ -28,7 +28,18 @@ import {useUrlParameters} from '#src/lib/useUrlParameters.ts'
 
 import css from './style.module.sass'
 
+const numberHotkeys = '1,2,3,4,5,6,7,8,9'
 const allModelIds = modelIds as ReadonlyArray<ModelId>
+const isModelId = (value: string): value is ModelId => allModelIds.includes(value as ModelId)
+const getModelIdsFromEntries = (entries: ReadonlyArray<EntryId>): Array<ModelId> => entries.filter(isModelId)
+const getNumberHotkey = (event: KeyboardEvent): number | null => {
+  const digit = event.code.replace(/^(?:Digit|Numpad)/, '')
+  const key = /^\d$/.test(digit) ? digit : event.key
+  if (!/^[1-9]$/.test(key)) {
+    return null
+  }
+  return Number(key)
+}
 const getModelsFromUrl = (value: string | null): Array<string> => {
   if (!value) {
     return ['gpt', 'deepseek']
@@ -43,14 +54,15 @@ type OutputPaneContentProps = {
   input: Uint8Array | string
   onTokenClick: (span: TokenSpan) => void
   onTokenHover: (span: TokenSpan | null) => void
+  preprocessedInput: Uint8Array | string
   tokenIds: ReadonlyArray<number> | null
 }
 
-const OutputPaneContent: FunctionComponent<OutputPaneContentProps> = ({focusedModel, focusedSpans, input, onTokenClick, onTokenHover, tokenIds}) => {
+const OutputPaneContent: FunctionComponent<OutputPaneContentProps> = ({focusedModel, focusedSpans, input, onTokenClick, onTokenHover, preprocessedInput, tokenIds}) => {
   const {tabKey: currentTab} = useTabbedView<OutputTab>()
-  if (currentTab === 'mirror') {
-    const displayInput = input instanceof Uint8Array ? new TextDecoder('utf-8', {fatal: false}).decode(input) : input
-    return <div className={css.mirrorView}>{displayInput || <span className={css.empty}>Start typing…</span>}</div>
+  if (currentTab === 'preprocessed') {
+    const displayInput = preprocessedInput instanceof Uint8Array ? new TextDecoder('utf-8', {fatal: false}).decode(preprocessedInput) : preprocessedInput
+    return <div className={css.preprocessedView}>{displayInput || <span className={css.empty}>Start typing…</span>}</div>
   }
   if (currentTab === 'ids') {
     if (!tokenIds) {
@@ -92,13 +104,13 @@ const App: FunctionComponent = () => {
   useEffect(() => {
     if (!modelParam || modelParam === '') {
       state.focusedId = null
-    } else if (allModelIds.includes(modelParam as ModelId)) {
-      state.focusedId = modelParam as ModelId
+    } else if (isModelId(modelParam)) {
+      state.focusedId = modelParam
     }
   }, [modelParam])
   useEffect(() => {
     const ids = getModelsFromUrl(modelsRaw)
-    state.visibleEntries = ids.filter(s => allModelIds.includes(s as ModelId))
+    state.visibleEntries = ids.filter(isModelId)
     if (getShouldShowAverage() && !state.visibleEntries.includes('average')) {
       state.visibleEntries.push('average')
     }
@@ -297,15 +309,12 @@ const App: FunctionComponent = () => {
     state.focusedId = null
     setModelParam('')
   }, {preventDefault: true})
-  useHotkeys('1,2,3,4,5,6,7,8,9', (event, handler) => {
-    const keys = (handler as Record<string, unknown>).keys as Array<string> | undefined
-    const key = keys?.[0] ?? event.key
-    const num = Number.parseInt(String(key), 10)
-    if (!num || num < 1 || num > 9) {
+  useHotkeys(numberHotkeys, event => {
+    const num = getNumberHotkey(event)
+    if (num === null) {
       return
     }
-    const real = state.visibleEntries.filter((e): e is ModelId => e !== 'average')
-    const target = real[num - 1]
+    const target = getModelIdsFromEntries(state.visibleEntries)[num - 1]
     if (target) {
       onFocus(target)
     } else {
@@ -319,7 +328,10 @@ const App: FunctionComponent = () => {
   const hidden = getHiddenModelIds().map((id: ModelId) => getModel(id)).filter(Boolean)
   const focusedModel = state.focusedId ? getModel(state.focusedId) : null
   const curInput = state.isBinary && state.binaryData ? state.binaryData : state.text
-  const tokenIds = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData?.tokens ?? null : null
+  const focusedTokenizeData = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData ?? null : null
+  const preprocessedInput = focusedTokenizeData?.processedInput ?? focusedTokenizeData?.inputText ?? curInput
+  const tokenIds = focusedTokenizeData?.tokens ?? null
+  const outputTab = state.focusedId ? currentTab : 'preprocessed'
   return <>
     <Group orientation="horizontal" className={css.container}>
       <Panel defaultSize={50} minSize={20}>
@@ -350,10 +362,10 @@ const App: FunctionComponent = () => {
       <Separator className={css.paneSeparator} />
       <Panel defaultSize={50} minSize={20}>
         <div className={css.pane}>
-          <OutputHeader currentTab={currentTab} onTabChange={setCurrentTab}>
+          <OutputHeader currentTab={outputTab} onTabChange={setCurrentTab} showModelTabs={Boolean(state.focusedId)}>
             <div className={css.paneBody}>
               <OutputPaneContent focusedModel={focusedModel} focusedSpans={focusedSpans} input={curInput}
-                onTokenClick={onTokenClick} onTokenHover={onTokenHover} tokenIds={tokenIds} />
+                onTokenClick={onTokenClick} onTokenHover={onTokenHover} preprocessedInput={preprocessedInput} tokenIds={tokenIds} />
             </div>
           </OutputHeader>
           <OutputFooter entries={state.visibleEntries} modelsById={modelsMap}
