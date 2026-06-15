@@ -22,6 +22,24 @@ describe('components', () => {
     expect(html).toContain('00000000')
     expect(html).toContain('ff')
   })
+  test('Svg renders string and themed sources', async () => {
+    const stringHtml = await render('Svg', {
+      alt: 'Static icon',
+      src: '/static.svg',
+    })
+    expect(stringHtml).toContain('src="/static.svg"')
+    const themedHtml = await render('Svg', {
+      alt: 'Test icon',
+      className: 'icon',
+      src: {
+        dark: '/dark.svg',
+        light: '/light.svg',
+      },
+    })
+    expect(themedHtml).toContain('class="icon"')
+    expect(themedHtml).toContain('src="/dark.svg"')
+    expect(themedHtml).toContain('alt="Test icon"')
+  })
   test('TokenizedText renders an actual line break after hex newline tokens', async () => {
     const cases = [
       {hexDisplay: '0a', input: '\nX', lineBreakByteEnd: 1, text: '\n'},

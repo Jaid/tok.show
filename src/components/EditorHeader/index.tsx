@@ -5,6 +5,7 @@ import clsx from 'clsx'
 import {FaRegCopy} from 'react-icons/fa6'
 
 import NumberDisplay from '#component/NumberDisplay'
+import PulsatingNumber from '#component/PulsatingNumber'
 
 import css from './style.module.sass'
 
@@ -20,22 +21,27 @@ type Props = {
 }
 
 const EditorHeader: FunctionComponent<Props> = ({tabs, activeTabId, sizeInBytes, charCount, isBinary, binaryByteCount, onCopy, onTabSelect}) => {
+  const needsBinaryBytesDisplay = isBinary && binaryByteCount
+  const binaryBytesDisplay = needsBinaryBytesDisplay ? <NumberDisplay value={binaryByteCount} suffix="byte" suffixPlural /> : undefined
+  const needsUtfBytesDisplay = !isBinary && sizeInBytes && sizeInBytes !== charCount
+  const utfBytesDisplay = needsUtfBytesDisplay ? <PulsatingNumber value={sizeInBytes} suffix="byte" suffixPlural /> : undefined
+  const needsCharsDisplay = !isBinary && charCount
+  const charsDisplay = needsCharsDisplay ? <PulsatingNumber value={charCount} suffix="character" suffixPlural /> : undefined
+  const tabsElements = tabs.map(tab => {
+    return <button key={tab.id} className={clsx(css.tab, tab.id === activeTabId && css.activeTab)} onClick={() => onTabSelect(tab.id)} title={tab.name}>
+      {tab.name}
+    </button>
+  })
   return <div className={css.container}>
     <div className={css.tabs}>
-      {tabs.map(tab => <button
-        key={tab.id}
-        className={clsx(css.tab, tab.id === activeTabId && css.activeTab)}
-        onClick={() => onTabSelect(tab.id)}
-        title={tab.name}
-      >
-        {tab.name}
-      </button>)}
+      {tabsElements}
     </div>
-    <span className={css.size}>
-      {isBinary && binaryByteCount !== null && binaryByteCount !== undefined ? <NumberDisplay value={binaryByteCount} suffix="byte" suffixPlural /> : <><NumberDisplay value={sizeInBytes} suffix="byte" suffixPlural /> · <NumberDisplay value={charCount} suffix="char" suffixPlural /></>
-      }
-    </span>
-    <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
+    <div className={css.decoration}>
+      {binaryBytesDisplay}
+      {utfBytesDisplay}
+      {charsDisplay}
+      <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
+    </div>
   </div>
 }
 

@@ -1,6 +1,7 @@
 import type {Theme} from '#src/components/ThemeToggle/useTheme.ts'
 import type {OnChange, OnMount} from '@monaco-editor/react'
-import type {FunctionComponent, Ref} from 'react'
+import type {FirstParameter} from 'more-types'
+import type {ComponentProps, FunctionComponent, Ref} from 'react'
 
 import {Editor as MonacoEditor} from '@monaco-editor/react'
 import {once} from 'es-toolkit/function'
@@ -34,7 +35,7 @@ const monacoThemeByTheme = {
   dark: 'black',
   light: 'vs',
 } satisfies Record<Theme, string>
-const ensureTheme = once((monaco: Parameters<OnMount>[1]) => {
+const ensureTheme = once((monaco: FirstParameter<ComponentProps<typeof MonacoEditor>['beforeMount']>) => {
   monaco.editor.defineTheme('black', {
     base: 'vs-dark',
     inherit: true,
@@ -86,17 +87,14 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
     ])
   }, [])
   useImperativeHandle(ref, () => ({setHighlightRange}), [setHighlightRange])
-  // Highlight decoration sync for declarative callers. Hover uses the imperative handle to avoid rerendering the whole app.
   useEffect(() => {
     if (highlightRange !== undefined) {
       setHighlightRange(highlightRange)
     }
   }, [highlightRange, setHighlightRange])
-  // Binary hex viewer
   if (isBinary && binaryData) {
     return <HexViewer bytes={binaryData} />
   }
-  // Fallback textarea when Monaco disabled
   if (!useMonaco) {
     return <textarea
       className={css.textarea}
@@ -106,6 +104,33 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
       spellCheck={false}
     />
   }
+  const monacoOptions: ComponentProps<typeof MonacoEditor>['options'] = {
+    minimap: {enabled: false},
+    stickyScroll: {enabled: false},
+    lineNumbers: 'off',
+    fontFamily: 'code',
+    fontSize: 14,
+    lineHeight: 16,
+    tabSize: 2,
+    dragAndDrop: false,
+    accessibilitySupport: 'off',
+    guides: {indentation: false},
+    overviewRulerBorder: false,
+    renderWhitespace: 'trailing',
+    wordWrap: 'on',
+    contextmenu: true,
+    readOnly,
+    scrollbar: {
+      vertical: 'auto',
+      horizontal: 'auto',
+    },
+    renderLineHighlight: 'none',
+    renderControlCharacters: true,
+    folding: false,
+    padding: {
+      top: 6,
+    },
+  }
   return <div className={css.container}>
     <MonacoEditor
       value={value}
@@ -114,32 +139,7 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
       beforeMount={ensureTheme}
       theme={monacoThemeByTheme[theme]}
       language='plaintext'
-      options={{
-        minimap: {enabled: false},
-        stickyScroll: {enabled: false},
-        lineNumbers: 'off',
-        fontFamily: 'code',
-        fontSize: 14,
-        tabSize: 2,
-        dragAndDrop: false,
-        accessibilitySupport: 'off',
-        guides: {indentation: false},
-        lineHeight: 1.4,
-        overviewRulerBorder: false,
-        renderWhitespace: 'trailing',
-        wordWrap: 'on',
-        contextmenu: true,
-        readOnly,
-        scrollbar: {
-          vertical: 'auto',
-          horizontal: 'auto',
-        },
-        renderLineHighlight: 'none',
-        folding: false,
-        padding: {
-          top: 6,
-        },
-      }}
+      options={monacoOptions}
     />
   </div>
 }

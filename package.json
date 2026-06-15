@@ -10,11 +10,11 @@
     "#component/*": "./src/components/*/index.tsx"
   },
   "scripts": {
-    "build": "bun run vite build --mode development",
-    "build:production": "bun run vite build --mode production",
+    "build": "bun run vite build",
+    "build:dev": "bun run vite build --mode development",
     "lint": "tsc --noEmit --noUnusedLocals --pretty false ; knip-bun --reporter json",
     "test": "bun test --max-concurrency 1 ./test",
-    "test-live": "bun run build:production && target=dist bun test test/live.test.ts",
+    "test-live": "bun run build && target=dist bun test test/live.test.ts",
     "vite": "bun node_modules/vite/dist/node/cli.js --configLoader runner"
   },
   "dependencies": {

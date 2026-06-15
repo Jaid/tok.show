@@ -1,11 +1,9 @@
-$borderColor: #222
-
 .container
   display: flex
   align-items: center
   justify-content: space-between
   padding: 6px 10px
-  border-top: 1px solid $borderColor
+  border-top: 1px solid #222
   flex-shrink: 0
   font-size: 12px
 
@@ -16,10 +14,17 @@ $borderColor: #222
 
 .titleContainer
   margin-right: 20px
+  user-select: text
+  @include narrow
+    display: none
 
 .title
   font-size: 140%
   font-weight: 200
+
+.flavorTitle
+  color: #888
+  font-size: 11px
 
 .footerSize
   color: #888
@@ -32,7 +37,7 @@ $borderColor: #222
 
 .miniBtn
   background: transparent
-  border: 1px solid $borderColor
+  border: 1px solid #222
   color: #888
   padding: 2px 8px
   border-radius: 4px

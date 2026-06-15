@@ -1,13 +1,20 @@
-// @import-normalize
-// @import-sanitize
-
 @font-face
   font-family: main
   src: local("Geologica"), local("Geologica NF")
+  font-display: swap
 
 @font-face
   font-family: code
   src: local("JetBrains Mono"), local("JetBrains Mono NF")
+  font-display: swap
+
+@font-face
+  font-family: menu
+  src: local("Inter"), local("Inter Display"), url("https://esm.sh/inter-ui/web/Inter-Regular.woff2"), url("https://cdn.jsdelivr.net/npm/inter-ui/web/Inter-Regular.woff2")
+  font-display: swap
+
+@function gray($lightness: 50)
+  @return hsl(0, 0%, $lightness)
 
 body
   margin: 0
@@ -28,3 +35,14 @@ code
 
 pre>code
   white-space: pre-wrap
+
+button
+  font-family: menu
+  background: transparent
+  cursor: pointer
+  border: none
+  border-radius: 4px
+  &:hover
+    color: white
+    @include light
+      color: black

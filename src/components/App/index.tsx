@@ -214,7 +214,7 @@ const App: FunctionComponent = () => {
         isUtf8 = false
       }
       if (isUtf8) {
-        const text = new TextDecoder().decode(bytes)
+        const text = (new TextDecoder).decode(bytes)
         createInputTab({
           name: file.name || 'dropped.txt',
           text,
@@ -331,14 +331,7 @@ const App: FunctionComponent = () => {
             <Editor ref={editorRef} value={state.text} onChange={onInput} useMonaco={state.useMonaco}
               isBinary={state.isBinary} binaryData={state.binaryData} />
           </div>
-          <EditorFooter
-            useMonaco={state.useMonaco}
-            onToggleMonaco={() => {
-              state.useMonaco = !state.useMonaco
-              setMonacoParam(state.useMonaco)
-            }}
-            shareUrl={shareUrl}
-          />
+          <EditorFooter shareUrl={shareUrl} />
           {isDragOver && <div className={css.dropOverlay}>Drop text or file here</div>}
         </div>
       </Panel>

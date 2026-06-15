@@ -1,17 +1,14 @@
 .icon
   height: 40px
   display: flex
-//   margin-bottom: 8px
-//   svg
-//     display: block
-//     height: 100%
-//     width: auto
 
 .name
   font-size: 16px
   font-weight: 800
   font-family: Quicksand, main
   color: #bbb
+  @include narrow
+    display: none
 
 .subname
   font-size: 11px
@@ -19,3 +16,5 @@
   font-family: Montserrat, main
   font-weight: 500
   line-height: 1
+  @include narrow
+    display: none
