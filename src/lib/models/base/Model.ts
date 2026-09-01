@@ -1,31 +1,21 @@
 import type {ModelId, RawTokenizeResult, TokenizeInput} from 'token-vocabs'
-import type {ComponentProps, FunctionComponent, ReactElement} from 'react'
 
-import {createElement} from 'react'
 import {free, load, tokenizeLoaded} from 'token-vocabs'
 
-export type ModelIcon = FunctionComponent<ComponentProps<'svg'> & {
-  desc?: string
-  descId?: string
-  title?: string
-  titleId?: string
-}>
+export type ModelIconTheme = 'dark' | 'light'
+export type ModelIcon = Record<ModelIconTheme, string> | string
 
 export default abstract class Model {
+  abstract icon: ModelIcon
   id: ModelId
   initiallyVisible = false
   loaded = false
   loadPromise: Promise<ModelId> | undefined
   abstract name: string
   subname: string | undefined
-  abstract getIcon(): ReactElement
 
   constructor(id: ModelId) {
     this.id = id
-  }
-
-  protected renderIcon(Icon: ModelIcon) {
-    return createElement(Icon)
   }
 
   async load() {

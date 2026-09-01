@@ -5,6 +5,7 @@
     "": {
       "name": "tok.show",
       "dependencies": {
+        "@dnd-kit/dom": "0.5.0",
         "@dnd-kit/react": "0.5.0",
         "@floating-ui/react": "0.27.19",
         "@monaco-editor/react": "^4.7.0",
@@ -18,8 +19,10 @@
         "react-hotkeys-hook": "5.3.2",
         "react-icons": "5.6.0",
         "react-resizable-panels": "4.11.2",
+        "shape-to-svg": "^0.1.0",
         "token-vocabs": "0.6.0",
         "valtio": "2.3.2",
+        "vite-plugin-svgable": "workspace:*",
         "vite-plugin-svgr": "^5.2.0",
       },
       "devDependencies": {
@@ -51,6 +54,17 @@
         "vite": "8.0.16",
         "vite-plugin-media-mixins": "0.10.0",
         "vite-plugin-title": "0.5.0",
+      },
+    },
+    "packages/vite-plugin-svgable": {
+      "name": "vite-plugin-svgable",
+      "version": "0.1.0",
+      "dependencies": {
+        "shape-to-svg": "^0.1.0",
+        "yaml": "^2.9.0",
+      },
+      "peerDependencies": {
+        "vite": "^8.0.0",
       },
     },
   },
@@ -977,6 +991,8 @@
 
     "semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
+    "shape-to-svg": ["shape-to-svg@0.1.0", "", {}, "sha512-ZaL07TQW5YARGRf2+sntzWS5iZ1X7c+BRDqpd++rh9WTVxh6dWQy54KyWJEMTNHiuKTRXqamijmuWZmw5C5CfA=="],
+
     "shebang-command": ["shebang-command@2.0.0", "", { "dependencies": { "shebang-regex": "^3.0.0" } }, "sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA=="],
 
     "shebang-regex": ["shebang-regex@3.0.0", "", {}, "sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A=="],
@@ -1076,6 +1092,8 @@
     "vite": ["vite@8.0.16", "", { "dependencies": { "lightningcss": "^1.32.0", "picomatch": "^4.0.4", "postcss": "^8.5.15", "rolldown": "1.0.3", "tinyglobby": "^0.2.17" }, "optionalDependencies": { "fsevents": "~2.3.3" }, "peerDependencies": { "@types/node": "^20.19.0 || >=22.12.0", "@vitejs/devtools": "^0.1.18", "esbuild": "^0.27.0 || ^0.28.0", "jiti": ">=1.21.0", "less": "^4.0.0", "sass": "^1.70.0", "sass-embedded": "^1.70.0", "stylus": ">=0.54.8", "sugarss": "^5.0.0", "terser": "^5.16.0", "tsx": "^4.8.1", "yaml": "^2.4.2" }, "optionalPeers": ["@types/node", "@vitejs/devtools", "esbuild", "jiti", "less", "sass", "sass-embedded", "stylus", "sugarss", "terser", "tsx", "yaml"], "bin": { "vite": "bin/vite.js" } }, "sha512-h9bXPmJichP5fLmVQo3PyaGSDE2n3aPuomeAlVRm0JLmt4rY6zmPKd59HYI4LNW8oTK7tlTsuC7l/m7awx9Jcw=="],
 
     "vite-plugin-media-mixins": ["vite-plugin-media-mixins@0.10.0", "", { "peerDependencies": { "vite": "^8.0.16" } }, "sha512-CFctDKYijEKj/lOHFoj+x/V1kllgZHz0FTazUTpAo7ATFwQ2HXSmI7dRrzFQdmDE8RJeWp3CmOy31zHWK+6+xQ=="],
+
+    "vite-plugin-svgable": ["vite-plugin-svgable@workspace:packages/vite-plugin-svgable"],
 
     "vite-plugin-svgr": ["vite-plugin-svgr@5.2.0", "", { "dependencies": { "@rollup/pluginutils": "^5.3.0", "@svgr/core": "^8.1.0", "@svgr/plugin-jsx": "^8.1.0" }, "peerDependencies": { "vite": ">=3.0.0" } }, "sha512-qj2eAKF8C6PZWemVTvQA0xgQIcP1hHU6Buh7fl6BhvayWwnuxE+z417miKxeDvRWbDrupQ1oK99hfxElopJ3sQ=="],
 

@@ -8,11 +8,11 @@ import {useTheme} from '#src/components/ThemeToggle/useTheme.ts'
 
 import css from './style.module.sass'
 
-type Theme = 'dark' | 'light'
+export type Theme = 'dark' | 'light'
 
 type ThemedSource = Record<Theme, string>
 
-type SvgSource = ThemedSource | string
+export type SvgSource = ThemedSource | string
 
 type Props = {
   alt?: string
@@ -28,9 +28,11 @@ type Props = {
   width?: ComponentProps<'img'>['width']
 }
 
-const normalizeSvgSrc = (input: string) => {
+const getDefaultColorForTheme = (theme: Theme) => theme === 'light' ? 'black' : 'white'
+const normalizeSvgSrc = (input: string, theme: Theme) => {
   if (/^\s*<svg\s/i.test(input)) {
-    const serializedInput = btoa(input)
+    const themedInput = input.replaceAll('currentColor', getDefaultColorForTheme(theme))
+    const serializedInput = btoa(themedInput)
     return `data:image/svg+xml;base64,${serializedInput}`
   }
   return input
@@ -84,15 +86,15 @@ const Svg: FunctionComponent<Props> = props => {
   }
   if (!isThemed) {
     const className = clsx(props.className, elementClassNames)
-    const normalizedSrc = normalizeSvgSrc(src as string)
+    const normalizedSrc = normalizeSvgSrc(src as string, theme)
     return <img {...imgProps} src={normalizedSrc} className={className} />
   }
   const defaultColorScheme = props.defaultColorScheme || 'dark'
   const alternativeColorScheme = defaultColorScheme === 'light' ? 'dark' : 'light'
   const catcherQuery = `(prefers-color-scheme: ${alternativeColorScheme})`
-  const catcherSrc = normalizeSvgSrc((src as ThemedSource)[alternativeColorScheme])
+  const catcherSrc = normalizeSvgSrc((src as ThemedSource)[alternativeColorScheme], alternativeColorScheme)
   const catcherElement = <source media={catcherQuery} srcSet={catcherSrc} />
-  const defaultSrc = normalizeSvgSrc((src as ThemedSource)[defaultColorScheme])
+  const defaultSrc = normalizeSvgSrc((src as ThemedSource)[defaultColorScheme], defaultColorScheme)
   return <picture className={clsx(props.className, props.pictureClassName)}>
     {catcherElement}
     <img {...imgProps} src={defaultSrc} className={clsx(elementClassNames)} />

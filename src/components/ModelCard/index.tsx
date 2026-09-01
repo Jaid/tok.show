@@ -15,7 +15,7 @@ type Props = {
   isBest?: boolean
   isFocused?: boolean
   isLoading?: boolean
-  model: Pick<Model, 'getIcon' | 'name' | 'subname'>
+  model: Pick<Model, 'icon' | 'name' | 'subname'>
   onClick?: () => void
   ref?: React.Ref<HTMLDivElement>
 }

@@ -1,11 +1,9 @@
-import icon from '#root/assets/icons/minimax.svg?react'
+import icon from '#root/assets/icons/minimax.svg'
 
 import Model from './base/Model.ts'
 
 export default class MinimaxModel extends Model {
+  override icon = icon
   override name = 'MiniMax'
   override subname = 'M3'
-  override getIcon() {
-    return this.renderIcon(icon)
-  }
 }

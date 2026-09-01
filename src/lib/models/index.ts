@@ -29,5 +29,5 @@ add('minimax', MinimaxModel)
 add('sdxl', SdxlModel)
 add('step', StepModel)
 
-export type {default as Model} from './base/Model.ts'
+export type {default as Model, ModelIcon, ModelIconTheme} from './base/Model.ts'
 export default map

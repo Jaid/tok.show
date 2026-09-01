@@ -1,11 +1,9 @@
-import icon from '#root/assets/icons/kimi.svg?react'
+import icon from '#root/assets/icons/kimi.svg?svgable'
 
 import Model from './base/Model.ts'
 
 export default class KimiModel extends Model {
+  override icon = icon
   override name = 'Kimi'
   override subname = 'K2.7-Coder'
-  override getIcon() {
-    return this.renderIcon(icon)
-  }
 }

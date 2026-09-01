@@ -1,15 +1,17 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {FunctionComponent} from 'react'
 
+import Svg from '#component/Svg'
+
 import css from './style.module.sass'
 
 type Props = {
-  model: Pick<Model, 'getIcon' | 'name' | 'subname'>
+  model: Pick<Model, 'icon' | 'name' | 'subname'>
 }
 
 const ModelProfile: FunctionComponent<Props> = ({model}) => {
   return <>
-    <div className={css.icon}>{model.getIcon()}</div>
+    <Svg alt="" className={css.icon} src={model.icon} />
     <div className={css.name}>{model.name}</div>
     {model.subname && <div className={css.subname}>{model.subname}</div>}
   </>

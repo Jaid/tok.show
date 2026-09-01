@@ -7,6 +7,7 @@ import {autoUpdate, flip, offset, shift, useClick, useDismiss, useFloating, useI
 import clsx from 'clsx'
 import {Fragment, useLayoutEffect, useRef, useState} from 'react'
 
+import Svg from '#component/Svg'
 import modelsMap from '#src/lib/models/index.ts'
 import {getVisibleModelIds} from '#src/lib/state.ts'
 import textDecoder from '#src/lib/textDecoder.ts'
@@ -181,7 +182,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
                   }
                   return (
                     <span key={id} className={css.supportedIcon} title={m.name} role="img" aria-label={m.name}>
-                      {m.getIcon()}
+                      <Svg alt="" src={m.icon} />
                     </span>
                   )
                 })}

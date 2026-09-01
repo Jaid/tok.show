@@ -7,6 +7,7 @@ import cssnano from 'cssnano-preset-advanced'
 import postcssNormalize from 'postcss-normalize'
 import {mergeConfig} from 'vite'
 import mediaMixinsPlugin from 'vite-plugin-media-mixins'
+import svgablePlugin from 'vite-plugin-svgable'
 import svgrPlugin from 'vite-plugin-svgr'
 import titlePlugin from 'vite-plugin-title'
 
@@ -21,6 +22,7 @@ const getCommonConfig = () => {
       mediaMixinsPlugin({
         schemeSource: ['attribute'],
       }),
+      svgablePlugin(),
       svgrPlugin({
         include: '**/*.svg?react',
         svgrOptions: {
