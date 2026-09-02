@@ -66,7 +66,7 @@
     "tsconfig-jaid-bun": "^16.0.0",
     "tsconfig-jaid-react": "16.0.0",
     "type-fest": "5.9.0",
-    "typescript": "^7.0.2",
+    "typescript": "npm:typescript-classic@6.0.4",
     "vite": "8.2.2",
     "vite-plugin-media-mixins": "0.10.0",
     "vite-plugin-title": "0.6.0"
