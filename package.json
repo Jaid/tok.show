@@ -75,5 +75,9 @@
     "packages/*"
   ],
   "funding": "https://github.com/sponsors/Jaid",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jaid/tok.show.git"
+  }
 }
