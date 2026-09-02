@@ -73,5 +73,6 @@
   },
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "funding": "https://github.com/sponsors/Jaid"
 }
