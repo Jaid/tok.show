@@ -3,7 +3,7 @@ import {describe, expect, test} from 'bun:test'
 import {createElement} from 'react'
 import {renderToStaticMarkup} from 'react-dom/server'
 
-import {SassModulePlugin} from './lib/sassModulesPlugin.js'
+import {SassModulePlugin} from './lib/sassModulesPlugin.ts'
 
 Bun.plugin(SassModulePlugin)
 async function render(componentSegment: string, props?: Record<string, unknown>) {
