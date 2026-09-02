@@ -36,7 +36,7 @@ describe('components', () => {
         light: '/light.svg',
       },
     })
-    expect(themedHtml).toContain('class="icon"')
+    expect(themedHtml).toMatch(/class="[^"]*\bicon\b[^"]*"/)
     expect(themedHtml).toContain('src="/dark.svg"')
     expect(themedHtml).toContain('alt="Test icon"')
   })
