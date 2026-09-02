@@ -63,7 +63,6 @@
     "puppeteer-core": "25.9.0",
     "sass-embedded": "1.103.1",
     "terser": "5.51.2",
-    "tsconfig-jaid-bun": "16.0.0",
     "tsconfig-jaid-react": "16.0.0",
     "type-fest": "5.9.0",
     "typescript": "npm:typescript-classic@6.0.4",
