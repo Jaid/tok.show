@@ -102,7 +102,6 @@ const getProductionConfig = () => {
             }
             return '[name].[ext]'
           },
-          entryFileNames: 'main.js',
           codeSplitting: {
             groups: [
               {
