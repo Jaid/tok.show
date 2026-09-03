@@ -31,17 +31,17 @@ const sourceSize = {
 } as const
 const beams = [
   {
-    startX: 715,
-    startY: 508,
-    startWidth: 20,
+    startX: 726,
+    startY: 555,
+    startWidth: 22,
     endX: 1030,
     endY: 1383,
     endWidth: 600,
   },
   {
-    startX: 1229,
-    startY: 498,
-    startWidth: 20,
+    startX: 1260,
+    startY: 530,
+    startWidth: 22,
     endX: 1700,
     endY: 1265,
     endWidth: 500,
