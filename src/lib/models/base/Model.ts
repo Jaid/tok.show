@@ -1,6 +1,6 @@
 import type {ModelId, RawTokenizeResult, TokenizeInput} from 'token-vocabs'
 
-import {free, load, tokenizeLoaded} from 'token-vocabs'
+import {free, load, models, tokenizeLoaded} from 'token-vocabs'
 
 export type ModelIconTheme = 'dark' | 'light'
 export type ModelIcon = Record<ModelIconTheme, string> | string
@@ -11,7 +11,9 @@ export default abstract class Model {
   initiallyVisible = false
   loaded = false
   loadPromise: Promise<ModelId> | undefined
-  abstract name: string
+  get name() {
+    return models[this.id].title
+  }
   subname: string | undefined
 
   constructor(id: ModelId) {

@@ -4,6 +4,4 @@ import Model from './base/Model.ts'
 
 export default class KimiModel extends Model {
   override icon = icon
-  override name = 'Kimi'
-  override subname = 'K2.7-Coder'
 }

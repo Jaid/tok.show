@@ -4,6 +4,4 @@ import Model from './base/Model.ts'
 
 export default class MinimaxModel extends Model {
   override icon = icon
-  override name = 'MiniMax'
-  override subname = 'M3'
 }

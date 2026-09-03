@@ -5,6 +5,4 @@ import Model from './base/Model.ts'
 export default class GptModel extends Model {
   override icon = icon
   override initiallyVisible = true
-  override name = 'GPT'
-  override subname = '5.5'
 }
