@@ -42,6 +42,10 @@ const shapeSuffixPattern = /\.shape$/i
 const svgExtensionPattern = /\.svg$/i
 const svgableQueryPattern = /(?:^|[&?])svgable(?:&|$)/
 const themes = ['light', 'dark'] as const
+const defaultShapeColor: ThemedValue<string> = {
+  light: 'black',
+  dark: 'white',
+}
 const isRecord = (input: unknown): input is Record<string, unknown> => {
   return Boolean(input) && typeof input === 'object' && !Array.isArray(input)
 }
@@ -163,7 +167,7 @@ const normalizeShapeData = (input: unknown): ShapeData => {
   const color = normalizeOptionalThemedString(input.color, 'color', {
     dark: 'onDark',
     light: 'onLight',
-  })
+  }) ?? defaultShapeColor
   const size = normalizeSize(input)
   return {
     color,
@@ -280,7 +284,7 @@ const loadShapeModule = async (context: SvgablePluginContext, config: PluginConf
   context.addWatchFile(request.path)
   const source = await readFile(request.path, 'utf8')
   const shapeData = normalizeShapeData(parseYaml(source))
-  if (shapeData.path.light === shapeData.path.dark) {
+  if (shapeData.path.light === shapeData.path.dark && shapeData.color?.light === shapeData.color?.dark) {
     const svg = makeSvg(shapeData)
     const value = await makeCodeForSvg(context, config, outputDirectory, request.path, svg)
     return makeDefaultExport(value)

@@ -108,7 +108,7 @@ describe('vite-plugin-svgable', () => {
     await withTempFolder(async folder => {
       const sourcePath = join(folder, 'logo.shape.yml')
       const outputDirectory = join(folder, 'svg')
-      await writeFile(sourcePath, `shape: M0 0H1V1H0Z\nsize: 1\n`)
+      await writeFile(sourcePath, `shape: M0 0H1V1H0Z\nsize: 1\ncolor: '#123456'\n`)
       const plugin = vitePluginSvgable({outputDirectory})
       const context = makeContext()
       callConfigResolved(plugin, {
@@ -120,6 +120,28 @@ describe('vite-plugin-svgable', () => {
       expect(context.emitted).toHaveLength(1)
       expect(context.emitted[0]?.name).toMatch(/^logo\.[a-f0-9]{12}\.svg$/)
       expect(context.emitted[0]?.source).toContain('<svg')
+      expect(context.emitted[0]?.source).toContain('fill="#123456"')
+    })
+  })
+
+  test('defaults uncolored shapes to app-selectable light and dark assets', async () => {
+    await withTempFolder(async folder => {
+      const sourcePath = join(folder, 'logo.shape.yml')
+      const outputDirectory = join(folder, 'svg')
+      await writeFile(sourcePath, `shape: M0 0H1V1H0Z\nsize: 1\n`)
+      const plugin = vitePluginSvgable({outputDirectory})
+      const context = makeContext()
+      callConfigResolved(plugin, {
+        command: 'build',
+        root: folder,
+      })
+      const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
+      expect(code).toBe('export default {light:import.meta.ROLLUP_FILE_URL_asset1,dark:import.meta.ROLLUP_FILE_URL_asset2}')
+      expect(context.emitted).toHaveLength(2)
+      expect(context.emitted[0]?.source).toContain('fill="black"')
+      expect(context.emitted[1]?.source).toContain('fill="white"')
+      expect(context.emitted[0]?.source).not.toContain('currentColor')
+      expect(context.emitted[1]?.source).not.toContain('currentColor')
     })
   })
 
