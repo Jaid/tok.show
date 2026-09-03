@@ -20,6 +20,7 @@ import OutputFooter from '#component/OutputFooter'
 import OutputHeader from '#component/OutputHeader'
 import {useTabbedView} from '#component/TabbedView'
 import TokenizedText from '#component/TokenizedText'
+import WelcomePanel from '#component/WelcomePanel'
 import modelsMap from '#src/lib/models/index.ts'
 import {createInputTab, getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, setActiveInputTab, state, syncInputStateFromActiveTab, updateActiveInputTab} from '#src/lib/state.ts'
 import {ensureModelLoaded, initializeModels, runTokenization, unloadModel} from '#src/lib/tokenManager.ts'
@@ -361,6 +362,7 @@ const App: FunctionComponent = () => {
   const preprocessedInput = focusedTokenizeData?.processedInput ?? focusedTokenizeData?.inputText ?? curInput
   const tokenIds = focusedTokenizeData?.tokens ?? null
   const outputTab = state.focusedId ? currentTab : 'preprocessed'
+  const isInputEmpty = state.isBinary ? !state.binaryData?.byteLength : state.text.length === 0
   return <>
     <Group orientation="horizontal" className={css.container}>
       <Panel defaultSize={50} minSize={20}>
@@ -391,12 +393,14 @@ const App: FunctionComponent = () => {
       <Separator className={css.paneSeparator} />
       <Panel defaultSize={50} minSize={20}>
         <div className={css.pane}>
-          <OutputHeader currentTab={outputTab} onTabChange={setCurrentTab} showModelTabs={Boolean(state.focusedId)}>
-            <div className={css.paneBody}>
-              <OutputPaneContent focusedModel={focusedModel} focusedSpans={focusedSpans} input={curInput}
-                onTokenClick={onTokenClick} onTokenHover={onTokenHover} preprocessedInput={preprocessedInput} tokenIds={tokenIds} />
-            </div>
-          </OutputHeader>
+          {isInputEmpty
+            ? <div className={css.paneBody}><WelcomePanel /></div>
+            : <OutputHeader currentTab={outputTab} onTabChange={setCurrentTab} showModelTabs={Boolean(state.focusedId)}>
+              <div className={css.paneBody}>
+                <OutputPaneContent focusedModel={focusedModel} focusedSpans={focusedSpans} input={curInput}
+                  onTokenClick={onTokenClick} onTokenHover={onTokenHover} preprocessedInput={preprocessedInput} tokenIds={tokenIds} />
+              </div>
+            </OutputHeader>}
           <OutputFooter entries={state.visibleEntries} modelsById={modelsMap}
             counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
             hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}
