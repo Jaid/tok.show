@@ -8,6 +8,7 @@ import PulsatingNumber from '#component/PulsatingNumber'
 import Svg from '#component/Svg'
 import {Tab, TabbedView} from '#component/TabbedView'
 import textIcon from '#root/node_modules/material-icon-theme/icons/prompt.svg'
+import {useStage} from '#src/lib/useStage.ts'
 
 import css from './style.module.sass'
 
@@ -29,11 +30,12 @@ const EditorHeader: FunctionComponent<Props> = ({tabs, activeTabId, sizeInBytes,
   const utfBytesDisplay = needsUtfBytesDisplay ? <PulsatingNumber value={sizeInBytes} suffix="byte" suffixPlural /> : undefined
   const needsCharsDisplay = !isBinary && charCount
   const charsDisplay = needsCharsDisplay ? <PulsatingNumber value={charCount} suffix="character" suffixPlural /> : undefined
+  const stage = useStage()
   const decoration = <>
     {binaryBytesDisplay}
     {utfBytesDisplay}
     {charsDisplay}
-    <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>
+    {stage === 'editing' && <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>}
   </>
   const tabElements = tabs.map(tab => {
     const icon = <Svg src={textIcon} lineHeight/>

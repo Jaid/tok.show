@@ -25,6 +25,7 @@ import modelsMap from '#src/lib/models/index.ts'
 import {createInputTab, getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, setActiveInputTab, setVisibleModelIds, state, syncInputStateFromActiveTab, updateActiveInputTab} from '#src/lib/state.ts'
 import {beginUiTokenization, ensureModelLoaded, initializeModels, runTokenization, unloadModel} from '#src/lib/tokenManager.ts'
 import {getTokenSpans} from '#src/lib/tokenSpans.ts'
+import {useStage} from '#src/lib/useStage.ts'
 import {useUrlParameters} from '#src/lib/useUrlParameters.ts'
 import {useWebMcp} from '#src/lib/webmcp/index.ts'
 
@@ -369,7 +370,7 @@ const App: FunctionComponent = () => {
   const preprocessedInput = focusedTokenizeData?.processedInput ?? focusedTokenizeData?.inputText ?? curInput
   const tokenIds = focusedTokenizeData?.tokens ?? null
   const outputTab = state.focusedId ? currentTab : 'preprocessed'
-  const isInputEmpty = state.isBinary ? !state.binaryData?.byteLength : state.text.length === 0
+  const stage = useStage()
   return <>
     <Group orientation="horizontal" className={css.container}>
       <Panel defaultSize={50} minSize={20}>
@@ -400,7 +401,7 @@ const App: FunctionComponent = () => {
       <Separator className={css.paneSeparator} />
       <Panel defaultSize={50} minSize={20}>
         <div className={css.pane}>
-          {isInputEmpty
+          {stage === 'welcome'
             ? <div className={css.paneBody}><WelcomePanel /></div>
             : <OutputHeader currentTab={outputTab} onTabChange={tab => {
               state.activeTab = tab

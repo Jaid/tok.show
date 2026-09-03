@@ -5,6 +5,7 @@ import clsx from 'clsx'
 
 import ModelProfile from '#component/ModelProfile'
 import TokenCount from '#component/TokenCount'
+import {useStage} from '#src/lib/useStage.ts'
 
 import css from './style.module.sass'
 
@@ -21,6 +22,7 @@ type Props = {
 }
 
 const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, isLoading, error, onClick, handleRef, ref}) => {
+  const stage = useStage()
   return <div ref={ref} className={clsx(css.container, isLoading && css.loading, isFocused && css.focused, isBest && css.best)}
     onClick={onClick}
     role={onClick ? 'button' : undefined}
@@ -34,9 +36,9 @@ const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, i
     title={error ?? undefined}
   >
     <div className={css.triangle}>⏶</div>
-    <div className={css.count}>
+    {stage === 'editing' && <div className={css.count}>
       {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <TokenCount className={css.countElement} suffixClassName={css.countLabel} numberClassName={css.countNumber} value={count} /> : <span className={css.countNa}>–</span>}
-    </div>
+    </div>}
     <div ref={handleRef} className={css.profile}>
       <ModelProfile model={model} />
     </div>
