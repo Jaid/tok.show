@@ -12,8 +12,10 @@ type Props = {
 const ModelProfile: FunctionComponent<Props> = ({model}) => {
   return <>
     <Svg alt="" className={css.icon} src={model.icon} />
-    <div className={css.name} title={model.title}>{model.name}</div>
-    {model.subname && <div className={css.subname}>{model.subname}</div>}
+    <div className={css.caption}>
+      <div className={css.name} title={model.title}>{model.name}</div>
+      {model.subname && <div className={css.subname}>{model.subname}</div>}
+    </div>
   </>
 }
 

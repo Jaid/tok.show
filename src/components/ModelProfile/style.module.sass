@@ -2,19 +2,32 @@
   height: 40px
   display: flex
 
+.caption
+  background: hsl(from currentColor h s calc(100 - l) / 50%)
+  margin-top: -6px
+  height: 30px
+  display: flex
+  flex-direction: column
+  place-content: space-between
+  align-items: center
+  place-self: stretch
+  backdrop-filter: blur(2px)
+  @include dark
+    box-shadow: 0 0 8px hsl(from currentColor h s calc(100 - l) / 80%)
+
 .name
+  color: oklch(from currentColor l c h / 80%)
   font-size: 16px
+  text-fit: grow
   font-weight: 800
   font-family: Quicksand, main
-  color: #bbb
   @include narrow
     display: none
 
 .subname
   font-size: 11px
-  color: #555
+  color: oklch(from currentColor l c h / 60%)
   font-family: Montserrat, main
   font-weight: 500
-  line-height: 1
   @include narrow
     display: none
