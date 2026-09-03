@@ -1,8 +1,7 @@
 import type {InputTab, InputTabId} from '#src/lib/state.ts'
 import type {FunctionComponent} from 'react'
 
-import {FaRegCopy} from 'react-icons/fa6'
-
+import IconButton from '#component/IconButton'
 import NumberDisplay from '#component/NumberDisplay'
 import PulsatingNumber from '#component/PulsatingNumber'
 import Svg from '#component/Svg'
@@ -17,13 +16,14 @@ type Props = {
   binaryByteCount?: number | null
   charCount: number
   isBinary?: boolean
+  onClear: () => void
   onCopy: () => void
   onTabSelect: (id: InputTabId) => void
   sizeInBytes: number
   tabs: ReadonlyArray<InputTab>
 }
 
-const EditorHeader: FunctionComponent<Props> = ({tabs, activeTabId, sizeInBytes, charCount, isBinary, binaryByteCount, onCopy, onTabSelect}) => {
+const EditorHeader: FunctionComponent<Props> = ({tabs, activeTabId, sizeInBytes, charCount, isBinary, binaryByteCount, onClear, onCopy, onTabSelect}) => {
   const needsBinaryBytesDisplay = isBinary && binaryByteCount
   const binaryBytesDisplay = needsBinaryBytesDisplay ? <NumberDisplay value={binaryByteCount} suffix="byte" suffixPlural /> : undefined
   const needsUtfBytesDisplay = !isBinary && sizeInBytes && sizeInBytes !== charCount
@@ -35,7 +35,10 @@ const EditorHeader: FunctionComponent<Props> = ({tabs, activeTabId, sizeInBytes,
     {binaryBytesDisplay}
     {utfBytesDisplay}
     {charsDisplay}
-    {stage === 'editing' && <button className={css.iconBtn} onClick={onCopy} title="Copy input"><FaRegCopy /></button>}
+    {stage === 'editing' && <div className={css.buttons}>
+      <IconButton icon='' onClick={onClear} title="Clear input" />
+      <IconButton icon='' onClick={onCopy} title="Copy input" />
+    </div>}
   </>
   const tabElements = tabs.map(tab => {
     const icon = <Svg src={textIcon} lineHeight/>

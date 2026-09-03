@@ -382,6 +382,7 @@ const App: FunctionComponent = () => {
             charCount={state.text.length}
             isBinary={state.isBinary}
             binaryByteCount={state.binaryData?.byteLength ?? null}
+            onClear={() => onInput('')}
             onCopy={onCopy}
             onTabSelect={id => {
               setActiveInputTab(id)
