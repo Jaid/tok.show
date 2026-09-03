@@ -42,6 +42,8 @@
     display: block
     width: 100%
     height: auto
+    animation: point 2666ms ease-in-out infinite
+    will-change: transform
 
 .descriptionText
   min-width: 0
@@ -61,3 +63,17 @@
 
   .pointing
     flex-basis: 82px
+
+@keyframes point
+  0%, 100%
+    transform: translateX(0)
+  45%
+    transform: translateX(0)
+  50%
+    transform: translateX(-4px)
+  55%
+    transform: translateX(0)
+
+@media (prefers-reduced-motion: reduce)
+  .pointing img
+    animation: none
