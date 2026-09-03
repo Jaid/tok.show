@@ -16,8 +16,8 @@ const EditorFooter: FunctionComponent<Props> = ({shareUrl}) => {
     <div className={css.info}>
       <Icon />
       <div className={css.titleContainer}>
-        <div className={css.title}>Tok Show</div>
-        <div className={css.flavorTitle}>Offline Tokenization Playground</div>
+        <div className={css.title}>TokShow</div>
+        <div className={css.flavorTitle}>Local Tokenization Playground</div>
       </div>
     </div>
     <div className={css.footerRight}>
