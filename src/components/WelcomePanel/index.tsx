@@ -15,7 +15,13 @@ const WelcomePanel: FunctionComponent = () => {
       <AppTitle />
     </div>
     <div className={css.descriptionRow}>
-      The left side of this page is a text editor. Write, paste or drop the content you want to tokenize or start with one of the examples.
+      <picture className={css.pointing} aria-hidden='true'>
+        <source srcSet='/pointing.jxl' type='image/jxl' />
+        <img src='/pointing.webp' alt='' />
+      </picture>
+      <div className={css.descriptionText}>
+        The left side of this page is a text editor. Write, paste or drop the content you want to tokenize or start with one of the examples.
+      </div>
     </div>
     <div className={css.examplesRow}>
       <ExampleList />

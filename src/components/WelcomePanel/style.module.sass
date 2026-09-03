@@ -25,13 +25,39 @@
   font-size: clamp(17px, 2vw, 22px)
 
 .descriptionRow
+  width: min(100%, 780px)
+  display: flex
+  align-items: center
+  justify-content: center
+  gap: clamp(10px, 2vw, 18px)
+  user-select: text
+
+.pointing
+  flex: 0 0 clamp(96px, 17vw, 150px)
+  line-height: 0
+  user-select: none
+  pointer-events: none
+
+  img
+    display: block
+    width: 100%
+    height: auto
+
+.descriptionText
+  min-width: 0
   max-width: 620px
   color: #999
   text-align: center
   text-wrap: balance
   font-size: 13px
   line-height: 1.55
-  user-select: text
 
 .examplesRow
   width: min(100%, 620px)
+
+@media (max-width: 520px)
+  .descriptionRow
+    align-items: flex-start
+
+  .pointing
+    flex-basis: 82px
