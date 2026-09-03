@@ -3,13 +3,20 @@ import type {CSSProperties, FunctionComponent} from 'react'
 import css from './style.module.sass'
 
 type Beam = {
-  delay: string
   endWidth: number
   endX: number
   endY: number
   startWidth: number
   startX: number
   startY: number
+}
+
+type BeamEffect = {
+  accent: string
+  core: string
+  delay: string
+  duration: string
+  source: string
 }
 
 type Point = {
@@ -29,7 +36,6 @@ const beams = [
     endX: 1030,
     endY: 1383,
     endWidth: 600,
-    delay: '0ms',
   },
   {
     startX: 1229,
@@ -38,17 +44,32 @@ const beams = [
     endX: 1700,
     endY: 1265,
     endWidth: 500,
-    delay: '-600ms',
   },
 ] satisfies Array<Beam>
-const getBeamCorners = ({startX, startY, startWidth, endX, endY, endWidth}: Beam): [Point, Point, Point, Point] => {
+const beamEffects = [
+  {
+    source: '#fffde8',
+    core: '#ffe47a',
+    accent: '#ffb51b',
+    delay: '0ms',
+    duration: '3900ms',
+  },
+  {
+    source: '#f2fdff',
+    core: '#8be6ff',
+    accent: '#259eea',
+    delay: '-1450ms',
+    duration: '4300ms',
+  },
+] satisfies Array<BeamEffect>
+const getBeamCorners = ({startX, startY, startWidth, endX, endY, endWidth}: Beam, widthFactor = 1): [Point, Point, Point, Point] => {
   const dx = endX - startX
   const dy = endY - startY
   const length = Math.hypot(dx, dy)
   const perpendicularX = -dy / length
   const perpendicularY = dx / length
-  const startHalfWidth = startWidth / 2
-  const endHalfWidth = endWidth / 2
+  const startHalfWidth = startWidth * widthFactor / 2
+  const endHalfWidth = endWidth * widthFactor / 2
   return [
     {
       x: startX + perpendicularX * startHalfWidth,
@@ -68,10 +89,12 @@ const getBeamCorners = ({startX, startY, startWidth, endX, endY, endWidth}: Beam
     },
   ]
 }
-const toPoints = (beam: Beam) => getBeamCorners(beam).map(({x, y}) => `${x},${y}`).join(' ')
+const getBeamAngle = ({startX, startY, endX, endY}: Beam) => Math.atan2(endY - startY, endX - startX) * 180 / Math.PI
+const toPoints = (beam: Beam, widthFactor = 1) => getBeamCorners(beam, widthFactor).map(({x, y}) => `${x},${y}`).join(' ')
 
 type BeamStyle = CSSProperties & {
   '--beam-delay': string
+  '--beam-duration': string
 }
 
 const Tok: FunctionComponent = () => {
@@ -82,27 +105,115 @@ const Tok: FunctionComponent = () => {
     </picture>
     <svg className={css.beams} viewBox={`0 0 ${sourceSize.width} ${sourceSize.height}`} aria-hidden='true'>
       <defs>
-        {beams.map((beam, index) => <linearGradient
+        {beams.map((beam, index) => {
+          const effect = beamEffects[index]
+          return <linearGradient
+            key={index}
+            id={`beam-gradient-${index}`}
+            gradientUnits='userSpaceOnUse'
+            x1={beam.startX}
+            y1={beam.startY}
+            x2={beam.endX}
+            y2={beam.endY}
+          >
+            <stop offset='0%' stopColor={effect.source} stopOpacity='1' />
+            <stop offset='14%' stopColor={effect.core} stopOpacity='0.96' />
+            <stop offset='48%' stopColor={effect.core} stopOpacity='0.68' />
+            <stop offset='82%' stopColor={effect.accent} stopOpacity='0.42' />
+            <stop offset='100%' stopColor={effect.accent} stopOpacity='0.16' />
+          </linearGradient>
+        })}
+        {beams.map((beam, index) => <filter
           key={index}
-          id={`beam-gradient-${index}`}
-          gradientUnits='userSpaceOnUse'
-          x1={beam.startX}
-          y1={beam.startY}
-          x2={beam.endX}
-          y2={beam.endY}
+          id={`beam-edge-soften-${index}`}
+          x='-35%'
+          y='-35%'
+          width='170%'
+          height='170%'
+          colorInterpolationFilters='sRGB'
         >
-          <stop offset='0%' stopColor='oklch(99% 0.04 95)' stopOpacity='0.98' />
-          <stop offset='28%' stopColor='oklch(91% 0.11 88)' stopOpacity='0.58' />
-          <stop offset='72%' stopColor='oklch(79% 0.17 72)' stopOpacity='0.22' />
-          <stop offset='100%' stopColor='oklch(73% 0.14 67)' stopOpacity='0' />
-        </linearGradient>)}
+          <feGaussianBlur stdDeviation='18' />
+        </filter>)}
+        {beams.map((beam, index) => <mask
+          key={index}
+          id={`beam-mask-${index}`}
+          maskUnits='userSpaceOnUse'
+          x='0'
+          y='0'
+          width={sourceSize.width}
+          height={sourceSize.height}
+        >
+          <polygon
+            points={toPoints(beam, 1.04)}
+            fill='white'
+            filter={`url(#beam-edge-soften-${index})`}
+          />
+        </mask>)}
       </defs>
       {beams.map((beam, index) => {
-        const points = toPoints(beam)
-        const style: BeamStyle = {'--beam-delay': beam.delay}
+        const effect = beamEffects[index]
+        const style: BeamStyle = {
+          '--beam-delay': effect.delay,
+          '--beam-duration': effect.duration,
+        }
+        const landingRotation = getBeamAngle(beam) + 90
         return <g key={index} className={css.beam} style={style}>
-          <polygon className={css.beamGlow} points={points} fill={`url(#beam-gradient-${index})`} />
-          <polygon className={css.beamCore} points={points} fill={`url(#beam-gradient-${index})`} />
+          <g mask={`url(#beam-mask-${index})`}>
+            <image
+              className={css.beamTexture}
+              href='/tok.webp'
+              width={sourceSize.width}
+              height={sourceSize.height}
+            />
+            <polygon className={css.beamAtmosphere} points={toPoints(beam, 1.08)} fill={`url(#beam-gradient-${index})`} />
+            <polygon className={css.beamBody} points={toPoints(beam, 0.82)} fill={`url(#beam-gradient-${index})`} />
+            <polygon className={css.beamCore} points={toPoints(beam, 0.42)} fill={`url(#beam-gradient-${index})`} />
+            <polygon className={css.beamFlash} points={toPoints(beam, 0.58)} fill={effect.source} />
+          </g>
+          <ellipse
+            className={css.beamSourceHalo}
+            cx={beam.startX}
+            cy={beam.startY}
+            rx={Math.max(42, beam.startWidth * 3.5)}
+            ry={Math.max(42, beam.startWidth * 3.5)}
+            fill={effect.source}
+          />
+          <ellipse
+            className={css.beamSourceRing}
+            cx={beam.startX}
+            cy={beam.startY}
+            rx={Math.max(26, beam.startWidth * 1.8)}
+            ry={Math.max(26, beam.startWidth * 1.8)}
+            fill='none'
+            stroke={effect.core}
+            strokeWidth='8'
+          />
+          <ellipse
+            className={css.beamSourceCore}
+            cx={beam.startX}
+            cy={beam.startY}
+            rx={Math.max(15, beam.startWidth)}
+            ry={Math.max(15, beam.startWidth)}
+            fill={effect.source}
+          />
+          <ellipse
+            className={css.beamLandingGlow}
+            cx={beam.endX}
+            cy={beam.endY}
+            rx={beam.endWidth * 0.38}
+            ry={beam.endWidth * 0.1}
+            fill={effect.core}
+            transform={`rotate(${landingRotation} ${beam.endX} ${beam.endY})`}
+          />
+          <ellipse
+            className={css.beamLandingCore}
+            cx={beam.endX}
+            cy={beam.endY}
+            rx={beam.endWidth * 0.24}
+            ry={beam.endWidth * 0.045}
+            fill={effect.source}
+            transform={`rotate(${landingRotation} ${beam.endX} ${beam.endY})`}
+          />
         </g>
       })}
     </svg>
