@@ -5,12 +5,17 @@ import {getVisibleModelIds, state} from '#src/lib/state.ts'
 
 let tokenizeGeneration = 0
 
+const getCurrentInput = (): TokenizeInput => state.isBinary && state.binaryData ? state.binaryData : state.text
+
 export async function loadModel(modelId: ModelId): Promise<void> {
   const model = modelsMap.get(modelId)
   if (!model) {
     return
   }
   if (model.loaded) {
+    state.modelStates[modelId].loaded = true
+    state.modelStates[modelId].loading = false
+    state.modelStates[modelId].error = null
     return
   }
   state.modelStates[modelId].loading = true
@@ -78,7 +83,7 @@ export async function initializeModels(): Promise<void> {
   await Promise.allSettled(otherIds.map(id => loadModel(id)))
   // Tokenize with all loaded
   if (state.text) {
-    const input = state.isBinary && state.binaryData ? state.binaryData : state.text
+    const input = getCurrentInput()
     for (const id of getVisibleModelIds()) {
       tokenizeModel(id, input)
     }
@@ -87,6 +92,10 @@ export async function initializeModels(): Promise<void> {
 
 export async function ensureModelLoaded(modelId: ModelId): Promise<void> {
   await loadModel(modelId)
+  if (!getVisibleModelIds().includes(modelId)) {
+    return
+  }
+  tokenizeModel(modelId, getCurrentInput())
 }
 
 function tokenizeModel(modelId: ModelId, input: TokenizeInput): boolean {
