@@ -2,6 +2,7 @@ import type {FunctionComponent} from 'react'
 
 import {FaArrowUpRightFromSquare} from 'react-icons/fa6'
 
+import AppTitle from '#component/AppTitle'
 import Icon from '#component/Icon'
 import ThemeToggle from '#component/ThemeToggle'
 
@@ -15,10 +16,7 @@ const EditorFooter: FunctionComponent<Props> = ({shareUrl}) => {
   return <div className={css.container}>
     <div className={css.info}>
       <Icon />
-      <div className={css.titleContainer}>
-        <div className={css.title}>TokShow</div>
-        <div className={css.flavorTitle}>Local Tokenization Playground</div>
-      </div>
+      <AppTitle className={css.titleContainer} />
     </div>
     <div className={css.footerRight}>
       <ThemeToggle />

@@ -1,0 +1,6 @@
+English: Tokenization is fascinating.
+Deutsch: Grüße!
+日本語: こんにちは世界
+العربية: مرحبًا بالعالم
+Emoji: 🧑🏽‍💻 🐝 ✨
+Combining: naïve café

@@ -1,0 +1,7 @@
+type Greeting = {name: string; excited?: boolean}
+
+const greet = ({name, excited = false}: Greeting) => {
+  return `Hello, ${name}${excited ? '!' : '.'}`
+}
+
+console.log(greet({name: 'Tok', excited: true}))
