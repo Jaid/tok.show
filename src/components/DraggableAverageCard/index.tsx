@@ -1,5 +1,6 @@
 import type {FunctionComponent} from 'react'
 
+import {Feedback} from '@dnd-kit/dom'
 import {useSortable} from '@dnd-kit/react/sortable'
 
 import ModelCard from '#component/ModelCard'
@@ -17,20 +18,18 @@ type Props = {
 }
 
 const DraggableAverageCard: FunctionComponent<Props> = ({averageCount, index, isBest, showAverage, visibleModelCount}) => {
-  const {ref, handleRef, isDragging} = useSortable({
+  const {ref, handleRef} = useSortable({
     id: 'average',
     index,
     data: {type: 'average'},
+    plugins: defaults => [...defaults, Feedback.configure({feedback: 'clone'})],
   })
   if (!showAverage) {
     return null
   }
-  if (isDragging) {
-    return <div ref={ref} className={css.placeholder} />
-  }
   const subname = visibleModelCount >= 2 ? `of ${visibleModelCount} models` : undefined
   return (
-    <div ref={ref}>
+    <div ref={ref} className={css.item}>
       <ModelCard
         model={{
           icon: averageIcon,

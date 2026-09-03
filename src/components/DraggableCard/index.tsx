@@ -1,6 +1,7 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {FunctionComponent} from 'react'
 
+import {Feedback} from '@dnd-kit/dom'
 import {useSortable} from '@dnd-kit/react/sortable'
 
 import ModelCard from '#component/ModelCard'
@@ -20,19 +21,17 @@ type Props = {
 }
 
 const DraggableCard: FunctionComponent<Props> = ({id, index, model, count, isBest, isFocused, isLoading, error, onClick}) => {
-  const {ref, handleRef, isDragging} = useSortable({
+  const {ref, handleRef} = useSortable({
     id,
     index,
     data: {
       modelId: model.id,
       type: 'model',
     },
+    plugins: defaults => [...defaults, Feedback.configure({feedback: 'clone'})],
   })
-  if (isDragging) {
-    return <div ref={ref} className={css.placeholder} />
-  }
   return (
-    <div ref={ref}>
+    <div ref={ref} className={css.item}>
       <ModelCard
         model={model}
         count={count}

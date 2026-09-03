@@ -1,7 +1,15 @@
-.placeholder
-  width: 120px
-  height: 42px
-  background: #0a0a0a
-  border: 1px dashed #333
-  border-radius: 6px
-  opacity: 0.3
+.item
+  &[data-dnd-placeholder='clone']
+    border-radius: 8px
+    opacity: 30%
+    outline: 1px dashed rgb(255 255 255 / 30%)
+    outline-offset: -1px
+    pointer-events: none
+    scale: 0.8
+    transform: translateY(16px);
+    animation: fade-in-up 400ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+
+@keyframes fade-in-up
+  to
+    scale: 0.9
+    transform: translateY(0)
