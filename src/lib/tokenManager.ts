@@ -3,9 +3,83 @@ import type {ModelId, TokenizeInput} from 'token-vocabs'
 import modelsMap from '#src/lib/models/index.ts'
 import {getVisibleModelIds, state} from '#src/lib/state.ts'
 
-let tokenizeGeneration = 0
+let pendingUiTokenizationOperations = 0
+const uiTokenizationListeners = new Set<() => void>()
 
 const getCurrentInput = (): TokenizeInput => state.isBinary && state.binaryData ? state.binaryData : state.text
+
+const inputsEqual = (left: TokenizeInput, right: TokenizeInput): boolean => {
+  if (typeof left === 'string' || typeof right === 'string') {
+    return left === right
+  }
+  return left.byteLength === right.byteLength && left.every((byte, index) => byte === right[index])
+}
+
+const emitUiTokenizationChange = () => {
+  for (const listener of uiTokenizationListeners) {
+    listener()
+  }
+}
+
+export const beginUiTokenization = (): (() => void) => {
+  pendingUiTokenizationOperations++
+  emitUiTokenizationChange()
+  let ended = false
+  return () => {
+    if (ended) {
+      return
+    }
+    ended = true
+    pendingUiTokenizationOperations--
+    emitUiTokenizationChange()
+  }
+}
+
+export const isUiTokenizationIdle = (): boolean => {
+  if (pendingUiTokenizationOperations > 0) {
+    return false
+  }
+  const input = getCurrentInput()
+  return getVisibleModelIds().every(modelId => {
+    const modelState = state.modelStates[modelId]
+    if (modelState.loading) {
+      return false
+    }
+    if (modelState.error || !modelState.loaded) {
+      return true
+    }
+    if (!modelState.tokenizeData) {
+      return (typeof input === 'string' ? input.length : input.byteLength) === 0 && modelState.tokenCount === 0
+    }
+    return inputsEqual(modelState.tokenizeData.inputText, input)
+  })
+}
+
+export const waitForUiTokenizationIdle = async (signal?: AbortSignal): Promise<void> => {
+  while (!isUiTokenizationIdle()) {
+    signal?.throwIfAborted()
+    await new Promise<void>((resolve, reject) => {
+      const onChange = () => {
+        cleanup()
+        resolve()
+      }
+      const onAbort = () => {
+        cleanup()
+        reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'))
+      }
+      const cleanup = () => {
+        uiTokenizationListeners.delete(onChange)
+        signal?.removeEventListener('abort', onAbort)
+      }
+      uiTokenizationListeners.add(onChange)
+      signal?.addEventListener('abort', onAbort, {once: true})
+      if (isUiTokenizationIdle()) {
+        cleanup()
+        resolve()
+      }
+    })
+  }
+}
 
 export async function loadModel(modelId: ModelId): Promise<void> {
   const model = modelsMap.get(modelId)
@@ -45,60 +119,7 @@ export function unloadModel(modelId: ModelId): void {
   }
 }
 
-export function runTokenization(input: TokenizeInput): void {
-  const gen = ++tokenizeGeneration
-  const focusedId = state.focusedId
-  const doTokenize = async () => {
-    // 1. Focused model first — gives the user results ASAP for the model they care about
-    if (focusedId) {
-      const focusedModel = modelsMap.get(focusedId)
-      if (focusedModel?.loaded) {
-        tokenizeModel(focusedId, input)
-      }
-    }
-    if (gen !== tokenizeGeneration) {
-      return
-    }
-    // 2. Other visible models in parallel
-    const visibleIds = getVisibleModelIds().filter(id => id !== focusedId)
-    const otherLoaded = visibleIds.filter(id => modelsMap.get(id)?.loaded)
-    for (const id of otherLoaded) {
-      tokenizeModel(id, input)
-    }
-  }
-  void doTokenize()
-}
-
-export async function initializeModels(): Promise<void> {
-  const focusedId = state.focusedId
-  // 1. Load focused model first, solo
-  if (focusedId) {
-    await loadModel(focusedId)
-    if (state.text) {
-      tokenizeModel(focusedId, state.text)
-    }
-  }
-  // 2. Load all other visible models in parallel
-  const otherIds = getVisibleModelIds().filter(id => id !== focusedId)
-  await Promise.allSettled(otherIds.map(id => loadModel(id)))
-  // Tokenize with all loaded
-  if (state.text) {
-    const input = getCurrentInput()
-    for (const id of getVisibleModelIds()) {
-      tokenizeModel(id, input)
-    }
-  }
-}
-
-export async function ensureModelLoaded(modelId: ModelId): Promise<void> {
-  await loadModel(modelId)
-  if (!getVisibleModelIds().includes(modelId)) {
-    return
-  }
-  tokenizeModel(modelId, getCurrentInput())
-}
-
-function tokenizeModel(modelId: ModelId, input: TokenizeInput): boolean {
+const tokenizeLoadedModel = (modelId: ModelId, input: TokenizeInput): boolean => {
   const model = modelsMap.get(modelId)
   if (!model?.loaded) {
     return false
@@ -117,5 +138,53 @@ function tokenizeModel(modelId: ModelId, input: TokenizeInput): boolean {
   } catch (error) {
     state.modelStates[modelId].error = error instanceof Error ? error.message : String(error)
     return false
+  }
+}
+
+export function runTokenization(input: TokenizeInput): void {
+  const focusedId = state.focusedId
+  if (focusedId) {
+    tokenizeLoadedModel(focusedId, input)
+  }
+  for (const modelId of getVisibleModelIds()) {
+    if (modelId !== focusedId) {
+      tokenizeLoadedModel(modelId, input)
+    }
+  }
+}
+
+export async function initializeModels(): Promise<void> {
+  const finish = beginUiTokenization()
+  try {
+    const focusedId = state.focusedId
+    if (focusedId) {
+      await loadModel(focusedId)
+      if (state.text) {
+        tokenizeLoadedModel(focusedId, state.text)
+      }
+    }
+    const otherIds = getVisibleModelIds().filter(id => id !== focusedId)
+    await Promise.allSettled(otherIds.map(id => loadModel(id)))
+    if (state.text) {
+      const input = getCurrentInput()
+      for (const id of getVisibleModelIds()) {
+        tokenizeLoadedModel(id, input)
+      }
+    }
+  } finally {
+    finish()
+  }
+}
+
+export async function ensureModelLoaded(modelId: ModelId): Promise<void> {
+  const finish = beginUiTokenization()
+  try {
+    await loadModel(modelId)
+    if (!getVisibleModelIds().includes(modelId)) {
+      return
+    }
+    tokenizeLoadedModel(modelId, getCurrentInput())
+  } finally {
+    finish()
   }
 }

@@ -93,6 +93,7 @@ export function updateActiveInputTab(value: Pick<InputTab, 'binaryData' | 'isBin
   syncInputStateFromActiveTab()
 }
 
+
 export function createInputTab(input: Omit<InputTab, 'id'>): InputTab {
   const tab: InputTab = {
     ...input,
@@ -105,6 +106,13 @@ export function createInputTab(input: Omit<InputTab, 'id'>): InputTab {
 
 export function getVisibleModelIds(): Array<ModelId> {
   return state.visibleEntries.filter((id): id is ModelId => id !== 'average')
+}
+
+export function setVisibleModelIds(ids: ReadonlyArray<ModelId>): void {
+  state.visibleEntries = [...ids]
+  if (getShouldShowAverage()) {
+    state.visibleEntries.push('average')
+  }
 }
 
 export function getHiddenModelIds(): Array<ModelId> {

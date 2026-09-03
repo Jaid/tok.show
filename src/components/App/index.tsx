@@ -22,10 +22,11 @@ import {useTabbedView} from '#component/TabbedView'
 import TokenizedText from '#component/TokenizedText'
 import WelcomePanel from '#component/WelcomePanel'
 import modelsMap from '#src/lib/models/index.ts'
-import {createInputTab, getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, setActiveInputTab, state, syncInputStateFromActiveTab, updateActiveInputTab} from '#src/lib/state.ts'
-import {ensureModelLoaded, initializeModels, runTokenization, unloadModel} from '#src/lib/tokenManager.ts'
+import {createInputTab, getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, setActiveInputTab, setVisibleModelIds, state, syncInputStateFromActiveTab, updateActiveInputTab} from '#src/lib/state.ts'
+import {beginUiTokenization, ensureModelLoaded, initializeModels, runTokenization, unloadModel} from '#src/lib/tokenManager.ts'
 import {getTokenSpans} from '#src/lib/tokenSpans.ts'
 import {useUrlParameters} from '#src/lib/useUrlParameters.ts'
+import {useWebMcp} from '#src/lib/webmcp/index.ts'
 
 import css from './style.module.sass'
 
@@ -138,10 +139,7 @@ const App: FunctionComponent = () => {
   }, [modelParam])
   useEffect(() => {
     const ids = getModelsFromUrl(modelsRaw)
-    state.visibleEntries = ids.filter(isModelId)
-    if (getShouldShowAverage() && !state.visibleEntries.includes('average')) {
-      state.visibleEntries.push('average')
-    }
+    setVisibleModelIds(ids.filter(isModelId))
   }, [modelsRaw])
   useEffect(() => {
     state.useMonaco = monacoParam
@@ -153,14 +151,20 @@ const App: FunctionComponent = () => {
     if (timerRef.current) {
       clearTimeout(timerRef.current)
     }
+    const finishTokenization = beginUiTokenization()
     timerRef.current = setTimeout(() => {
-      const input = state.isBinary && state.binaryData ? state.binaryData : state.text
-      runTokenization(input)
+      try {
+        const input = state.isBinary && state.binaryData ? state.binaryData : state.text
+        runTokenization(input)
+      } finally {
+        finishTokenization()
+      }
     }, 16)
     return () => {
       if (timerRef.current) {
         clearTimeout(timerRef.current)
       }
+      finishTokenization()
     }
   }, [state.text, state.isBinary, state.binaryData, snap.focusedId, snap.visibleEntries])
   useEffect(() => {
@@ -337,6 +341,9 @@ const App: FunctionComponent = () => {
     state.focusedId = null
     setModelParam('')
   }
+  useWebMcp({
+    setText: setTextParam,
+  })
   useHotkeys('0', () => {
     clearFocus()
   }, modelHotkeyOptions)
@@ -395,7 +402,10 @@ const App: FunctionComponent = () => {
         <div className={css.pane}>
           {isInputEmpty
             ? <div className={css.paneBody}><WelcomePanel /></div>
-            : <OutputHeader currentTab={outputTab} onTabChange={setCurrentTab} showModelTabs={Boolean(state.focusedId)}>
+            : <OutputHeader currentTab={outputTab} onTabChange={tab => {
+              state.activeTab = tab
+              setCurrentTab(tab)
+            }} showModelTabs={Boolean(state.focusedId)}>
               <div className={css.paneBody}>
                 <OutputPaneContent focusedModel={focusedModel} focusedSpans={focusedSpans} input={curInput}
                   onTokenClick={onTokenClick} onTokenHover={onTokenHover} preprocessedInput={preprocessedInput} tokenIds={tokenIds} />

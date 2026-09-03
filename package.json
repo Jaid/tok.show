@@ -68,7 +68,8 @@
     "typescript": "npm:typescript-classic@6.0.4",
     "vite": "8.2.2",
     "vite-plugin-media-mixins": "0.10.0",
-    "vite-plugin-title": "0.6.0"
+    "vite-plugin-title": "0.6.0",
+    "webmcp-types": "0.1.5"
   },
   "workspaces": [
     "packages/*"

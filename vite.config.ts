@@ -14,7 +14,7 @@ import titlePlugin from 'vite-plugin-title'
 const svgPaths: Array<string> = []
 const getCommonConfig = () => {
   const config: UserConfig = {
-    build: {target: 'chrome147'},
+    build: {target: 'chrome152'},
     plugins: [
       titlePlugin(),
       reactPlugin(),
