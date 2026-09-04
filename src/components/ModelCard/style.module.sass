@@ -13,6 +13,8 @@
 .best
   .countNumber
     color: oklch(90% 0.15 95)
+    @include light
+      color: oklch(48% 0.15 90)
 
 .loading
   opacity: .72
@@ -27,6 +29,8 @@
 .triangle
   line-height: 0.8
   color: white
+  @include light
+    color: black
   margin-top: -4px
   opacity: 0
 
@@ -57,6 +61,8 @@
 
 .countNa
   color: #444
+  @include light
+    color: #999
 
 @keyframes blink
   0%, 100%

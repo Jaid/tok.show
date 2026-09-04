@@ -41,6 +41,9 @@
   padding: 16px 0 20px
   border-bottom: 1px solid #1d1d1d
 
+.group:last-child .tool:last-child
+  border-bottom: none
+
 .toolHeading
   display: flex
   align-items: center
@@ -48,7 +51,7 @@
   gap: 12px
 
 .toolName
-  color: #fff
+  color: inherit
   font-family: code, monospace
   font-size: 15px
   font-weight: 600
@@ -108,10 +111,10 @@
 @include light
   .container
     color: #444
-  .intro h2,
-  .groupHeading h3,
-  .toolName
-    color: #111
+  .intro h2
+    color: #444
+  .groupHeading h3
+    color: #222
   .intro p,
   .description,
   .toolTitle,

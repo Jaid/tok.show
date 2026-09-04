@@ -12,6 +12,8 @@
   overflow-y: auto
   isolation: isolate
   background: radial-gradient(circle at 50% 48%, oklch(28% 0.035 72 / 0.45), transparent 58%)
+  @include light
+    background: radial-gradient(circle at 50% 48%, oklch(94% 0.025 82 / 0.9), transparent 62%)
 
   &::before,
   &::after
@@ -29,10 +31,14 @@
   &::before
     background: #3d3200
     mask-position: 0 0
+    @include light
+      background: oklch(82% 0.075 91 / 0.7)
 
   &::after
     background: #00385b
     mask-position: 80px 80px
+    @include light
+      background: oklch(80% 0.07 240 / 0.65)
 
 .tokRow
   width: 100%
@@ -47,9 +53,12 @@
   display: grid
   place-items: center
   gap: clamp(10px, 2vh, 18px)
-  z-index: 1;
+  z-index: 1
   backdrop-filter: blur(18px)
-  background: hsl(0 0 0 / 70%)
+  background: hsl(0 0% 0% / 70%)
+  @include light
+    background: hsl(0 0% 100% / 74%)
+    box-shadow: inset 0 1px hsl(0 0% 0% / 7%)
   padding: 16px
 
 .titleRow
@@ -83,6 +92,8 @@
   min-width: 0
   max-width: 480px
   color: #999
+  @include light
+    color: #666
   text-align: center
   text-wrap: balance
   font-size: 16px

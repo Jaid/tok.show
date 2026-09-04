@@ -4,6 +4,8 @@
   gap: 6px
   place-content: space-between
   border-bottom: 1px solid #222
+  @include light
+    border-bottom-color: #ddd
 
 .tabs
   display: flex
@@ -39,8 +41,8 @@
   @include light
     color: black
     background: white
-    border-left-color: black
-    border-right-color: black
+    border-left-color: #ddd
+    border-right-color: #ddd
 
 .decoration
   display: flex
@@ -49,6 +51,8 @@
   font-size: 11px
   >*:not(:first-child)
     border-left: 1px solid #888
+    @include light
+      border-left-color: #bbb
     padding-left: 8px
   >*:not(:last-child)
     padding-right: 8px

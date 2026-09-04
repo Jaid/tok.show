@@ -14,6 +14,8 @@
   font-size: 14px
   padding: 6px
   color: #ccc
+  @include light
+    color: #333
   white-space: pre-wrap
   word-break: break-all
   line-height: 1.4
@@ -32,19 +34,28 @@
   transition-delay: 0.3s
   transition-property: filter
   transition-timing-function: ease
+  @include light
+    color: oklch(45% 0.14 82)
+    background: oklch(from currentColor 94% 0.025 h)
 
 .tokenEven
   color: oklch(90% 0.15 250)
+  @include light
+    color: oklch(44% 0.14 250)
 
 .tokenHovered
   box-shadow: 0 0 0 2px oklch(from currentColor 90% 0.1 calc(h))
   filter: brightness(150%)
+  @include light
+    filter: brightness(90%)
   z-index: 1
   position: relative
   transition: none
 
 .tokenClicked
   box-shadow: 0 0 0 2px white
+  @include light
+    box-shadow: 0 0 0 2px black
   z-index: 2
   position: relative
 
@@ -71,6 +82,10 @@
   min-width: 160px
   max-width: 280px
   pointer-events: auto
+  @include light
+    background: white
+    border-color: #ddd
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15)
 
 .tooltipRow
   display: flex
@@ -80,11 +95,15 @@
 
 .tooltipLabel
   color: #888
+  @include light
+    color: #666
   flex-shrink: 0
 
 .tooltipValue
   font-weight: 500
   color: #e0e0e0
+  @include light
+    color: #222
 
 .tooltipMono
   font-family: code, monospace
@@ -99,6 +118,8 @@
   margin-top: 8px
   padding-top: 8px
   border-top: 1px solid #1a1a1a
+  @include light
+    border-top-color: #eee
 
 .supportedModels
   display: flex
@@ -117,4 +138,6 @@
 
 .empty
   color: #444
+  @include light
+    color: #888
   font-style: italic

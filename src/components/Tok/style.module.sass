@@ -3,6 +3,8 @@
   width: min(82%, 101vh, 800px)
   aspect-ratio: 2206 / 1704
   filter: drop-shadow(0 0 40px black) drop-shadow(0 0 4px black)
+  @include light
+    filter: drop-shadow(0 12px 32px rgb(55 45 20 / 0.18)) drop-shadow(0 0 4px rgb(0 0 0 / 0.2))
 
   &::before
     content: ''
@@ -44,6 +46,8 @@
   pointer-events: none
   overflow: visible
   mix-blend-mode: screen
+  @include light
+    mix-blend-mode: normal
 
 .beamTexture
   opacity: 0.08

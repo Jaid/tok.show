@@ -7,6 +7,9 @@
   height: 100%
   background: #000
   color: #e0e0e0
+  @include light
+    background: white
+    color: #222
   border: none
   padding: 12px
   font-family: code, monospace
@@ -19,6 +22,8 @@
 
 .tokenHighlight
   background: rgba(255, 255, 255, 0.1) !important
+  @include light
+    background: rgba(0, 0, 0, 0.08) !important
 
 .tokenInlineHighlight
   background: rgba(255, 224, 102, 0.3) !important

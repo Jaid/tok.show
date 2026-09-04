@@ -4,6 +4,8 @@
   justify-content: space-between
   padding: 6px 10px
   border-top: 1px solid #222
+  @include light
+    border-top-color: #ddd
   flex-shrink: 0
   font-size: 12px
 
@@ -19,6 +21,8 @@
 
 .footerSize
   color: #888
+  @include light
+    color: #666
   font-size: 11px
 
 .footerRight
@@ -35,16 +39,26 @@
   cursor: pointer
   font-size: 11px
   transition: border-color 0.1s
+  @include light
+    border-color: #ddd
+    color: #666
   &:hover
     border-color: #333
     color: #e0e0e0
+    @include light
+      border-color: #aaa
+      color: #222
 
 .shareLink
   display: inline-flex
   align-items: center
   gap: 4px
   color: #555
+  @include light
+    color: #777
   text-decoration: none
   font-size: 11px
   &:hover
     color: #888
+    @include light
+      color: #444

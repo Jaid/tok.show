@@ -11,10 +11,15 @@ $borderColor: #222
   color: #888
   z-index: 20
   pointer-events: none
+  @include light
+    background: rgba(255, 255, 255, 0.82)
+    color: #555
 
 .paneSeparator
   width: 1px
   background: $borderColor
+  @include light
+    background: #ddd
   cursor: col-resize
 
 .pane
@@ -35,6 +40,8 @@ $borderColor: #222
   white-space: pre-wrap
   word-break: break-all
   color: #ccc
+  @include light
+    color: #333
   line-height: 1.5
   overflow: auto
   height: 100%
@@ -51,6 +58,8 @@ $borderColor: #222
   height: 100%
   color: oklch(95% 0.1 94)
   place-content: start
+  @include light
+    color: oklch(45% 0.14 82)
   &.empty
     display: flex
     align-items: center
@@ -61,9 +70,15 @@ $borderColor: #222
     corner-shape: squircle
     background: oklch(from currentColor 30% 0.05 h)
     text-align: right
+    @include light
+      background: oklch(from currentColor 94% 0.025 h)
     &:nth-child(even)
       color: oklch(90% 0.15 250)
+      @include light
+        color: oklch(44% 0.14 250)
 
 .empty
   color: #444
+  @include light
+    color: #888
   font-style: italic

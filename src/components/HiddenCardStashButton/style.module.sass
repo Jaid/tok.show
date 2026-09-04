@@ -8,6 +8,8 @@
   background: transparent
   border: none
   border-left: 1px dashed #333
+  @include light
+    border-left-color: #ddd
   align-self: stretch
   color: gray
   font-size: 16px
@@ -32,3 +34,5 @@
   z-index: 100
   @include light
     background: white
+    border-color: #ddd
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15)
