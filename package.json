@@ -1,9 +1,9 @@
 {
   "name": "tok.show",
-  "displayName": "Tok·Show",
+  "displayName": "TokShow",
   "version": "0.1.0",
   "type": "module",
-  "description": "web app for offline LLM tokenization supporting a wide range of popular models",
+  "description": "web app for local LLM tokenization with support for a wide range of popular models and vocabularies",
   "imports": {
     "#component/*": "./src/components/*/index.tsx",
     "#src/*": "./src/*",
