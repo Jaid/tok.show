@@ -4,7 +4,7 @@ import {isUiTokenizationIdle, waitForUiTokenizationIdle} from '#src/lib/tokenMan
 import {contentSourceProperties, contentSourceRequirement, resolveContentSource} from './contentSource.ts'
 import {buildPermalink} from './permalink.ts'
 import {getExecutionSignal} from './shared.ts'
-import type {WebMcpUiBridge} from './tools.ts'
+import type {WebmcpUiBridge} from './tools.ts'
 
 const textEncoder = new TextEncoder
 
@@ -16,7 +16,7 @@ const emptySchema = {
 
 const getActiveInputTab = () => state.inputTabs.find(tab => tab.id === state.activeInputTabId) ?? state.inputTabs[0]!
 
-export const createGuiTools = (getBridge: () => WebMcpUiBridge): Array<WebMCP.ModelContextTool> => [
+export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.ModelContextTool> => [
   {
     name: 'inspect',
     title: 'Inspect UI',
@@ -24,7 +24,6 @@ export const createGuiTools = (getBridge: () => WebMcpUiBridge): Array<WebMCP.Mo
     inputSchema: emptySchema,
     annotations: {
       readOnlyHint: true,
-      untrustedContentHint: true,
     },
     execute: () => {
       const tab = getActiveInputTab()
@@ -53,7 +52,7 @@ export const createGuiTools = (getBridge: () => WebMcpUiBridge): Array<WebMCP.Mo
           entries: [...state.visibleEntries],
         },
         output: {
-          tab: state.focusedId ? state.activeTab : 'preprocessed',
+          tab: state.activeTab === 'webmcp' ? 'webmcp' : state.focusedId ? state.activeTab : 'preprocessed',
         },
         tokenization: {
           idle: isUiTokenizationIdle(),
@@ -69,7 +68,6 @@ export const createGuiTools = (getBridge: () => WebMcpUiBridge): Array<WebMCP.Mo
     inputSchema: emptySchema,
     annotations: {
       readOnlyHint: true,
-      untrustedContentHint: true,
     },
     execute: () => {
       const tab = getActiveInputTab()
@@ -96,7 +94,6 @@ export const createGuiTools = (getBridge: () => WebMcpUiBridge): Array<WebMCP.Mo
     inputSchema: emptySchema,
     annotations: {
       readOnlyHint: true,
-      untrustedContentHint: false,
     },
     execute: async (_input, options) => {
       const signal = getExecutionSignal(options)
@@ -152,7 +149,6 @@ export const createGuiTools = (getBridge: () => WebMcpUiBridge): Array<WebMCP.Mo
     inputSchema: emptySchema,
     annotations: {
       readOnlyHint: true,
-      untrustedContentHint: true,
     },
     execute: () => {
       if (state.isBinary) {

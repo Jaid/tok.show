@@ -1,9 +1,9 @@
 import {useEffect, useRef} from 'react'
 
-import {registerWebMcp} from './register.ts'
-import type {WebMcpUiBridge} from './tools.ts'
+import {registerWebmcp} from './register.ts'
+import type {WebmcpUiBridge} from './tools.ts'
 
-export const useWebMcp = (bridge: WebMcpUiBridge): void => {
+export const useWebmcp = (bridge: WebmcpUiBridge): void => {
   const bridgeRef = useRef(bridge)
   useEffect(() => {
     bridgeRef.current = bridge
@@ -11,7 +11,7 @@ export const useWebMcp = (bridge: WebMcpUiBridge): void => {
   useEffect(() => {
     const controller = new AbortController
     let unregister = () => {}
-    void registerWebMcp(() => bridgeRef.current, controller.signal).then(cleanup => {
+    void registerWebmcp(() => bridgeRef.current, controller.signal).then(cleanup => {
       if (controller.signal.aborted) {
         cleanup()
       } else {

@@ -2,7 +2,7 @@ import {afterEach, describe, expect, test} from 'bun:test'
 
 import {state} from '#src/lib/state.ts'
 import {beginUiTokenization, ensureModelLoaded, unloadModel} from '#src/lib/tokenManager.ts'
-import {createWebMcpTools} from '#src/lib/webmcp/tools.ts'
+import {createWebmcpTools} from '#src/lib/webmcp/tools.ts'
 
 const originalState = {
   activeInputTabId: state.activeInputTabId,
@@ -20,7 +20,7 @@ const executeOptions = {signal: new AbortController().signal}
 const createTools = () => {
   let permalinkText = ''
   return {
-    tools: createWebMcpTools(() => ({
+    tools: createWebmcpTools(() => ({
       setText: value => {
         permalinkText = value
       },

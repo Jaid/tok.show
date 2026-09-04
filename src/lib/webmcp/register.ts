@@ -1,9 +1,9 @@
-import {createWebMcpTools} from './tools.ts'
-import type {WebMcpUiBridge} from './tools.ts'
+import {createWebmcpTools} from './tools.ts'
+import type {WebmcpUiBridge} from './tools.ts'
 
 const noop = () => {}
 
-export const registerWebMcp = async (getBridge: () => WebMcpUiBridge, signal: AbortSignal): Promise<() => void> => {
+export const registerWebmcp = async (getBridge: () => WebmcpUiBridge, signal: AbortSignal): Promise<() => void> => {
   const modelContext = globalThis.document?.modelContext
   if (!modelContext || signal.aborted) {
     return noop
@@ -17,7 +17,7 @@ export const registerWebMcp = async (getBridge: () => WebMcpUiBridge, signal: Ab
   }
 
   try {
-    for (const tool of createWebMcpTools(getBridge)) {
+    for (const tool of createWebmcpTools(getBridge)) {
       registrationController.signal.throwIfAborted()
       await modelContext.registerTool(tool, {signal: registrationController.signal})
     }

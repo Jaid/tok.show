@@ -17,7 +17,7 @@ import Editor from '#component/Editor'
 import EditorFooter from '#component/EditorFooter'
 import EditorHeader from '#component/EditorHeader'
 import OutputFooter from '#component/OutputFooter'
-import OutputHeader from '#component/OutputHeader'
+import OutputHeader, {WebmcpDocumentation} from '#component/OutputHeader'
 import {useTabbedView} from '#component/TabbedView'
 import TokenizedText from '#component/TokenizedText'
 import WelcomePanel from '#component/WelcomePanel'
@@ -27,7 +27,7 @@ import {beginUiTokenization, ensureModelLoaded, initializeModels, runTokenizatio
 import {getTokenSpans} from '#src/lib/tokenSpans.ts'
 import {useStage} from '#src/lib/useStage.ts'
 import {useUrlParameters} from '#src/lib/useUrlParameters.ts'
-import {useWebMcp} from '#src/lib/webmcp/index.ts'
+import {useWebmcp} from '#src/lib/webmcp/index.ts'
 
 import css from './style.module.sass'
 
@@ -90,6 +90,9 @@ type OutputPaneContentProps = {
 
 const OutputPaneContent: FunctionComponent<OutputPaneContentProps> = ({focusedModel, focusedSpans, input, onTokenClick, onTokenHover, preprocessedInput, tokenIds}) => {
   const {tabKey: currentTab} = useTabbedView<OutputTab>()
+  if (currentTab === 'webmcp') {
+    return <WebmcpDocumentation />
+  }
   if (currentTab === 'preprocessed') {
     const displayInput = preprocessedInput instanceof Uint8Array ? new TextDecoder('utf-8', {fatal: false}).decode(preprocessedInput) : preprocessedInput
     return <div className={css.preprocessedView}>{displayInput || <span className={css.empty}>Start typing…</span>}</div>
@@ -342,7 +345,7 @@ const App: FunctionComponent = () => {
     state.focusedId = null
     setModelParam('')
   }
-  useWebMcp({
+  useWebmcp({
     setText: setTextParam,
   })
   useHotkeys('0', () => {
@@ -369,7 +372,7 @@ const App: FunctionComponent = () => {
   const focusedTokenizeData = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData ?? null : null
   const preprocessedInput = focusedTokenizeData?.processedInput ?? focusedTokenizeData?.inputText ?? curInput
   const tokenIds = focusedTokenizeData?.tokens ?? null
-  const outputTab = state.focusedId ? currentTab : 'preprocessed'
+  const outputTab = currentTab === 'webmcp' ? currentTab : state.focusedId ? currentTab : 'preprocessed'
   const stage = useStage()
   return <>
     <Group orientation="horizontal" className={css.container}>

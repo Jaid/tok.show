@@ -2,7 +2,7 @@ import type {FunctionComponent, ReactNode} from 'react'
 
 import {Tab, TabbedView} from '#component/TabbedView'
 
-export type OutputTab = 'ids' | 'preprocessed' | 'tokenized'
+export type OutputTab = 'ids' | 'preprocessed' | 'tokenized' | 'webmcp'
 
 type Props = {
   children?: ReactNode
@@ -30,6 +30,10 @@ const OutputHeader: FunctionComponent<Props> = ({children, currentTab, onTabChan
       label: 'preprocessed',
     },
     ...(showModelTabs ? modelTabs : []),
+    {
+      id: 'webmcp',
+      label: 'WebMCP',
+    },
   ]
   return <TabbedView<OutputTab> activeTabKey={currentTab} onTabChange={onTabChange}>
     {tabs.map(tab => <Tab key={tab.id}>{tab.label}</Tab>)}
@@ -37,4 +41,5 @@ const OutputHeader: FunctionComponent<Props> = ({children, currentTab, onTabChan
   </TabbedView>
 }
 
+export {default as WebmcpDocumentation} from './WebmcpDocumentation/index.tsx'
 export default OutputHeader

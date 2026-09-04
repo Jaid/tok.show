@@ -1,1 +1,1 @@
-export {useWebMcp} from './useWebMcp.ts'
+export {useWebmcp} from './useWebmcp.ts'

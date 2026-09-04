@@ -77,7 +77,6 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
     },
     annotations: {
       readOnlyHint: true,
-      untrustedContentHint: false,
     },
     execute: () => ({
       models: modelIds.map(modelId => {
@@ -99,7 +98,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
     inputSchema: contentAndModelSchema,
     annotations: {
       readOnlyHint: true,
-      untrustedContentHint: false,
+      untrustedContentHint: true,
     },
     execute: async (input, options) => {
       const signal = getExecutionSignal(options)
@@ -121,7 +120,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
     inputSchema: contentAndModelSchema,
     annotations: {
       readOnlyHint: true,
-      untrustedContentHint: false,
+      untrustedContentHint: true,
     },
     execute: async (input, options) => {
       const signal = getExecutionSignal(options)
@@ -141,7 +140,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
     inputSchema: contentAndModelSchema,
     annotations: {
       readOnlyHint: true,
-      untrustedContentHint: false,
+      untrustedContentHint: true,
     },
     execute: async (input, options) => {
       const signal = getExecutionSignal(options)

@@ -1,11 +1,11 @@
 import {createGuiTools} from './guiTools.ts'
 import {createHeadlessTools} from './headlessTools.ts'
 
-export type WebMcpUiBridge = {
+export type WebmcpUiBridge = {
   setText: (value: string) => void
 }
 
-export const createWebMcpTools = (getBridge: () => WebMcpUiBridge): Array<WebMCP.ModelContextTool> => [
+export const createWebmcpTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.ModelContextTool> => [
   ...createGuiTools(getBridge),
   ...createHeadlessTools(),
 ]
