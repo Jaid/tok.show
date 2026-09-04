@@ -35,7 +35,7 @@ const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, i
     } : undefined}
     title={error ?? undefined}
   >
-    <div className={css.triangle}>⏶</div>
+    {stage === 'editing' && <div className={css.triangle}>⏶</div>}
     {stage === 'editing' && <div className={css.count}>
       {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <TokenCount className={css.countElement} suffixClassName={css.countLabel} numberClassName={css.countNumber} value={count} /> : <span className={css.countNa}>–</span>}
     </div>}
