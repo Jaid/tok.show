@@ -1,5 +1,4 @@
 type Example = {
-  description: string
   id: string
   text: string
   title: string
@@ -22,28 +21,27 @@ const getAssetText = (id: string) => {
 const exampleMetadata = [
   {
     id: 'quick_brown_fox',
-    title: 'Quick brown fox',
-    description: 'A short English pangram.',
+    title: 'quick brown fox and friends',
   },
   {
     id: 'typescript',
     title: 'TypeScript',
-    description: 'Modern code and identifiers.',
   },
   {
     id: 'unicode',
-    title: 'Unicode sampler',
-    description: 'Multiple scripts, emoji and combining marks.',
+    title: 'Unicode',
   },
   {
     id: 'fast_inverse_square_root',
-    title: 'Quake III',
-    description: 'The fast inverse square root implementation.',
+    title: 'fast inverse square root',
   },
   {
     id: 'mit',
     title: 'MIT license',
-    description: 'The complete license text for this project.',
+  },
+  {
+    id: 'html',
+    title: 'view-source:example.com',
   },
 ] satisfies Array<ExampleMetadata>
 

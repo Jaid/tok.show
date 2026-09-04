@@ -3,7 +3,7 @@
   box-sizing: border-box
   height: 100%
   display: grid
-  grid-template-rows: minmax(180px, 1fr) auto auto auto
+  grid-template-rows: minmax(180px, 1fr) auto
   place-items: center
   align-content: safe center
   gap: clamp(10px, 2vh, 18px)
@@ -20,9 +20,21 @@
   display: grid
   place-items: center
 
+.documentation
+  width: 100%
+  display: grid
+  place-items: center
+  gap: clamp(10px, 2vh, 18px)
+  z-index: 1;
+  backdrop-filter: blur(18px)
+  background: hsl(0 0 0 / 70%)
+  padding: 16px
+
 .titleRow
   text-align: center
-  font-size: clamp(17px, 2vw, 22px)
+  font-size: 24px
+  margin-bottom: 4px
+  font-weight: 200
 
 .descriptionRow
   width: min(100%, 780px)
@@ -33,7 +45,7 @@
   user-select: text
 
 .pointing
-  flex: 0 0 clamp(96px, 17vw, 150px)
+  flex: 0 0 6em
   line-height: 0
   user-select: none
   pointer-events: none
@@ -47,12 +59,11 @@
 
 .descriptionText
   min-width: 0
-  max-width: 620px
+  max-width: 480px
   color: #999
   text-align: center
   text-wrap: balance
-  font-size: 13px
-  line-height: 1.55
+  font-size: 16px
 
 .examplesRow
   width: min(100%, 620px)
