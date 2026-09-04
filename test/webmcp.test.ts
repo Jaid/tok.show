@@ -95,6 +95,25 @@ describe('WebMCP', () => {
     expect(state.text).toBe(originalText)
   })
 
+  test('rejects undeclared properties in code instead of relying on schema enforcement', async () => {
+    const {tools} = createTools()
+    const inspect = getTool(tools, 'inspect')
+    const countTokens = getTool(tools, 'count_tokens')
+    const compare = getTool(tools, 'compare')
+
+    expect(() => inspect.execute({unexpected: true} as any, executeOptions)).toThrow('unknown property “unexpected”')
+    await expect(countTokens.execute({text: 'strict', models: 'glm', unexpected: true} as any, executeOptions)).rejects.toThrow('unknown property “unexpected”')
+    await expect(compare.execute({
+      model: 'glm',
+      cases: [{text: 'first', unexpected: true}, {text: 'second'}],
+    } as any, executeOptions)).rejects.toThrow('cases[0] must not contain unknown property “unexpected”')
+  })
+
+  test('marks editor contents as untrusted agent output', () => {
+    const {tools} = createTools()
+    expect(getTool(tools, 'read_editor').annotations?.untrustedContentHint).toBe(true)
+  })
+
   test('ContentSource URL inputs are fetched and text/url are mutually exclusive', async () => {
     const {tools} = createTools()
     const countTokens = getTool(tools, 'count_tokens')

@@ -7,7 +7,7 @@ import {getTokenSpans} from '#src/lib/tokenSpans.ts'
 
 import {contentSourceProperties, contentSourceRequirement, resolveContentSource} from './contentSource.ts'
 import {buildPermalink, defaultPermalinkState} from './permalink.ts'
-import {getExecutionSignal, getModelId, getModelIds, modelIdSchema, modelSelectionSchema} from './shared.ts'
+import {assertObjectProperties, getExecutionSignal, getModelId, getModelIds, modelIdSchema, modelSelectionSchema} from './shared.ts'
 
 const textEncoder = new TextEncoder
 
@@ -78,18 +78,21 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
     annotations: {
       readOnlyHint: true,
     },
-    execute: () => ({
-      models: modelIds.map(modelId => {
-        const model = modelsMap.get(modelId)!
-        const definition = models[modelId]
-        return {
-          id: modelId,
-          name: model.name,
-          subname: model.subname ?? null,
-          ...definition,
-        }
-      }),
-    }),
+    execute: input => {
+      assertObjectProperties(input, [])
+      return {
+        models: modelIds.map(modelId => {
+          const model = modelsMap.get(modelId)!
+          const definition = models[modelId]
+          return {
+            id: modelId,
+            name: model.name,
+            subname: model.subname ?? null,
+            ...definition,
+          }
+        }),
+      }
+    },
   },
   {
     name: 'count_tokens',
@@ -101,6 +104,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       untrustedContentHint: true,
     },
     execute: async (input, options) => {
+      assertObjectProperties(input, ['text', 'url', 'models'])
       const signal = getExecutionSignal(options)
       const [content, selectedModelIds] = await Promise.all([
         resolveContentSource(input, signal),
@@ -123,6 +127,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       untrustedContentHint: true,
     },
     execute: async (input, options) => {
+      assertObjectProperties(input, ['text', 'url', 'models'])
       const signal = getExecutionSignal(options)
       const content = await resolveContentSource(input, signal)
       const selectedModelIds = getModelIds(input.models)
@@ -143,6 +148,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       untrustedContentHint: true,
     },
     execute: async (input, options) => {
+      assertObjectProperties(input, ['text', 'url', 'models'])
       const signal = getExecutionSignal(options)
       const content = await resolveContentSource(input, signal)
       const selectedModelIds = getModelIds(input.models)
@@ -197,6 +203,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       untrustedContentHint: true,
     },
     execute: async (input, options) => {
+      assertObjectProperties(input, ['model', 'cases'])
       const signal = getExecutionSignal(options)
       const modelId = getModelId(input.model)
       if (!Array.isArray(input.cases) || input.cases.length < 2 || input.cases.length > 64) {
@@ -206,7 +213,8 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
         if (!value || typeof value !== 'object' || Array.isArray(value)) {
           throw new TypeError(`cases[${index}] must be a content source object.`)
         }
-        return resolveContentSource(value as Record<string, unknown>, signal)
+        assertObjectProperties(value, ['text', 'url'], `cases[${index}]`)
+        return resolveContentSource(value, signal)
       }))
       signal.throwIfAborted()
       await load(modelId)
@@ -258,6 +266,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       untrustedContentHint: true,
     },
     execute: async (input, options) => {
+      assertObjectProperties(input, ['text', 'url', 'models', 'model', 'monaco'])
       const signal = getExecutionSignal(options)
       const content = await resolveContentSource(input, signal)
       const selectedModelIds = getModelIds(input.models, defaultPermalinkState.models)

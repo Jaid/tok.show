@@ -3,7 +3,7 @@ import {isUiTokenizationIdle, waitForUiTokenizationIdle} from '#src/lib/tokenMan
 
 import {contentSourceProperties, contentSourceRequirement, resolveContentSource} from './contentSource.ts'
 import {buildPermalink} from './permalink.ts'
-import {getExecutionSignal} from './shared.ts'
+import {assertObjectProperties, getExecutionSignal} from './shared.ts'
 import type {WebmcpUiBridge} from './tools.ts'
 
 const textEncoder = new TextEncoder
@@ -25,7 +25,8 @@ export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.Mo
     annotations: {
       readOnlyHint: true,
     },
-    execute: () => {
+    execute: input => {
+      assertObjectProperties(input, [])
       const tab = getActiveInputTab()
       const visibleModels = getVisibleModelIds()
       return {
@@ -69,7 +70,8 @@ export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.Mo
     annotations: {
       readOnlyHint: true,
     },
-    execute: () => {
+    execute: input => {
+      assertObjectProperties(input, [])
       const tab = getActiveInputTab()
       if (tab.isBinary) {
         const bytes = tab.binaryData ?? new Uint8Array
@@ -95,7 +97,8 @@ export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.Mo
     annotations: {
       readOnlyHint: true,
     },
-    execute: async (_input, options) => {
+    execute: async (input, options) => {
+      assertObjectProperties(input, [])
       const signal = getExecutionSignal(options)
       await waitForUiTokenizationIdle(signal)
       const visibleModels = getVisibleModelIds()
@@ -124,6 +127,7 @@ export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.Mo
       untrustedContentHint: true,
     },
     execute: async (input, options) => {
+      assertObjectProperties(input, ['text', 'url'])
       const signal = getExecutionSignal(options)
       const content = await resolveContentSource(input, signal)
       const isPrimaryInput = state.activeInputTabId === 'input'
@@ -150,7 +154,8 @@ export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.Mo
     annotations: {
       readOnlyHint: true,
     },
-    execute: () => {
+    execute: input => {
+      assertObjectProperties(input, [])
       if (state.isBinary) {
         throw new Error('The current binary editor contents cannot be represented by a Tok·Show permalink.')
       }
