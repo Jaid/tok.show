@@ -15,30 +15,30 @@
   @include light
     background: radial-gradient(circle at 50% 48%, oklch(94% 0.025 82 / 0.9), transparent 62%)
 
-  &::before,
-  &::after
-    content: ''
-    position: absolute
-    inset: -160px
-    z-index: 0
-    pointer-events: none
-    mask-image: url('/cog.svg')
-    mask-repeat: repeat
-    mask-size: 160px 160px
-    animation: welcomePatternDrift 21334ms linear infinite
-    will-change: transform
+.cogs
+  position: absolute
+  inset: -160px
+  width: calc(100% + 320px)
+  height: calc(100% + 320px)
+  z-index: 0
+  pointer-events: none
+  animation: welcomePatternDrift 21334ms linear infinite
+  will-change: transform
+  color: #3d3200
+  @include light
+    color: oklch(82% 0.075 91 / 0.7)
 
-  &::before
-    background: #3d3200
-    mask-position: 0 0
+  &:nth-child(2)
+    color: #00385b
     @include light
-      background: oklch(82% 0.075 91 / 0.7)
+      color: oklch(80% 0.07 240 / 0.65)
 
-  &::after
-    background: #00385b
-    mask-position: 80px 80px
-    @include light
-      background: oklch(80% 0.07 240 / 0.65)
+    .cog
+      animation-direction: reverse
+
+.cog
+  animation: welcomeCogSpin 21334ms linear infinite
+
 
 .tokRow
   width: 100%
@@ -114,6 +114,10 @@
   to
     transform: translate3d(0, 0, 0)
 
+@keyframes welcomeCogSpin
+  to
+    transform: rotate(360deg)
+
 @keyframes point
   0%, 100%
     transform: translateX(0)
@@ -125,7 +129,7 @@
     transform: translateX(0)
 
 @media (prefers-reduced-motion: reduce)
-  .container::before,
-  .container::after,
+  .cogs,
+  .cog,
   .pointing img
     animation: none
