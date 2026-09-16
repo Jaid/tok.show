@@ -117,6 +117,7 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
     guides: {indentation: false},
     overviewRulerBorder: false,
     renderWhitespace: 'trailing',
+    disableMonospaceOptimizations: true,
     wordWrap: 'on',
     contextmenu: true,
     readOnly,
@@ -127,6 +128,7 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
     renderLineHighlight: 'none',
     renderControlCharacters: true,
     folding: false,
+    largeFileOptimizations: false,
     padding: {
       top: 6,
     },
