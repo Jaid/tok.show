@@ -108,7 +108,7 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
     minimap: {enabled: false},
     stickyScroll: {enabled: false},
     lineNumbers: 'off',
-    fontFamily: 'code',
+    fontFamily: 'Antimono',
     fontSize: 14,
     lineHeight: 16,
     tabSize: 2,

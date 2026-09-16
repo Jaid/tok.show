@@ -1,3 +1,4 @@
+import 'antimono/css/antimono-static.css'
 import '#src/style.sass'
 
 import mountRoot from 'mount-root'

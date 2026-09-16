@@ -9,6 +9,7 @@
         "@dnd-kit/react": "0.5.0",
         "@floating-ui/react": "0.27.20",
         "@monaco-editor/react": "4.7.0",
+        "antimono": "0.1.0",
         "clsx": "2.1.1",
         "es-toolkit": "1.52.0",
         "material-icon-theme": "5.38.1",
@@ -457,6 +458,8 @@
     "ansi-regex": ["ansi-regex@6.3.0", "", {}, "sha512-WpDfL7NO6j7tH88IDBNVdUJxDh9nmCteAVW9dsep846XdwF4naCBK+/tGLX3KJgcpgMRXCFlTM2hKGoK9FsdrQ=="],
 
     "ansi-styles": ["ansi-styles@6.2.3", "", {}, "sha512-4Dj6M28JB+oAH8kFkTLUo+a2jwOFkuqb3yucU0CANcRRUbxS0cP0nZYCGjcc3BNXwRIsUVmDGgzawme7zvJHvg=="],
+
+    "antimono": ["antimono@0.1.0", "", {}, "sha512-lxAkWKSFDiZwCN6jHdoz/62FHC4iALhxVr3voneeJ/adIIU9JSmqZ70R4VFNXhoxIod/9lpkMRuqEoV7gpVBAw=="],
 
     "argparse": ["argparse@2.0.1", "", {}, "sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q=="],
 
