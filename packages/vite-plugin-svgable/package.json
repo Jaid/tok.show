@@ -8,9 +8,9 @@
   },
   "dependencies": {
     "shape-to-svg": "^0.1.0",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "peerDependencies": {
-    "vite": "^8.2.2"
+    "vite": "^8.3.0"
   }
 }
