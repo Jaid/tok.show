@@ -102,22 +102,15 @@ const OutputPaneContent: FunctionComponent<OutputPaneContentProps> = ({focusedMo
       return <div className={clsx(css.idsView, css.empty)}>No tokens (focus a model)</div>
     }
     const elements = tokenIds.map((id: number, i: number) => {
-      return <span key={i} className={css.tokenIdChip}>{id}</span>
+      return <span className={css.tokenIdChip} key={i}>{id}</span>
     })
-    return <div className={css.idsView} children={elements}/>
+    return <div children={elements} className={css.idsView} />
   }
-  return <TokenizedText input={input} spans={focusedSpans} focusedModel={focusedModel} onHoverSpan={onTokenHover} onClickSpan={onTokenClick} />
+  return <TokenizedText focusedModel={focusedModel} input={input} onClickSpan={onTokenClick} onHoverSpan={onTokenHover} spans={focusedSpans} />
 }
 const App: FunctionComponent = () => {
   const snap = useSnapshot(state)
-  const {model: modelParam,
-    models: modelsRaw,
-    monaco: monacoParam,
-    setModel: setModelParam,
-    setModels: setModelsRaw,
-    setText: setTextParam,
-    shareUrl,
-    text: textParam} = useUrlParameters()
+  const {model: modelParam, models: modelsRaw, monaco: monacoParam, setModel: setModelParam, setModels: setModelsRaw, setText: setTextParam, shareUrl, text: textParam} = useUrlParameters()
   const [currentTab, setCurrentTab] = useState<OutputTab>('tokenized')
   const editorRef = useRef<EditorHandle>(null)
   const [isDragOver, setIsDragOver] = useState(false)
@@ -206,8 +199,10 @@ const App: FunctionComponent = () => {
   })()
   const tokenCounts = (() => {
     const c: Record<string, number> = {}
-    for (const [id, ms] of Object.entries(snap.modelStates) as Array<[string, {loaded: boolean
-      tokenCount: number}]>) {
+    for (const [id, ms] of Object.entries(snap.modelStates) as Array<[string, {
+      loaded: boolean
+      tokenCount: number
+    }]>) {
       if (ms && (ms.tokenCount > 0 || ms.loaded)) {
         c[id] = ms.tokenCount
       }
@@ -372,61 +367,65 @@ const App: FunctionComponent = () => {
   const focusedTokenizeData = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData ?? null : null
   const preprocessedInput = focusedTokenizeData?.processedInput ?? focusedTokenizeData?.inputText ?? curInput
   const tokenIds = focusedTokenizeData?.tokens ?? null
-  const outputTab = currentTab === 'webmcp' ? currentTab : state.focusedId ? currentTab : 'preprocessed'
+  const outputTab = currentTab === 'webmcp' ? currentTab : (state.focusedId ? currentTab : 'preprocessed')
   const stage = useStage()
-  return <>
-    <Group orientation="horizontal" className={css.container}>
-      <Panel defaultSize={50} minSize={20}>
-        <div className={css.pane} onDragOver={onDragOver} onDragLeave={onDragLeave} onDrop={onDrop}>
-          <EditorHeader
-            tabs={snap.inputTabs}
-            activeTabId={snap.activeInputTabId}
-            sizeInBytes={(new TextEncoder).encode(state.text).byteLength}
-            charCount={state.text.length}
-            isBinary={state.isBinary}
-            binaryByteCount={state.binaryData?.byteLength ?? null}
-            onClear={() => onInput('')}
-            onCopy={onCopy}
-            onTabSelect={id => {
-              setActiveInputTab(id)
-              if (id === 'input') {
-                setTextParam(state.text)
-              }
-            }}
+  return <Group className={css.container} orientation='horizontal'>
+    <Panel defaultSize={50} minSize={20}>
+      <div className={css.pane} onDragLeave={onDragLeave} onDragOver={onDragOver} onDrop={onDrop}>
+        <EditorHeader
+          activeTabId={snap.activeInputTabId}
+          binaryByteCount={state.binaryData?.byteLength ?? null}
+          charCount={state.text.length}
+          isBinary={state.isBinary}
+          onClear={() => onInput('')}
+          onCopy={onCopy}
+          onTabSelect={id => {
+            setActiveInputTab(id)
+            if (id === 'input') {
+              setTextParam(state.text)
+            }
+          }}
+          sizeInBytes={(new TextEncoder).encode(state.text).byteLength}
+          tabs={snap.inputTabs}
+        />
+        <div className={css.paneBody}>
+          <Editor
+            binaryData={state.binaryData} isBinary={state.isBinary} onChange={onInput} ref={editorRef}
+            useMonaco={state.useMonaco} value={state.text}
           />
+        </div>
+        <EditorFooter shareUrl={shareUrl} />
+        {isDragOver && <div className={css.dropOverlay}>Drop text or file here</div>}
+      </div>
+    </Panel>
+    <Separator className={css.paneSeparator} />
+    <Panel defaultSize={50} minSize={20}>
+      <div className={css.pane}>
+        {stage === 'welcome' ? <div className={css.paneBody}><WelcomePanel /></div> : <OutputHeader
+          currentTab={outputTab} onTabChange={tab => {
+            state.activeTab = tab
+            setCurrentTab(tab)
+          }} showModelTabs={Boolean(state.focusedId)}
+        >
           <div className={css.paneBody}>
-            <Editor ref={editorRef} value={state.text} onChange={onInput} useMonaco={state.useMonaco}
-              isBinary={state.isBinary} binaryData={state.binaryData} />
+            <OutputPaneContent
+              focusedModel={focusedModel} focusedSpans={focusedSpans} input={curInput}
+              onTokenClick={onTokenClick} onTokenHover={onTokenHover} preprocessedInput={preprocessedInput} tokenIds={tokenIds}
+            />
           </div>
-          <EditorFooter shareUrl={shareUrl} />
-          {isDragOver && <div className={css.dropOverlay}>Drop text or file here</div>}
-        </div>
-      </Panel>
-      <Separator className={css.paneSeparator} />
-      <Panel defaultSize={50} minSize={20}>
-        <div className={css.pane}>
-          {stage === 'welcome'
-            ? <div className={css.paneBody}><WelcomePanel /></div>
-            : <OutputHeader currentTab={outputTab} onTabChange={tab => {
-              state.activeTab = tab
-              setCurrentTab(tab)
-            }} showModelTabs={Boolean(state.focusedId)}>
-              <div className={css.paneBody}>
-                <OutputPaneContent focusedModel={focusedModel} focusedSpans={focusedSpans} input={curInput}
-                  onTokenClick={onTokenClick} onTokenHover={onTokenHover} preprocessedInput={preprocessedInput} tokenIds={tokenIds} />
-              </div>
-            </OutputHeader>}
-          <OutputFooter entries={state.visibleEntries} modelsById={modelsMap}
-            counts={tokenCounts} errors={modelErrors} focusedId={state.focusedId}
-            hiddenEntryIds={state.hiddenEntryIds} loadingSet={loadingSet}
-            onReorder={onReorder} onFocus={onFocus} onStashDrop={onStashDrop}
-            showAverage={showAvg} averageCount={avgCount} visibleModelCount={visibleCount}
-            hiddenModels={hidden}
-            onUnhide={onUnhide} onHide={(id: EntryId) => onHide(id)} />
-        </div>
-      </Panel>
-    </Group>
-  </>
+        </OutputHeader>}
+        <OutputFooter
+          averageCount={avgCount} counts={tokenCounts}
+          entries={state.visibleEntries} errors={modelErrors} focusedId={state.focusedId}
+          hiddenEntryIds={state.hiddenEntryIds} hiddenModels={hidden}
+          loadingSet={loadingSet} modelsById={modelsMap} onFocus={onFocus}
+          onHide={(id: EntryId) => onHide(id)} onReorder={onReorder} onStashDrop={onStashDrop}
+          onUnhide={onUnhide}
+          showAverage={showAvg} visibleModelCount={visibleCount}
+        />
+      </div>
+    </Panel>
+  </Group>
 }
 
 export default App

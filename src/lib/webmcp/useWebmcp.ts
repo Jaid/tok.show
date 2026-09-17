@@ -1,7 +1,8 @@
+import type {WebmcpUiBridge} from './tools.ts'
+
 import {useEffect, useRef} from 'react'
 
 import {registerWebmcp} from './register.ts'
-import type {WebmcpUiBridge} from './tools.ts'
 
 export const useWebmcp = (bridge: WebmcpUiBridge): void => {
   const bridgeRef = useRef(bridge)

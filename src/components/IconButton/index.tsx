@@ -53,7 +53,7 @@ const IconButton: FunctionComponent<Props> = ({className, children: extraChildre
       }
     }
   }
-  return <button type={type} className={clsx(css.button, className, extraClassName, getShapeClass())} {...props}>{child}{extraChildren}</button>
+  return <button className={clsx(css.button, className, extraClassName, getShapeClass())} type={type} {...props}>{child}{extraChildren}</button>
 }
 
 export default IconButton

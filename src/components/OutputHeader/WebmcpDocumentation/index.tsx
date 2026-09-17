@@ -1,4 +1,5 @@
 import type {FunctionComponent} from 'react'
+
 import {stringify} from 'yaml'
 
 import {webmcpToolDocumentation} from '#src/lib/webmcp/documentation.ts'

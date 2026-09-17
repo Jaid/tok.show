@@ -31,16 +31,16 @@ const DraggableCard: FunctionComponent<Props> = ({id, index, model, count, isBes
     plugins: defaults => [...defaults, Feedback.configure({feedback: 'clone'})],
   })
   return (
-    <div ref={ref} className={css.item}>
+    <div className={css.item} ref={ref}>
       <ModelCard
-        model={model}
         count={count}
+        error={error}
+        handleRef={handleRef}
         isBest={isBest}
         isFocused={isFocused}
         isLoading={isLoading}
-        error={error}
+        model={model}
         onClick={onClick}
-        handleRef={handleRef}
       />
     </div>
   )

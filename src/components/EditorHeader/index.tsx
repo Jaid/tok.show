@@ -25,26 +25,26 @@ type Props = {
 
 const EditorHeader: FunctionComponent<Props> = ({tabs, activeTabId, sizeInBytes, charCount, isBinary, binaryByteCount, onClear, onCopy, onTabSelect}) => {
   const needsBinaryBytesDisplay = isBinary && binaryByteCount
-  const binaryBytesDisplay = needsBinaryBytesDisplay ? <NumberDisplay value={binaryByteCount} suffix="byte" suffixPlural /> : undefined
+  const binaryBytesDisplay = needsBinaryBytesDisplay ? <NumberDisplay suffix='byte' suffixPlural value={binaryByteCount} /> : undefined
   const needsUtfBytesDisplay = !isBinary && sizeInBytes && sizeInBytes !== charCount
-  const utfBytesDisplay = needsUtfBytesDisplay ? <PulsatingNumber value={sizeInBytes} suffix="byte" suffixPlural /> : undefined
+  const utfBytesDisplay = needsUtfBytesDisplay ? <PulsatingNumber suffix='byte' suffixPlural value={sizeInBytes} /> : undefined
   const needsCharsDisplay = !isBinary && charCount
-  const charsDisplay = needsCharsDisplay ? <PulsatingNumber value={charCount} suffix="character" suffixPlural /> : undefined
+  const charsDisplay = needsCharsDisplay ? <PulsatingNumber suffix='character' suffixPlural value={charCount} /> : undefined
   const stage = useStage()
   const decoration = <>
     {binaryBytesDisplay}
     {utfBytesDisplay}
     {charsDisplay}
     {stage === 'editing' && <div className={css.buttons}>
-      <IconButton icon='' onClick={onClear} title="Clear input" />
-      <IconButton icon='' onClick={onCopy} title="Copy input" />
+      <IconButton icon='' onClick={onClear} title='Clear input' />
+      <IconButton icon='' onClick={onCopy} title='Copy input' />
     </div>}
   </>
   const tabElements = tabs.map(tab => {
-    const icon = <Svg src={textIcon} lineHeight/>
+    const icon = <Svg lineHeight src={textIcon} />
     return <Tab key={tab.id} title={tab.name}>{icon}{tab.name}</Tab>
   })
-  return <TabbedView tabClassName={css.tab} activeTabKey={activeTabId} decoration={decoration} onTabChange={onTabSelect}>
+  return <TabbedView activeTabKey={activeTabId} decoration={decoration} onTabChange={onTabSelect} tabClassName={css.tab}>
     {tabElements}
   </TabbedView>
 }

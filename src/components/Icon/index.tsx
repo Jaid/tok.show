@@ -8,7 +8,7 @@ import icon from '/icon.svg'
 
 const Icon: FunctionComponent = () => {
   return <a href='/'>
-    <Svg imgClassName={css.element} src={icon} alt="favicon" />
+    <Svg alt='favicon' imgClassName={css.element} src={icon} />
   </a>
 }
 

@@ -1,5 +1,6 @@
-import {createWebmcpTools} from './tools.ts'
 import type {WebmcpUiBridge} from './tools.ts'
+
+import {createWebmcpTools} from './tools.ts'
 
 const noop = () => {}
 
@@ -8,14 +9,12 @@ export const registerWebmcp = async (getBridge: () => WebmcpUiBridge, signal: Ab
   if (!modelContext || signal.aborted) {
     return noop
   }
-
   const registrationController = new AbortController
   const abortRegistration = () => registrationController.abort(signal.reason)
   signal.addEventListener('abort', abortRegistration, {once: true})
   if (signal.aborted) {
     abortRegistration()
   }
-
   try {
     for (const tool of createWebmcpTools(getBridge)) {
       registrationController.signal.throwIfAborted()
@@ -26,7 +25,6 @@ export const registerWebmcp = async (getBridge: () => WebmcpUiBridge, signal: Ab
     signal.removeEventListener('abort', abortRegistration)
     throw error
   }
-
   return () => {
     signal.removeEventListener('abort', abortRegistration)
     registrationController.abort()

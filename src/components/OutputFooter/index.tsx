@@ -28,13 +28,17 @@ type Props = {
 
 const OutputFooter: FunctionComponent<Props> = ({entries, modelsById, counts, errors, focusedId, hiddenEntryIds, loadingSet, onReorder, onFocus, onStashDrop, showAverage, averageCount, visibleModelCount, hiddenModels, onUnhide, onHide}) => {
   return <div className={css.container}>
-    <DraggableCardContainer entries={entries} modelsById={modelsById}
-      counts={counts} errors={errors} focusedId={focusedId}
+    <DraggableCardContainer
+      averageCount={averageCount} counts={counts}
+      entries={entries} errors={errors} focusedId={focusedId}
       hiddenEntryIds={hiddenEntryIds} loadingSet={loadingSet}
-      onReorder={onReorder} onFocus={onFocus} onStashDrop={onStashDrop}
-      showAverage={showAverage} averageCount={averageCount} visibleModelCount={visibleModelCount}>
-      <HiddenCardStashButton hiddenModels={hiddenModels}
-        onUnhide={onUnhide} onHide={(id: string) => onHide(id)} />
+      modelsById={modelsById} onFocus={onFocus} onReorder={onReorder}
+      onStashDrop={onStashDrop} showAverage={showAverage} visibleModelCount={visibleModelCount}
+    >
+      <HiddenCardStashButton
+        hiddenModels={hiddenModels}
+        onHide={(id: string) => onHide(id)} onUnhide={onUnhide}
+      />
     </DraggableCardContainer>
   </div>
 }

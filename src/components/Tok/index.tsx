@@ -105,7 +105,7 @@ const Tok: FunctionComponent = () => {
   return <div className={css.tok}>
     <picture>
       <source srcSet='/tok.jxl' type='image/jxl' />
-      <img className={css.image} src='/tok.webp' alt='Tok' />
+      <img alt='Tok' className={css.image} src='/tok.webp' />
     </picture>
     {beamEffects.map((effect, index) => {
       const style: BeamStyle = {
@@ -113,22 +113,22 @@ const Tok: FunctionComponent = () => {
         '--beam-delay': effect.delay,
         '--beam-duration': effect.duration,
       }
-      return <picture key={index} aria-hidden='true'>
+      return <picture aria-hidden='true' key={index}>
         <source srcSet='/tok.jxl' type='image/jxl' />
-        <img className={css.imageShade} src='/tok.webp' alt='' style={style} />
+        <img alt='' className={css.imageShade} src='/tok.webp' style={style} />
       </picture>
     })}
-    <svg className={css.beams} viewBox={`0 0 ${sourceSize.width} ${sourceSize.height}`} aria-hidden='true'>
+    <svg aria-hidden='true' className={css.beams} viewBox={`0 0 ${sourceSize.width} ${sourceSize.height}`}>
       <defs>
         {beams.map((beam, index) => {
           const effect = beamEffects[index]
           return <linearGradient
-            key={index}
-            id={`beam-gradient-${index}`}
             gradientUnits='userSpaceOnUse'
+            id={`beam-gradient-${index}`}
+            key={index}
             x1={beam.startX}
-            y1={beam.startY}
             x2={beam.endX}
+            y1={beam.startY}
             y2={beam.endY}
           >
             <stop offset='0%' stopColor={effect.source} stopOpacity='1' />
@@ -139,29 +139,29 @@ const Tok: FunctionComponent = () => {
           </linearGradient>
         })}
         {beams.map((beam, index) => <filter
-          key={index}
+          colorInterpolationFilters='sRGB'
+          height='170%'
           id={`beam-edge-soften-${index}`}
+          key={index}
+          width='170%'
           x='-35%'
           y='-35%'
-          width='170%'
-          height='170%'
-          colorInterpolationFilters='sRGB'
         >
           <feGaussianBlur stdDeviation='18' />
         </filter>)}
         {beams.map((beam, index) => <mask
-          key={index}
+          height={sourceSize.height}
           id={`beam-mask-${index}`}
+          key={index}
           maskUnits='userSpaceOnUse'
+          width={sourceSize.width}
           x='0'
           y='0'
-          width={sourceSize.width}
-          height={sourceSize.height}
         >
           <polygon
-            points={toPoints(beam, 1.04)}
             fill='white'
             filter={`url(#beam-edge-soften-${index})`}
+            points={toPoints(beam, 1.04)}
           />
         </mask>)}
       </defs>
@@ -172,34 +172,34 @@ const Tok: FunctionComponent = () => {
           '--beam-duration': effect.duration,
         }
         const landingRotation = getBeamAngle(beam) + 90
-        return <g key={index} className={css.beam} style={style}>
+        return <g className={css.beam} key={index} style={style}>
           <g mask={`url(#beam-mask-${index})`}>
             <image
               className={css.beamTexture}
+              height={sourceSize.height}
               href='/tok.webp'
               width={sourceSize.width}
-              height={sourceSize.height}
             />
-            <polygon className={css.beamAtmosphere} points={toPoints(beam, 1.08)} fill={`url(#beam-gradient-${index})`} />
-            <polygon className={css.beamBody} points={toPoints(beam, 0.82)} fill={`url(#beam-gradient-${index})`} />
-            <polygon className={css.beamCore} points={toPoints(beam, 0.42)} fill={`url(#beam-gradient-${index})`} />
-            <polygon className={css.beamFlash} points={toPoints(beam, 0.58)} fill={effect.source} />
+            <polygon className={css.beamAtmosphere} fill={`url(#beam-gradient-${index})`} points={toPoints(beam, 1.08)} />
+            <polygon className={css.beamBody} fill={`url(#beam-gradient-${index})`} points={toPoints(beam, 0.82)} />
+            <polygon className={css.beamCore} fill={`url(#beam-gradient-${index})`} points={toPoints(beam, 0.42)} />
+            <polygon className={css.beamFlash} fill={effect.source} points={toPoints(beam, 0.58)} />
           </g>
           <ellipse
             className={css.beamSourceHalo}
             cx={beam.startX}
             cy={beam.startY}
+            fill={effect.source}
             rx={Math.max(42, beam.startWidth * 3.5)}
             ry={Math.max(42, beam.startWidth * 3.5)}
-            fill={effect.source}
           />
           <ellipse
             className={css.beamSourceRing}
             cx={beam.startX}
             cy={beam.startY}
+            fill='none'
             rx={Math.max(26, beam.startWidth * 1.8)}
             ry={Math.max(26, beam.startWidth * 1.8)}
-            fill='none'
             stroke={effect.core}
             strokeWidth='8'
           />
@@ -207,26 +207,26 @@ const Tok: FunctionComponent = () => {
             className={css.beamSourceCore}
             cx={beam.startX}
             cy={beam.startY}
+            fill={effect.source}
             rx={Math.max(15, beam.startWidth)}
             ry={Math.max(15, beam.startWidth)}
-            fill={effect.source}
           />
           <ellipse
             className={css.beamLandingGlow}
             cx={beam.endX}
             cy={beam.endY}
+            fill={effect.core}
             rx={beam.endWidth * 0.38}
             ry={beam.endWidth * 0.1}
-            fill={effect.core}
             transform={`rotate(${landingRotation} ${beam.endX} ${beam.endY})`}
           />
           <ellipse
             className={css.beamLandingCore}
             cx={beam.endX}
             cy={beam.endY}
+            fill={effect.source}
             rx={beam.endWidth * 0.24}
             ry={beam.endWidth * 0.045}
-            fill={effect.source}
             transform={`rotate(${landingRotation} ${beam.endX} ${beam.endY})`}
           />
         </g>

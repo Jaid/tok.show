@@ -10,9 +10,9 @@ import css from './style.module.sass'
 
 export type Theme = 'dark' | 'light'
 
-type ThemedSource = Record<Theme, string>
-
 export type SvgSource = ThemedSource | string
+
+type ThemedSource = Record<Theme, string>
 
 type Props = {
   alt?: string
@@ -28,7 +28,7 @@ type Props = {
   width?: ComponentProps<'img'>['width']
 }
 
-const getDefaultColorForTheme = (theme: Theme) => theme === 'light' ? 'black' : 'white'
+const getDefaultColorForTheme = (theme: Theme) => (theme === 'light' ? 'black' : 'white')
 const normalizeSvgSrc = (input: string, theme: Theme) => {
   if (/^\s*<svg\s/i.test(input)) {
     const themedInput = input.replaceAll('currentColor', getDefaultColorForTheme(theme))
@@ -87,7 +87,7 @@ const Svg: FunctionComponent<Props> = props => {
   if (!isThemed) {
     const className = clsx(props.className, elementClassNames)
     const normalizedSrc = normalizeSvgSrc(src as string, theme)
-    return <img {...imgProps} src={normalizedSrc} className={className} />
+    return <img {...imgProps} className={className} src={normalizedSrc} />
   }
   const defaultColorScheme = props.defaultColorScheme || 'dark'
   const alternativeColorScheme = defaultColorScheme === 'light' ? 'dark' : 'light'
@@ -97,7 +97,7 @@ const Svg: FunctionComponent<Props> = props => {
   const defaultSrc = normalizeSvgSrc((src as ThemedSource)[defaultColorScheme], defaultColorScheme)
   return <picture className={clsx(props.className, props.pictureClassName)}>
     {catcherElement}
-    <img {...imgProps} src={defaultSrc} className={clsx(elementClassNames)} />
+    <img {...imgProps} className={clsx(elementClassNames)} src={defaultSrc} />
   </picture>
 }
 

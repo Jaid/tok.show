@@ -20,8 +20,10 @@ const EditorFooter: FunctionComponent<Props> = ({shareUrl}) => {
     </div>
     <div className={css.footerRight}>
       <ThemeToggle />
-      <a className={css.shareLink} href={shareUrl} target="_blank" rel="noopener noreferrer"
-        title="Duplicate or share this session (right-click to copy link)">
+      <a
+        className={css.shareLink} href={shareUrl} rel='noopener noreferrer' target='_blank'
+        title='Duplicate or share this session (right-click to copy link)'
+      >
         <FaArrowUpRightFromSquare />
       </a>
     </div>

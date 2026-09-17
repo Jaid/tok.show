@@ -19,7 +19,6 @@ const emptyObjectSchema = {
   properties: {},
   additionalProperties: false,
 } as const
-
 const contentSourceOutputSchema = {
   oneOf: [
     {
@@ -39,17 +38,14 @@ const contentSourceOutputSchema = {
     },
   ],
 } as const
-
 const modelIdArraySchema = {
   type: 'array',
   items: modelIdSchema,
 } as const
-
 const errorMapSchema = {
   type: 'object',
   additionalProperties: {type: 'string'},
 } as const
-
 const guiOutputSchemas: Record<string, object> = {
   inspect: {
     type: 'object',
@@ -63,8 +59,14 @@ const guiOutputSchemas: Record<string, object> = {
               id: {type: 'string'},
               name: {type: 'string'},
               type: {enum: ['binary', 'text']},
-              bytes: {type: 'integer', minimum: 0},
-              characters: {type: 'integer', minimum: 0},
+              bytes: {
+                type: 'integer',
+                minimum: 0,
+              },
+              characters: {
+                type: 'integer',
+                minimum: 0,
+              },
             },
             required: ['id', 'name', 'type', 'bytes'],
             additionalProperties: false,
@@ -94,7 +96,10 @@ const guiOutputSchemas: Record<string, object> = {
           focused: {oneOf: [modelIdSchema, {type: 'null'}]},
           visible: modelIdArraySchema,
           hidden: modelIdArraySchema,
-          entries: {type: 'array', items: {type: 'string'}},
+          entries: {
+            type: 'array',
+            items: {type: 'string'},
+          },
         },
         required: ['focused', 'visible', 'hidden', 'entries'],
         additionalProperties: false,
@@ -125,8 +130,14 @@ const guiOutputSchemas: Record<string, object> = {
         properties: {
           type: {const: 'text'},
           text: {type: 'string'},
-          characters: {type: 'integer', minimum: 0},
-          bytes: {type: 'integer', minimum: 0},
+          characters: {
+            type: 'integer',
+            minimum: 0,
+          },
+          bytes: {
+            type: 'integer',
+            minimum: 0,
+          },
         },
         required: ['type', 'text', 'characters', 'bytes'],
         additionalProperties: false,
@@ -135,8 +146,18 @@ const guiOutputSchemas: Record<string, object> = {
         type: 'object',
         properties: {
           type: {const: 'binary'},
-          bytes: {type: 'array', items: {type: 'integer', minimum: 0, maximum: 255}},
-          byteLength: {type: 'integer', minimum: 0},
+          bytes: {
+            type: 'array',
+            items: {
+              type: 'integer',
+              minimum: 0,
+              maximum: 255,
+            },
+          },
+          byteLength: {
+            type: 'integer',
+            minimum: 0,
+          },
         },
         required: ['type', 'bytes', 'byteLength'],
         additionalProperties: false,
@@ -146,7 +167,10 @@ const guiOutputSchemas: Record<string, object> = {
   read_results: {
     type: 'object',
     properties: {
-      counts: {type: 'object', additionalProperties: {type: 'number'}},
+      counts: {
+        type: 'object',
+        additionalProperties: {type: 'number'},
+      },
       errors: errorMapSchema,
       average: {type: ['number', 'null']},
     },
@@ -157,8 +181,14 @@ const guiOutputSchemas: Record<string, object> = {
     type: 'object',
     properties: {
       source: contentSourceOutputSchema,
-      characters: {type: 'integer', minimum: 0},
-      bytes: {type: 'integer', minimum: 0},
+      characters: {
+        type: 'integer',
+        minimum: 0,
+      },
+      bytes: {
+        type: 'integer',
+        minimum: 0,
+      },
     },
     required: ['source', 'characters', 'bytes'],
     additionalProperties: false,
@@ -170,7 +200,6 @@ const guiOutputSchemas: Record<string, object> = {
     additionalProperties: false,
   },
 }
-
 const headlessOutputSchemas: Record<string, object> = {
   list_models: {
     type: 'object',
@@ -187,7 +216,10 @@ const headlessOutputSchemas: Record<string, object> = {
             kind: {type: 'string'},
             encoding: {type: 'string'},
             openrouter: {type: 'string'},
-            source: {type: 'object', additionalProperties: {type: 'string'}},
+            source: {
+              type: 'object',
+              additionalProperties: {type: 'string'},
+            },
           },
           required: ['id', 'name', 'subname', 'title', 'kind', 'source'],
           additionalProperties: true,
@@ -201,7 +233,13 @@ const headlessOutputSchemas: Record<string, object> = {
     type: 'object',
     properties: {
       source: contentSourceOutputSchema,
-      counts: {type: 'object', additionalProperties: {type: 'integer', minimum: 0}},
+      counts: {
+        type: 'object',
+        additionalProperties: {
+          type: 'integer',
+          minimum: 0,
+        },
+      },
       errors: errorMapSchema,
     },
     required: ['source', 'counts'],
@@ -211,7 +249,13 @@ const headlessOutputSchemas: Record<string, object> = {
     type: 'object',
     properties: {
       source: contentSourceOutputSchema,
-      tokens: {type: 'object', additionalProperties: {type: 'array', items: {type: 'integer'}}},
+      tokens: {
+        type: 'object',
+        additionalProperties: {
+          type: 'array',
+          items: {type: 'integer'},
+        },
+      },
       errors: errorMapSchema,
     },
     required: ['source', 'tokens'],
@@ -228,8 +272,14 @@ const headlessOutputSchemas: Record<string, object> = {
           items: {
             type: 'object',
             properties: {
-              start: {type: 'integer', minimum: 0},
-              end: {type: 'integer', minimum: 0},
+              start: {
+                type: 'integer',
+                minimum: 0,
+              },
+              end: {
+                type: 'integer',
+                minimum: 0,
+              },
             },
             required: ['start', 'end'],
             additionalProperties: false,
@@ -273,11 +323,23 @@ const headlessOutputSchemas: Record<string, object> = {
         items: {
           type: 'object',
           properties: {
-            index: {type: 'integer', minimum: 0},
+            index: {
+              type: 'integer',
+              minimum: 0,
+            },
             source: contentSourceOutputSchema,
-            characters: {type: 'integer', minimum: 0},
-            bytes: {type: 'integer', minimum: 0},
-            tokens: {type: 'integer', minimum: 0},
+            characters: {
+              type: 'integer',
+              minimum: 0,
+            },
+            bytes: {
+              type: 'integer',
+              minimum: 0,
+            },
+            tokens: {
+              type: 'integer',
+              minimum: 0,
+            },
             deltaFromFirst: {type: 'integer'},
             ratioToFirst: {type: ['number', 'null']},
           },
@@ -291,8 +353,17 @@ const headlessOutputSchemas: Record<string, object> = {
           minimum: {
             type: 'object',
             properties: {
-              tokens: {type: 'integer', minimum: 0},
-              cases: {type: 'array', items: {type: 'integer', minimum: 0}},
+              tokens: {
+                type: 'integer',
+                minimum: 0,
+              },
+              cases: {
+                type: 'array',
+                items: {
+                  type: 'integer',
+                  minimum: 0,
+                },
+              },
             },
             required: ['tokens', 'cases'],
             additionalProperties: false,
@@ -300,13 +371,25 @@ const headlessOutputSchemas: Record<string, object> = {
           maximum: {
             type: 'object',
             properties: {
-              tokens: {type: 'integer', minimum: 0},
-              cases: {type: 'array', items: {type: 'integer', minimum: 0}},
+              tokens: {
+                type: 'integer',
+                minimum: 0,
+              },
+              cases: {
+                type: 'array',
+                items: {
+                  type: 'integer',
+                  minimum: 0,
+                },
+              },
             },
             required: ['tokens', 'cases'],
             additionalProperties: false,
           },
-          spread: {type: 'integer', minimum: 0},
+          spread: {
+            type: 'integer',
+            minimum: 0,
+          },
         },
         required: ['minimum', 'maximum', 'spread'],
         additionalProperties: false,
@@ -325,11 +408,10 @@ const headlessOutputSchemas: Record<string, object> = {
     additionalProperties: false,
   },
 }
-
 const documentTools = (group: WebmcpToolGroup, tools: ReadonlyArray<WebMCP.ModelContextTool>, outputSchemas: Record<string, object>): Array<WebmcpToolDocumentation> => tools.map(tool => {
   const outputSchema = outputSchemas[tool.name]
   if (!outputSchema) {
-    throw new Error('Missing WebMCP output schema documentation for \u201C' + tool.name + '\u201D.')
+    throw new Error(`Missing WebMCP output schema documentation for \u{201C}${tool.name}\u{201D}.`)
   }
   return {
     annotations: tool.annotations,
@@ -341,7 +423,6 @@ const documentTools = (group: WebmcpToolGroup, tools: ReadonlyArray<WebMCP.Model
     title: tool.title,
   }
 })
-
 const documentationBridge = () => ({setText: (_value: string) => {}})
 
 export const webmcpToolDocumentation = [

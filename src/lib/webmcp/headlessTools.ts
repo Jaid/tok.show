@@ -10,11 +10,9 @@ import {buildPermalink, defaultPermalinkState} from './permalink.ts'
 import {assertObjectProperties, getExecutionSignal, getModelId, getModelIds, modelIdSchema, modelSelectionSchema} from './shared.ts'
 
 const textEncoder = new TextEncoder
-
 const modelProperties = {
   models: modelSelectionSchema,
 } as const
-
 const contentAndModelSchema = {
   type: 'object',
   properties: {
@@ -24,10 +22,11 @@ const contentAndModelSchema = {
   ...contentSourceRequirement,
   additionalProperties: false,
 } as const
-
-const getErrorMessage = (error: unknown) => error instanceof Error ? error.message : String(error)
-
-const runForModels = async <Value>(selectedModelIds: ReadonlyArray<ModelId>, signal: AbortSignal, operation: (modelId: ModelId) => Value): Promise<{errors: Record<string, string>, values: Partial<Record<ModelId, Value>>}> => {
+const getErrorMessage = (error: unknown) => Error.isError(error) ? error.message : String(error)
+const runForModels = async <Value>(selectedModelIds: ReadonlyArray<ModelId>, signal: AbortSignal, operation: (modelId: ModelId) => Value): Promise<{
+  errors: Record<string, string>
+  values: Partial<Record<ModelId, Value>>
+}> => {
   const entries = await Promise.all(selectedModelIds.map(async modelId => {
     signal.throwIfAborted()
     try {
@@ -47,14 +46,18 @@ const runForModels = async <Value>(selectedModelIds: ReadonlyArray<ModelId>, sig
       values[modelId] = result.value
     }
   }
-  return {values, errors}
+  return {
+    values,
+    errors,
+  }
 }
-
-const withErrors = <Value>(key: string, result: {errors: Record<string, string>, values: Partial<Record<ModelId, Value>>}) => ({
+const withErrors = <Value>(key: string, result: {
+  errors: Record<string, string>
+  values: Partial<Record<ModelId, Value>>
+}) => ({
   [key]: result.values,
-  ...(Object.keys(result.errors).length ? {errors: result.errors} : {}),
+  ...Object.keys(result.errors).length ? {errors: result.errors} : {},
 })
-
 const getCompareCase = (text: string, count: number, index: number, source: unknown, baseline: number) => ({
   index,
   source,
@@ -152,12 +155,16 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       const signal = getExecutionSignal(options)
       const content = await resolveContentSource(input, signal)
       const selectedModelIds = getModelIds(input.models)
-      const spanInputs: Partial<Record<ModelId, {type: 'original'} | {type: 'processed', text: string}>> = {}
+      const spanInputs: Partial<Record<ModelId, {
+        text: string
+        type: 'processed'
+      } | {type: 'original'}>> = {}
       const result = await runForModels(selectedModelIds, signal, modelId => {
         const tokenization = tokenizeLoaded(content.text, modelId)
-        spanInputs[modelId] = tokenization.processedInput === undefined
-          ? {type: 'original'}
-          : {type: 'processed', text: tokenization.processedInput}
+        spanInputs[modelId] = tokenization.processedInput === undefined ? {type: 'original'} : {
+          type: 'processed',
+          text: tokenization.processedInput,
+        }
         return getTokenSpans({
           offsets: tokenization.offsets,
           originalInput: content.text,
@@ -220,8 +227,8 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       await load(modelId)
       signal.throwIfAborted()
       const counts = cases.map(content => countLoaded(content.text, modelId))
-      const baseline = counts[0]!
-      const comparedCases = cases.map((content, index) => getCompareCase(content.text, counts[index]!, index, content.source, baseline))
+      const baseline = counts[0]
+      const comparedCases = cases.map((content, index) => getCompareCase(content.text, counts[index], index, content.source, baseline))
       const minimum = Math.min(...counts)
       const maximum = Math.max(...counts)
       return {
@@ -270,8 +277,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       const signal = getExecutionSignal(options)
       const content = await resolveContentSource(input, signal)
       const selectedModelIds = getModelIds(input.models, defaultPermalinkState.models)
-      let focusedModel = input.model === undefined
-        ? selectedModelIds.includes(defaultPermalinkState.model!) ? defaultPermalinkState.model! : selectedModelIds[0]!
+      const focusedModel = input.model === undefined ? selectedModelIds.includes(defaultPermalinkState.model!) ? defaultPermalinkState.model! : selectedModelIds[0]!
         : getModelId(input.model)
       if (!selectedModelIds.includes(focusedModel)) {
         selectedModelIds.push(focusedModel)

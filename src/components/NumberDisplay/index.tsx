@@ -40,7 +40,7 @@ const NumberDisplay: FunctionComponent<Props> = props => {
     if (!props.suffix) {
       return
     }
-    const plural = props.suffixPlural === true ? props.value === 1 ? props.suffix : `${props.suffix}s` : typeof props.suffixPlural === 'function' ? props.suffixPlural(props.value, props.suffix) : props.suffix
+    const plural = props.suffixPlural === true ? (props.value === 1 ? props.suffix : `${props.suffix}s`) : (typeof props.suffixPlural === 'function' ? props.suffixPlural(props.value, props.suffix) : props.suffix)
     if (!props.gluedSuffix) {
       return ` ${plural}`
     }
@@ -59,12 +59,12 @@ const NumberDisplay: FunctionComponent<Props> = props => {
     while (remaining > 0) {
       const chunk = remaining % 1000
       remaining = Math.floor(remaining / 1000)
-      elements.unshift(<span key={elements.length} className={clsx(props.chunkClassName, css.chunk)}>{chunk}</span>)
+      elements.unshift(<span className={clsx(props.chunkClassName, css.chunk)} key={elements.length}>{chunk}</span>)
     }
     return elements
   }
   const numberParts = getNumberParts()
-  const numberElement = <span ref={props.numberRef} className={clsx(props.numberClassName, css.number)}>{numberParts}</span>
+  const numberElement = <span className={clsx(props.numberClassName, css.number)} ref={props.numberRef}>{numberParts}</span>
   return <span className={clsx(props.className, css.element)}>
     {prefixElement}
     {numberElement}

@@ -1,20 +1,19 @@
+import type {WebmcpUiBridge} from './tools.ts'
+
 import {getAverageCount, getHiddenModelIds, getVisibleModelIds, state, updateActiveInputTab} from '#src/lib/state.ts'
 import {isUiTokenizationIdle, waitForUiTokenizationIdle} from '#src/lib/tokenManager.ts'
 
 import {contentSourceProperties, contentSourceRequirement, resolveContentSource} from './contentSource.ts'
 import {buildPermalink} from './permalink.ts'
 import {assertObjectProperties, getExecutionSignal} from './shared.ts'
-import type {WebmcpUiBridge} from './tools.ts'
 
 const textEncoder = new TextEncoder
-
 const emptySchema = {
   type: 'object',
   properties: {},
   additionalProperties: false,
 } as const
-
-const getActiveInputTab = () => state.inputTabs.find(tab => tab.id === state.activeInputTabId) ?? state.inputTabs[0]!
+const getActiveInputTab = () => state.inputTabs.find(tab => tab.id === state.activeInputTabId) ?? state.inputTabs[0]
 
 export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.ModelContextTool> => [
   {
@@ -36,7 +35,7 @@ export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.Mo
             name: tab.name,
             type: tab.isBinary ? 'binary' : 'text',
             bytes: tab.isBinary ? tab.binaryData?.byteLength ?? 0 : textEncoder.encode(tab.text).byteLength,
-            ...(tab.isBinary ? {} : {characters: tab.text.length}),
+            ...tab.isBinary ? {} : {characters: tab.text.length},
           },
           tabs: state.inputTabs.map(inputTab => ({
             id: inputTab.id,
@@ -53,7 +52,7 @@ export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.Mo
           entries: [...state.visibleEntries],
         },
         output: {
-          tab: state.activeTab === 'webmcp' ? 'webmcp' : state.focusedId ? state.activeTab : 'preprocessed',
+          tab: state.activeTab === 'webmcp' ? 'webmcp' : (state.focusedId ? state.activeTab : 'preprocessed'),
         },
         tokenization: {
           idle: isUiTokenizationIdle(),
@@ -77,7 +76,7 @@ export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.Mo
         const bytes = tab.binaryData ?? new Uint8Array
         return {
           type: 'binary',
-          bytes: Array.from(bytes),
+          bytes: [...bytes],
           byteLength: bytes.byteLength,
         }
       }

@@ -12,8 +12,10 @@ type Props = {
 }
 
 const OutputHeader: FunctionComponent<Props> = ({children, currentTab, onTabChange, showModelTabs}) => {
-  const modelTabs: Array<{id: OutputTab
-    label: string}> = [
+  const modelTabs: Array<{
+    id: OutputTab
+    label: string
+  }> = [
     {
       id: 'tokenized',
       label: 'tokenized',
@@ -23,13 +25,15 @@ const OutputHeader: FunctionComponent<Props> = ({children, currentTab, onTabChan
       label: 'IDs',
     },
   ]
-  const tabs: Array<{id: OutputTab
-    label: string}> = [
+  const tabs: Array<{
+    id: OutputTab
+    label: string
+  }> = [
     {
       id: 'preprocessed',
       label: 'preprocessed',
     },
-    ...(showModelTabs ? modelTabs : []),
+    ...showModelTabs ? modelTabs : [],
     {
       id: 'webmcp',
       label: 'WebMCP',

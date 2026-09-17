@@ -42,8 +42,18 @@ describe('components', () => {
   })
   test('TokenizedText renders an actual line break after hex newline tokens', async () => {
     const cases = [
-      {hexDisplay: '0a', input: '\nX', lineBreakByteEnd: 1, text: '\n'},
-      {hexDisplay: '0d 0a', input: '\r\nX', lineBreakByteEnd: 2, text: '\r\n'},
+      {
+        hexDisplay: '0a',
+        input: '\nX',
+        lineBreakByteEnd: 1,
+        text: '\n',
+      },
+      {
+        hexDisplay: '0d 0a',
+        input: '\r\nX',
+        lineBreakByteEnd: 2,
+        text: '\r\n',
+      },
     ]
     for (const tokenCase of cases) {
       const html = await render('TokenizedText', {

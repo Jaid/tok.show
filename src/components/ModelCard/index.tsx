@@ -23,23 +23,24 @@ type Props = {
 
 const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, isLoading, error, onClick, handleRef, ref}) => {
   const stage = useStage()
-  return <div ref={ref} className={clsx(css.container, isLoading && css.loading, isFocused && css.focused, isBest && css.best)}
-    onClick={onClick}
-    role={onClick ? 'button' : undefined}
-    tabIndex={onClick ? 0 : undefined}
+  return <div
+    className={clsx(css.container, isLoading && css.loading, isFocused && css.focused, isBest && css.best)} onClick={onClick}
     onKeyDown={onClick ? e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
         onClick()
       }
     } : undefined}
+    ref={ref}
+    role={onClick ? 'button' : undefined}
+    tabIndex={onClick ? 0 : undefined}
     title={error ?? undefined}
   >
     {stage === 'editing' && <div className={css.triangle}>⏶</div>}
     {stage === 'editing' && <div className={css.count}>
-      {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <TokenCount className={css.countElement} suffixClassName={css.countLabel} numberClassName={css.countNumber} value={count} /> : <span className={css.countNa}>–</span>}
+      {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <TokenCount className={css.countElement} numberClassName={css.countNumber} suffixClassName={css.countLabel} value={count} /> : <span className={css.countNa}>–</span>}
     </div>}
-    <div ref={handleRef} className={css.profile}>
+    <div className={css.profile} ref={handleRef}>
       <ModelProfile model={model} />
     </div>
   </div>

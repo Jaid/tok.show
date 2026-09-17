@@ -29,16 +29,16 @@ const DraggableAverageCard: FunctionComponent<Props> = ({averageCount, index, is
   }
   const subname = visibleModelCount >= 2 ? `of ${visibleModelCount} models` : undefined
   return (
-    <div ref={ref} className={css.item}>
+    <div className={css.item} ref={ref}>
       <ModelCard
+        count={averageCount}
+        handleRef={handleRef}
+        isBest={isBest}
         model={{
           icon: averageIcon,
           name: 'Average',
           subname,
         }}
-        count={averageCount}
-        isBest={isBest}
-        handleRef={handleRef}
       />
     </div>
   )

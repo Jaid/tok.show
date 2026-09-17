@@ -1,11 +1,11 @@
+import type {TabbedViewContextValue, TabbedViewKey, TabbedViewProps, TabDefinition, TabProps} from '../types.ts'
 import type {Key, ReactElement, ReactNode} from 'react'
 
 import clsx from 'clsx'
 import {Children, isValidElement, useState} from 'react'
 
-import {Tab} from '../Tab/index.tsx'
 import {TabbedViewContext} from '../context.ts'
-import type {TabDefinition, TabbedViewContextValue, TabbedViewKey, TabbedViewProps, TabProps} from '../types.ts'
+import {Tab} from '../Tab/index.tsx'
 
 import css from './style.module.sass'
 
@@ -18,7 +18,6 @@ const getTabKey = <TabKey extends TabbedViewKey>(tabKey: TabKey | undefined, ele
   }
   return String(elementKey) as TabKey
 }
-
 const isTabElement = <TabKey extends TabbedViewKey>(child: ReactNode): child is ReactElement<TabProps<TabKey>> => {
   return isValidElement<TabProps<TabKey>>(child) && child.type === Tab
 }
@@ -62,18 +61,18 @@ export const TabbedView = <TabKey extends TabbedViewKey = TabbedViewKey>({active
   } satisfies TabbedViewContextValue<TabKey>
   return <TabbedViewContext.Provider value={context as unknown as TabbedViewContextValue}>
     <div className={clsx(css.container, className)} data-tab-index={tabIndex} data-tab-key={tabKey}>
-      <div className={css.tabs} role="tablist">
+      <div className={css.tabs} role='tablist'>
         {tabs.map(tab => {
           const isActive = tab.key === tabKey
           return <button
-            key={tab.key}
             aria-selected={isActive}
             className={clsx(css.tab, tabClassName, isActive && css.activeTab)}
             disabled={tab.disabled}
+            key={tab.key}
             onClick={() => selectTab(tab.key)}
-            role="tab"
+            role='tab'
             title={tab.title}
-            type="button"
+            type='button'
           >
             {tab.label}
           </button>

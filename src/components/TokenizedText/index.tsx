@@ -53,7 +53,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
     const supported: Array<string> = []
     const visibleSet = new Set(getVisibleModelIds())
     // Check all models concurrently, loading hidden ones temporarily
-    const checks = [...modelsMap.entries()].map(async ([id, model]) => {
+    const checks = [...modelsMap].map(async ([id, model]) => {
       const wasLoaded = model.loaded
       try {
         await model.load()
@@ -126,7 +126,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
     )
   }
   return (
-    <div ref={containerRef} className={css.container}>
+    <div className={css.container} ref={containerRef}>
       {spans.map((span, i) => {
         const isOdd = i % 2 === 0
         const isClicked = clickedSpan?.index === i
@@ -136,14 +136,14 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
           <Fragment key={i}>
             <span
               className={clsx(css.token, !isOdd && css.tokenEven, isClicked && css.tokenClicked, span.isNonRepresentable && css.tokenHex)}
+              onClick={e => handleSpanClick(span, e)}
               onMouseEnter={() => handleMouseEnter(span)}
               onMouseLeave={handleMouseLeave}
-              onClick={e => handleSpanClick(span, e)}
               {...(isClicked ? getReferenceProps() : {})}
               data-token-id={span.id}
               data-token-index={span.index}
             >
-              {span.isNonRepresentable && span.hexDisplay ? span.hexDisplay.split(' ').map((hexByte, hi) => <span key={hi} className={css.hexByte}>{hexByte}</span>) : getSpanText(span)}
+              {span.isNonRepresentable && span.hexDisplay ? span.hexDisplay.split(' ').map((hexByte, hi) => <span className={css.hexByte} key={hi}>{hexByte}</span>) : getSpanText(span)}
             </span>
             {lineBreaks}
           </Fragment>
@@ -152,9 +152,9 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
 
       {tooltipOpen && clickedSpan
         && <div
+          className={css.tooltip}
           ref={refs.setFloating}
           style={floatingStyles}
-          className={css.tooltip}
           {...getFloatingProps()}
         >
           <div className={css.tooltipRow}>
@@ -181,8 +181,8 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
                     return null
                   }
                   return (
-                    <span key={id} className={css.supportedIcon} title={m.title} role="img" aria-label={m.title}>
-                      <Svg alt="" src={m.icon} />
+                    <span aria-label={m.title} className={css.supportedIcon} key={id} role='img' title={m.title}>
+                      <Svg alt='' src={m.icon} />
                     </span>
                   )
                 })}
@@ -201,7 +201,7 @@ function getSpanText(span: TokenSpan): string {
   if (span.isNonRepresentable && span.hexDisplay) {
     return span.hexDisplay
   }
-  return span.text || '\u2423'
+  return span.text || '\u{2423}'
 }
 function getArtificialLineBreaks(span: TokenSpan) {
   if (!span.isNonRepresentable || !span.hexDisplay) {

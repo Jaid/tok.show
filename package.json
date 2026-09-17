@@ -4,6 +4,12 @@
   "version": "0.1.0",
   "type": "module",
   "description": "web app for local LLM tokenization with support for a wide range of popular models and vocabularies",
+  "funding": "https://github.com/sponsors/Jaid",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jaid/tok.show.git"
+  },
   "imports": {
     "#component/*": "./src/components/*/index.tsx",
     "#src/*": "./src/*",
@@ -74,11 +80,5 @@
   },
   "workspaces": [
     "packages/*"
-  ],
-  "funding": "https://github.com/sponsors/Jaid",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Jaid/tok.show.git"
-  }
+  ]
 }

@@ -15,8 +15,8 @@ export default abstract class Model {
   initiallyVisible = false
   loaded = false
   loadPromise: Promise<ModelId> | undefined
-  get title() {
-    return models[this.id].title
+  constructor(id: ModelId) {
+    this.id = id
   }
 
   get name() {
@@ -30,13 +30,13 @@ export default abstract class Model {
 
   get subname() {
     if (compactNameOverrides[this.id]) {
-      return undefined
+      return
     }
     return this.title.slice(this.name.length).replace(/^[\s-]+/, '') || undefined
   }
 
-  constructor(id: ModelId) {
-    this.id = id
+  get title() {
+    return models[this.id].title
   }
 
   async load() {

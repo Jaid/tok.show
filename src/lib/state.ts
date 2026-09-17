@@ -46,7 +46,7 @@ export const state = proxy({
   text: '',
   isBinary: false,
   binaryData: null as Uint8Array | null,
-  activeInputTabId: 'input' as InputTabId,
+  activeInputTabId: 'input',
   inputTabs: [{
     id: 'input',
     name: 'input.txt',
@@ -65,11 +65,6 @@ export const state = proxy({
 })
 
 let nextInputTabId = 1
-
-function getActiveInputTab(): InputTab {
-  return state.inputTabs.find(tab => tab.id === state.activeInputTabId) ?? state.inputTabs[0]!
-}
-
 export function syncInputStateFromActiveTab(): void {
   const tab = getActiveInputTab()
   state.text = tab.text
@@ -92,7 +87,6 @@ export function updateActiveInputTab(value: Pick<InputTab, 'binaryData' | 'isBin
   tab.binaryData = value.binaryData
   syncInputStateFromActiveTab()
 }
-
 
 export function createInputTab(input: Omit<InputTab, 'id'>): InputTab {
   const tab: InputTab = {
@@ -138,4 +132,8 @@ export function getAverageCount(): number | null {
   }
   const sum = counts.reduce((a, b) => a + b, 0)
   return Math.round(sum / counts.length * 10) / 10
+}
+
+function getActiveInputTab(): InputTab {
+  return state.inputTabs.find(tab => tab.id === state.activeInputTabId) ?? state.inputTabs[0]
 }

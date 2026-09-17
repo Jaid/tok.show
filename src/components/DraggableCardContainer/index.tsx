@@ -49,11 +49,10 @@ const getBestEntryIds = (counts: Record<string, number>, entries: Array<EntryId>
   }
   const values = [...allCounts.values()]
   const min = Math.min(...values)
-  const winners = [...allCounts.entries()].filter(([, c]) => c === min).map(([id]) => id)
+  const winners = [...allCounts].filter(([, c]) => c === min).map(([id]) => id)
   return new Set(winners)
 }
-const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, modelsById, counts, errors, focusedId, loadingSet,
-  onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}) => {
+const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, modelsById, counts, errors, focusedId, loadingSet, onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}) => {
   const bestEntryIds = getBestEntryIds(counts, entries)
   const handleDragEnd = (event: DragEndEvent) => {
     if (event.canceled) {
@@ -88,10 +87,10 @@ const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, mo
           if (entry === 'average') {
             return (
               <DraggableAverageCard
-                key="average"
                 averageCount={averageCount}
                 index={index}
                 isBest={bestEntryIds.has('average')}
+                key='average'
                 showAverage={showAverage}
                 visibleModelCount={visibleModelCount}
               />
@@ -103,15 +102,15 @@ const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, mo
           }
           return (
             <DraggableCard
-              key={entry}
-              id={entry}
-              index={index}
-              model={model}
               count={counts[entry] ?? null}
               error={errors[entry] ?? null}
+              id={entry}
+              index={index}
               isBest={bestEntryIds.has(entry)}
               isFocused={focusedId === entry}
               isLoading={loadingSet.has(entry)}
+              key={entry}
+              model={model}
               onClick={() => onFocus(entry)}
             />
           )

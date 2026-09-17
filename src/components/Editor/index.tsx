@@ -13,8 +13,10 @@ import {getTextRangeFromByteRange} from '#src/lib/tokenization.ts'
 
 import css from './style.module.sass'
 
-export type EditorHighlightRange = {end: number
-  start: number}
+export type EditorHighlightRange = {
+  end: number
+  start: number
+}
 
 export type EditorHandle = {
   setHighlightRange: (range: EditorHighlightRange | null) => void
@@ -98,10 +100,10 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
   if (!useMonaco) {
     return <textarea
       className={css.textarea}
-      value={value}
       onChange={e => onChange(e.currentTarget.value)}
       readOnly={readOnly}
       spellCheck={false}
+      value={value}
     />
   }
   const monacoOptions: ComponentProps<typeof MonacoEditor>['options'] = {
@@ -135,13 +137,13 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
   }
   return <div className={css.container}>
     <MonacoEditor
-      value={value}
+      beforeMount={ensureTheme}
+      language='plaintext'
       onChange={handleChange}
       onMount={handleMount}
-      beforeMount={ensureTheme}
-      theme={monacoThemeByTheme[theme]}
-      language='plaintext'
       options={monacoOptions}
+      theme={monacoThemeByTheme[theme]}
+      value={value}
     />
   </div>
 }

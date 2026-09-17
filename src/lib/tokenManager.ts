@@ -4,9 +4,8 @@ import modelsMap from '#src/lib/models/index.ts'
 import {getVisibleModelIds, state} from '#src/lib/state.ts'
 
 let pendingUiTokenizationOperations = 0
-const uiTokenizationListeners = new Set<() => void>()
-
-const getCurrentInput = (): TokenizeInput => state.isBinary && state.binaryData ? state.binaryData : state.text
+const uiTokenizationListeners = new Set<() => void>
+const getCurrentInput = (): TokenizeInput => (state.isBinary && state.binaryData ? state.binaryData : state.text)
 
 const inputsEqual = (left: TokenizeInput, right: TokenizeInput): boolean => {
   if (typeof left === 'string' || typeof right === 'string') {
@@ -14,14 +13,13 @@ const inputsEqual = (left: TokenizeInput, right: TokenizeInput): boolean => {
   }
   return left.byteLength === right.byteLength && left.every((byte, index) => byte === right[index])
 }
-
 const emitUiTokenizationChange = () => {
   for (const listener of uiTokenizationListeners) {
     listener()
   }
 }
 
-export const beginUiTokenization = (): (() => void) => {
+export const beginUiTokenization = (): () => void => {
   pendingUiTokenizationOperations++
   emitUiTokenizationChange()
   let ended = false
@@ -100,7 +98,7 @@ export async function loadModel(modelId: ModelId): Promise<void> {
     state.modelStates[modelId].loading = false
   } catch (error) {
     console.error(`Failed to load model ${modelId}:`, error)
-    state.modelStates[modelId].error = error instanceof Error ? error.message : String(error)
+    state.modelStates[modelId].error = Error.isError(error) ? error.message : String(error)
     state.modelStates[modelId].loading = false
   }
 }
@@ -136,7 +134,7 @@ const tokenizeLoadedModel = (modelId: ModelId, input: TokenizeInput): boolean =>
     state.modelStates[modelId].error = null
     return true
   } catch (error) {
-    state.modelStates[modelId].error = error instanceof Error ? error.message : String(error)
+    state.modelStates[modelId].error = Error.isError(error) ? error.message : String(error)
     return false
   }
 }

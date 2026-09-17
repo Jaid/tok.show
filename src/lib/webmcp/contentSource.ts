@@ -1,7 +1,10 @@
 import {maxInputCharacters} from './shared.ts'
 
 export type ResolvedContentSource = {
-  source: {type: 'text'} | {type: 'url', url: string}
+  source: {type: 'text'} | {
+    type: 'url'
+    url: string
+  }
   text: string
 }
 
@@ -19,8 +22,14 @@ export const contentSourceProperties = {
 
 export const contentSourceRequirement = {
   oneOf: [
-    {required: ['text'], not: {required: ['url']}},
-    {required: ['url'], not: {required: ['text']}},
+    {
+      required: ['text'],
+      not: {required: ['url']},
+    },
+    {
+      required: ['url'],
+      not: {required: ['text']},
+    },
   ],
 } as const
 
@@ -30,7 +39,6 @@ const validateText = (text: string): string => {
   }
   return text
 }
-
 const resolveUrl = (value: string): URL => {
   let url: URL
   try {
@@ -43,7 +51,6 @@ const resolveUrl = (value: string): URL => {
   }
   return url
 }
-
 const readResponseText = async (response: Response, signal: AbortSignal): Promise<string> => {
   if (!response.body) {
     return validateText(await response.text())

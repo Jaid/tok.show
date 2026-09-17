@@ -46,23 +46,25 @@ const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(({h
   return (
     <>
       <button
-        ref={setRefs}
         className={clsx(css.element, isDropTarget && css.dropTarget)}
+        ref={setRefs}
         {...getReferenceProps()}
       >
         {`+ ${count}`}
       </button>
       {isOpen
           && <div
+            className={css.popover}
             ref={refs.setFloating}
             style={floatingStyles}
-            className={css.popover}
             {...getFloatingProps()}
           >
-            <HiddenCardStash models={hiddenModels} onUnhide={id => {
-              onUnhide(id)
-              setIsOpen(false)
-            }} />
+            <HiddenCardStash
+              models={hiddenModels} onUnhide={id => {
+                onUnhide(id)
+                setIsOpen(false)
+              }}
+            />
           </div>
       }
     </>

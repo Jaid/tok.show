@@ -36,7 +36,7 @@ export const modelSelectionSchema = {
 } as const
 
 // Chrome 152 does not yet pass execution options; Chrome 153+ follows the current draft.
-const fallbackExecutionSignal = new AbortController().signal
+const fallbackExecutionSignal = (new AbortController).signal
 
 export const getExecutionSignal = (options: WebMCP.ToolExecuteCallbackOptions | undefined): AbortSignal => options?.signal ?? fallbackExecutionSignal
 

@@ -21,7 +21,7 @@ export const encodeUtf8 = (text: string) => utf8Encoder.encode(text)
 
 export const decodeUtf8 = (bytes: Uint8Array) => utf8Decoder.decode(bytes)
 
-const toInputBytes = (input: TokenizeInput) => typeof input === 'string' ? encodeUtf8(input) : input
+const toInputBytes = (input: TokenizeInput) => (typeof input === 'string' ? encodeUtf8(input) : input)
 
 const getTokenStartOffsets = (tokenizeResult: RawTokenizeResult) => [0, ...tokenizeResult.offsets]
 
@@ -37,7 +37,7 @@ export const bytesToHexPairs = (bytes: Uint8Array) => Array.from(bytes, byte => 
 
 export const bytesToHex = (bytes: Uint8Array) => bytesToHexPairs(bytes).join(' ')
 
-const controlCharacterPattern = /[\u0000-\u0008\v\f\u000E-\u001F\u007F\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF\uFFFD]/u
+const controlCharacterPattern = /[\u{0}-\u{8}\v\f\u{E}-\u{1F}\u{7F}\u{200B}-\u{200F}\u{202A}-\u{202E}\u{2060}-\u{206F}\u{FEFF}\u{FFFD}]/u
 const visibleContentPattern = /[\p{Letter}\p{Mark}\p{Number}\p{Punctuation}\p{Separator}\p{Symbol}]/u
 
 export const isVisuallyRepresentable = (text: string) => {
@@ -112,4 +112,4 @@ export const getTextRangeFromByteRange = (text: string, range: ByteRange) => {
   }
 }
 
-export const formatTokenCount = (value: number | undefined) => value === undefined ? '…' : value.toLocaleString('en-US')
+export const formatTokenCount = (value: number | undefined) => (value === undefined ? '…' : value.toLocaleString('en-US'))

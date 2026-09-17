@@ -38,7 +38,7 @@ const getCommonConfig = () => {
                 params: {
                   delim: '',
                   prefix: (element, context) => {
-                    void element
+                    element
                     if (!context.path) {
                       return ''
                     }
