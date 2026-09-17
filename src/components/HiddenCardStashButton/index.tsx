@@ -55,8 +55,8 @@ const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(({h
       {isOpen
           && <div
             className={css.popover}
-            ref={refs.setFloating}
             style={floatingStyles}
+            ref={refs.setFloating}
             {...getFloatingProps()}
           >
             <HiddenCardStash

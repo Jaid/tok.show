@@ -14,9 +14,9 @@ const HexViewer: FunctionComponent<Props> = ({bytes}) => {
     rows.push(bytes.slice(index, index + 16))
   }
   return <div className={css.container}>
-    {rows.map((row, rowIndex) => <div className={css.row} key={rowIndex}>
+    {rows.map((row, rowIndex) => <div key={rowIndex} className={css.row}>
       <span className={css.offset}>{(rowIndex * 16).toString(16).padStart(8, '0')}</span>
-      <span className={css.hex}>{bytesToHexPairs(row).map((pair, pairIndex) => <span className={css.byte} key={pairIndex}>{pair}</span>)}</span>
+      <span className={css.hex}>{bytesToHexPairs(row).map((pair, pairIndex) => <span key={pairIndex} className={css.byte}>{pair}</span>)}</span>
     </div>)}
   </div>
 }

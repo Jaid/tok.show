@@ -65,14 +65,14 @@ export const TabbedView = <TabKey extends TabbedViewKey = TabbedViewKey>({active
         {tabs.map(tab => {
           const isActive = tab.key === tabKey
           return <button
-            aria-selected={isActive}
-            className={clsx(css.tab, tabClassName, isActive && css.activeTab)}
-            disabled={tab.disabled}
             key={tab.key}
-            onClick={() => selectTab(tab.key)}
+            className={clsx(css.tab, tabClassName, isActive && css.activeTab)}
+            aria-selected={isActive}
+            disabled={tab.disabled}
             role='tab'
             title={tab.title}
             type='button'
+            onClick={() => selectTab(tab.key)}
           >
             {tab.label}
           </button>

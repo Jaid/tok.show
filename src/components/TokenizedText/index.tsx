@@ -143,7 +143,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
               data-token-id={span.id}
               data-token-index={span.index}
             >
-              {span.isNonRepresentable && span.hexDisplay ? span.hexDisplay.split(' ').map((hexByte, hi) => <span className={css.hexByte} key={hi}>{hexByte}</span>) : getSpanText(span)}
+              {span.isNonRepresentable && span.hexDisplay ? span.hexDisplay.split(' ').map((hexByte, hi) => <span key={hi} className={css.hexByte}>{hexByte}</span>) : getSpanText(span)}
             </span>
             {lineBreaks}
           </Fragment>
@@ -153,8 +153,8 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
       {tooltipOpen && clickedSpan
         && <div
           className={css.tooltip}
-          ref={refs.setFloating}
           style={floatingStyles}
+          ref={refs.setFloating}
           {...getFloatingProps()}
         >
           <div className={css.tooltipRow}>
@@ -181,7 +181,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
                     return null
                   }
                   return (
-                    <span aria-label={m.title} className={css.supportedIcon} key={id} role='img' title={m.title}>
+                    <span key={id} className={css.supportedIcon} aria-label={m.title} role='img' title={m.title}>
                       <Svg alt='' src={m.icon} />
                     </span>
                   )

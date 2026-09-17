@@ -14,12 +14,12 @@ const WebmcpDocumentation: FunctionComponent = () => {
       <h2>WebMCP tools</h2>
       <p>TokShow automatically registers these tools with the browser’s model context. They are grouped into GUI tools (that read or change this tab’s DOM state) and headless tools (that operate in the background and don’t interfere with human users).</p>
     </header>
-    {groups.map(group => <section className={css.group} key={group}>
+    {groups.map(group => <section key={group} className={css.group}>
       <div className={css.groupHeading}>
         <h3>{group}</h3>
         <span>{webmcpToolDocumentation.filter(tool => tool.group === group).length} tools</span>
       </div>
-      {webmcpToolDocumentation.filter(tool => tool.group === group).map(tool => <article className={css.tool} key={tool.name}>
+      {webmcpToolDocumentation.filter(tool => tool.group === group).map(tool => <article key={tool.name} className={css.tool}>
         <div className={css.toolHeading}>
           <div>
             <code className={css.toolName}>{tool.name}</code>

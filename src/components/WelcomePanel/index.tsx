@@ -13,9 +13,9 @@ import css from './style.module.sass'
 const WelcomePanel: FunctionComponent = () => {
   const patternId = useId()
   return <div className={css.container}>
-    {[0, 1].map(layer => <svg aria-hidden='true' className={css.cogs} key={layer}>
+    {[0, 1].map(layer => <svg key={layer} className={css.cogs} aria-hidden='true'>
       <defs>
-        <pattern height='160' id={`${patternId}-${layer}`} patternUnits='userSpaceOnUse' width='160' x={layer * 80} y={layer * 80}>
+        <pattern id={`${patternId}-${layer}`} height='160' patternUnits='userSpaceOnUse' width='160' x={layer * 80} y={layer * 80}>
           <g transform='translate(80 80)'>
             <g className={css.cog}>
               <Cog height={160} width={160} x={-80} y={-80} />
@@ -33,7 +33,7 @@ const WelcomePanel: FunctionComponent = () => {
         <AppTitle />
       </div>
       <div className={css.descriptionRow}>
-        <picture aria-hidden='true' className={css.pointing}>
+        <picture className={css.pointing} aria-hidden='true'>
           <source srcSet='/pointing.jxl' type='image/jxl' />
           <img alt='' src='/pointing.webp' />
         </picture>

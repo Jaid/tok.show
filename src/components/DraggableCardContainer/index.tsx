@@ -81,16 +81,16 @@ const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, mo
     }
   }
   return (
-    <DragDropProvider onDragEnd={handleDragEnd} sensors={[pointerSensor, KeyboardSensor.configure({})]}>
+    <DragDropProvider sensors={[pointerSensor, KeyboardSensor.configure({})]} onDragEnd={handleDragEnd}>
       <div className={css.container}>
         {entries.map((entry, index) => {
           if (entry === 'average') {
             return (
               <DraggableAverageCard
+                key='average'
                 averageCount={averageCount}
                 index={index}
                 isBest={bestEntryIds.has('average')}
-                key='average'
                 showAverage={showAverage}
                 visibleModelCount={visibleModelCount}
               />
@@ -102,14 +102,14 @@ const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, mo
           }
           return (
             <DraggableCard
+              key={entry}
+              id={entry}
               count={counts[entry] ?? null}
               error={errors[entry] ?? null}
-              id={entry}
               index={index}
               isBest={bestEntryIds.has(entry)}
               isFocused={focusedId === entry}
               isLoading={loadingSet.has(entry)}
-              key={entry}
               model={model}
               onClick={() => onFocus(entry)}
             />

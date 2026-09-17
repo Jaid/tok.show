@@ -36,15 +36,15 @@ const EditorHeader: FunctionComponent<Props> = ({tabs, activeTabId, sizeInBytes,
     {utfBytesDisplay}
     {charsDisplay}
     {stage === 'editing' && <div className={css.buttons}>
-      <IconButton icon='' onClick={onClear} title='Clear input' />
-      <IconButton icon='' onClick={onCopy} title='Copy input' />
+      <IconButton icon='' title='Clear input' onClick={onClear} />
+      <IconButton icon='' title='Copy input' onClick={onCopy} />
     </div>}
   </>
   const tabElements = tabs.map(tab => {
     const icon = <Svg lineHeight src={textIcon} />
     return <Tab key={tab.id} title={tab.name}>{icon}{tab.name}</Tab>
   })
-  return <TabbedView activeTabKey={activeTabId} decoration={decoration} onTabChange={onTabSelect} tabClassName={css.tab}>
+  return <TabbedView activeTabKey={activeTabId} decoration={decoration} tabClassName={css.tab} onTabChange={onTabSelect}>
     {tabElements}
   </TabbedView>
 }

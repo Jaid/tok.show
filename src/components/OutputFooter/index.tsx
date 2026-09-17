@@ -32,8 +32,8 @@ const OutputFooter: FunctionComponent<Props> = ({entries, modelsById, counts, er
       averageCount={averageCount} counts={counts}
       entries={entries} errors={errors} focusedId={focusedId}
       hiddenEntryIds={hiddenEntryIds} loadingSet={loadingSet}
-      modelsById={modelsById} onFocus={onFocus} onReorder={onReorder}
-      onStashDrop={onStashDrop} showAverage={showAverage} visibleModelCount={visibleModelCount}
+      modelsById={modelsById} showAverage={showAverage} visibleModelCount={visibleModelCount}
+      onFocus={onFocus} onReorder={onReorder} onStashDrop={onStashDrop}
     >
       <HiddenCardStashButton
         hiddenModels={hiddenModels}

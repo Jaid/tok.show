@@ -24,17 +24,17 @@ type Props = {
 const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, isLoading, error, onClick, handleRef, ref}) => {
   const stage = useStage()
   return <div
-    className={clsx(css.container, isLoading && css.loading, isFocused && css.focused, isBest && css.best)} onClick={onClick}
+    className={clsx(css.container, isLoading && css.loading, isFocused && css.focused, isBest && css.best)} role={onClick ? 'button' : undefined}
+    tabIndex={onClick ? 0 : undefined}
+    title={error ?? undefined}
+    ref={ref}
+    onClick={onClick}
     onKeyDown={onClick ? e => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault()
         onClick()
       }
     } : undefined}
-    ref={ref}
-    role={onClick ? 'button' : undefined}
-    tabIndex={onClick ? 0 : undefined}
-    title={error ?? undefined}
   >
     {stage === 'editing' && <div className={css.triangle}>⏶</div>}
     {stage === 'editing' && <div className={css.count}>

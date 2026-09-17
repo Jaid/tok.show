@@ -102,11 +102,11 @@ const OutputPaneContent: FunctionComponent<OutputPaneContentProps> = ({focusedMo
       return <div className={clsx(css.idsView, css.empty)}>No tokens (focus a model)</div>
     }
     const elements = tokenIds.map((id: number, i: number) => {
-      return <span className={css.tokenIdChip} key={i}>{id}</span>
+      return <span key={i} className={css.tokenIdChip}>{id}</span>
     })
-    return <div children={elements} className={css.idsView} />
+    return <div className={css.idsView} children={elements} />
   }
-  return <TokenizedText focusedModel={focusedModel} input={input} onClickSpan={onTokenClick} onHoverSpan={onTokenHover} spans={focusedSpans} />
+  return <TokenizedText focusedModel={focusedModel} input={input} spans={focusedSpans} onClickSpan={onTokenClick} onHoverSpan={onTokenHover} />
 }
 const App: FunctionComponent = () => {
   const snap = useSnapshot(state)
@@ -367,7 +367,7 @@ const App: FunctionComponent = () => {
   const focusedTokenizeData = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData ?? null : null
   const preprocessedInput = focusedTokenizeData?.processedInput ?? focusedTokenizeData?.inputText ?? curInput
   const tokenIds = focusedTokenizeData?.tokens ?? null
-  const outputTab = currentTab === 'webmcp' ? currentTab : (state.focusedId ? currentTab : 'preprocessed')
+  const outputTab = currentTab === 'webmcp' ? currentTab : state.focusedId ? currentTab : 'preprocessed'
   const stage = useStage()
   return <Group className={css.container} orientation='horizontal'>
     <Panel defaultSize={50} minSize={20}>
@@ -377,6 +377,8 @@ const App: FunctionComponent = () => {
           binaryByteCount={state.binaryData?.byteLength ?? null}
           charCount={state.text.length}
           isBinary={state.isBinary}
+          sizeInBytes={(new TextEncoder).encode(state.text).byteLength}
+          tabs={snap.inputTabs}
           onClear={() => onInput('')}
           onCopy={onCopy}
           onTabSelect={id => {
@@ -385,13 +387,11 @@ const App: FunctionComponent = () => {
               setTextParam(state.text)
             }
           }}
-          sizeInBytes={(new TextEncoder).encode(state.text).byteLength}
-          tabs={snap.inputTabs}
         />
         <div className={css.paneBody}>
           <Editor
-            binaryData={state.binaryData} isBinary={state.isBinary} onChange={onInput} ref={editorRef}
-            useMonaco={state.useMonaco} value={state.text}
+            binaryData={state.binaryData} isBinary={state.isBinary} useMonaco={state.useMonaco} value={state.text}
+            ref={editorRef} onChange={onInput}
           />
         </div>
         <EditorFooter shareUrl={shareUrl} />
@@ -402,15 +402,15 @@ const App: FunctionComponent = () => {
     <Panel defaultSize={50} minSize={20}>
       <div className={css.pane}>
         {stage === 'welcome' ? <div className={css.paneBody}><WelcomePanel /></div> : <OutputHeader
-          currentTab={outputTab} onTabChange={tab => {
+          currentTab={outputTab} showModelTabs={Boolean(state.focusedId)} onTabChange={tab => {
             state.activeTab = tab
             setCurrentTab(tab)
-          }} showModelTabs={Boolean(state.focusedId)}
+          }}
         >
           <div className={css.paneBody}>
             <OutputPaneContent
               focusedModel={focusedModel} focusedSpans={focusedSpans} input={curInput}
-              onTokenClick={onTokenClick} onTokenHover={onTokenHover} preprocessedInput={preprocessedInput} tokenIds={tokenIds}
+              preprocessedInput={preprocessedInput} tokenIds={tokenIds} onTokenClick={onTokenClick} onTokenHover={onTokenHover}
             />
           </div>
         </OutputHeader>}
@@ -418,10 +418,10 @@ const App: FunctionComponent = () => {
           averageCount={avgCount} counts={tokenCounts}
           entries={state.visibleEntries} errors={modelErrors} focusedId={state.focusedId}
           hiddenEntryIds={state.hiddenEntryIds} hiddenModels={hidden}
-          loadingSet={loadingSet} modelsById={modelsMap} onFocus={onFocus}
-          onHide={(id: EntryId) => onHide(id)} onReorder={onReorder} onStashDrop={onStashDrop}
-          onUnhide={onUnhide}
-          showAverage={showAvg} visibleModelCount={visibleCount}
+          loadingSet={loadingSet} modelsById={modelsMap} showAverage={showAvg}
+          visibleModelCount={visibleCount} onFocus={onFocus} onHide={(id: EntryId) => onHide(id)}
+          onReorder={onReorder}
+          onStashDrop={onStashDrop} onUnhide={onUnhide}
         />
       </div>
     </Panel>

@@ -100,10 +100,10 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
   if (!useMonaco) {
     return <textarea
       className={css.textarea}
-      onChange={e => onChange(e.currentTarget.value)}
       readOnly={readOnly}
       spellCheck={false}
       value={value}
+      onChange={e => onChange(e.currentTarget.value)}
     />
   }
   const monacoOptions: ComponentProps<typeof MonacoEditor>['options'] = {
@@ -139,11 +139,11 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
     <MonacoEditor
       beforeMount={ensureTheme}
       language='plaintext'
-      onChange={handleChange}
-      onMount={handleMount}
       options={monacoOptions}
       theme={monacoThemeByTheme[theme]}
       value={value}
+      onChange={handleChange}
+      onMount={handleMount}
     />
   </div>
 }

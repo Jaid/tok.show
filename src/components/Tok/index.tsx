@@ -105,7 +105,7 @@ const Tok: FunctionComponent = () => {
   return <div className={css.tok}>
     <picture>
       <source srcSet='/tok.jxl' type='image/jxl' />
-      <img alt='Tok' className={css.image} src='/tok.webp' />
+      <img className={css.image} alt='Tok' src='/tok.webp' />
     </picture>
     {beamEffects.map((effect, index) => {
       const style: BeamStyle = {
@@ -113,19 +113,19 @@ const Tok: FunctionComponent = () => {
         '--beam-delay': effect.delay,
         '--beam-duration': effect.duration,
       }
-      return <picture aria-hidden='true' key={index}>
+      return <picture key={index} aria-hidden='true'>
         <source srcSet='/tok.jxl' type='image/jxl' />
-        <img alt='' className={css.imageShade} src='/tok.webp' style={style} />
+        <img className={css.imageShade} alt='' src='/tok.webp' style={style} />
       </picture>
     })}
-    <svg aria-hidden='true' className={css.beams} viewBox={`0 0 ${sourceSize.width} ${sourceSize.height}`}>
+    <svg className={css.beams} aria-hidden='true' viewBox={`0 0 ${sourceSize.width} ${sourceSize.height}`}>
       <defs>
         {beams.map((beam, index) => {
           const effect = beamEffects[index]
           return <linearGradient
-            gradientUnits='userSpaceOnUse'
-            id={`beam-gradient-${index}`}
             key={index}
+            id={`beam-gradient-${index}`}
+            gradientUnits='userSpaceOnUse'
             x1={beam.startX}
             x2={beam.endX}
             y1={beam.startY}
@@ -139,10 +139,10 @@ const Tok: FunctionComponent = () => {
           </linearGradient>
         })}
         {beams.map((beam, index) => <filter
+          key={index}
+          id={`beam-edge-soften-${index}`}
           colorInterpolationFilters='sRGB'
           height='170%'
-          id={`beam-edge-soften-${index}`}
-          key={index}
           width='170%'
           x='-35%'
           y='-35%'
@@ -150,9 +150,9 @@ const Tok: FunctionComponent = () => {
           <feGaussianBlur stdDeviation='18' />
         </filter>)}
         {beams.map((beam, index) => <mask
-          height={sourceSize.height}
-          id={`beam-mask-${index}`}
           key={index}
+          id={`beam-mask-${index}`}
+          height={sourceSize.height}
           maskUnits='userSpaceOnUse'
           width={sourceSize.width}
           x='0'
@@ -172,7 +172,7 @@ const Tok: FunctionComponent = () => {
           '--beam-duration': effect.duration,
         }
         const landingRotation = getBeamAngle(beam) + 90
-        return <g className={css.beam} key={index} style={style}>
+        return <g key={index} className={css.beam} style={style}>
           <g mask={`url(#beam-mask-${index})`}>
             <image
               className={css.beamTexture}

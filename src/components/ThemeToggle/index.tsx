@@ -16,7 +16,7 @@ const ThemeToggle: FunctionComponent = () => {
   }
   const title = `Switch to ${isDark ? 'light' : 'dark'} mode`
   const icon = isDark ? FaMoon : GrSun
-  return <IconButton icon={icon} onClick={handleClick} title={title} />
+  return <IconButton icon={icon} title={title} onClick={handleClick} />
 }
 
 export default ThemeToggle
