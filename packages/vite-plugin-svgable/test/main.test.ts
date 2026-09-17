@@ -1,16 +1,23 @@
 import {describe, expect, test} from 'bun:test'
-
 import {mkdtemp, readFile, rm, writeFile} from 'node:fs/promises'
-import {join} from 'node:path'
 import {tmpdir} from 'node:os'
+import {join} from 'node:path'
 
 import vitePluginSvgable from '../src/main.ts'
 
 type TestPluginContext = {
-  emitted: Array<{name: string, source: string, type: 'asset'}>
-  watched: Array<string>
   addWatchFile: (path: string) => void
-  emitFile: (file: {name: string, source: string, type: 'asset'}) => string
+  emitFile: (file: {
+    name: string
+    source: string
+    type: 'asset'
+  }) => string
+  emitted: Array<{
+    name: string
+    source: string
+    type: 'asset'
+  }>
+  watched: Array<string>
 }
 
 const makeContext = (): TestPluginContext => {
@@ -27,41 +34,39 @@ const makeContext = (): TestPluginContext => {
   }
   return context
 }
-
 const callConfigResolved = (plugin: ReturnType<typeof vitePluginSvgable>, config: unknown) => {
   if (typeof plugin.configResolved !== 'function') {
     throw new TypeError('Expected configResolved hook to be a function.')
   }
   return (plugin.configResolved as (this: unknown, config: unknown) => unknown).call({}, config)
 }
-
 const callLoad = async (plugin: ReturnType<typeof vitePluginSvgable>, context: TestPluginContext, id: string) => {
   if (typeof plugin.load !== 'function') {
     throw new TypeError('Expected load hook to be a function.')
   }
   return await (plugin.load as unknown as (this: TestPluginContext, id: string) => unknown).call(context, id)
 }
-
 const readDefaultExport = (code: string) => {
   const expression = code.replace(/^export default /, '')
-  return Function(`return (${expression})`)() as unknown
+  return new Function(`return (${expression})`)() as unknown
 }
-
 const withTempFolder = async <Result>(task: (folder: string) => Promise<Result>) => {
   const folder = await mkdtemp(join(tmpdir(), 'vite-plugin-svgable-'))
   try {
     return await task(folder)
   } finally {
-    await rm(folder, {force: true, recursive: true})
+    await rm(folder, {
+      force: true,
+      recursive: true,
+    })
   }
 }
-
 describe('vite-plugin-svgable', () => {
   test('exports a persisted SVG URL for static shape data in development', async () => {
     await withTempFolder(async folder => {
       const sourcePath = join(folder, 'logo.shape.yml')
       const outputDirectory = join(folder, 'svg')
-      await writeFile(sourcePath, `shape: M0 0H1V1H0Z\nsize: 1\ncolor: '#123456'\n`)
+      await writeFile(sourcePath, 'shape: M0 0H1V1H0Z\nsize: 1\ncolor: \'#123456\'\n')
       const plugin = vitePluginSvgable({outputDirectory})
       const context = makeContext()
       callConfigResolved(plugin, {
@@ -80,12 +85,11 @@ describe('vite-plugin-svgable', () => {
       expect(svg).toContain('fill="#123456"')
     })
   })
-
   test('exports themed persisted SVG URLs when shape paths differ', async () => {
     await withTempFolder(async folder => {
       const sourcePath = join(folder, 'logo.shape.yml')
       const outputDirectory = join(folder, 'svg')
-      await writeFile(sourcePath, `shape:\n  light: M0 0H1V1H0Z\n  dark: M0 0H2V2H0Z\nsize: 2\n`)
+      await writeFile(sourcePath, 'shape:\n  light: M0 0H1V1H0Z\n  dark: M0 0H2V2H0Z\nsize: 2\n')
       const plugin = vitePluginSvgable({outputDirectory})
       const context = makeContext()
       callConfigResolved(plugin, {
@@ -103,12 +107,11 @@ describe('vite-plugin-svgable', () => {
       expect(darkSvg).toContain('M0 0H2V2H0Z')
     })
   })
-
   test('emits Rollup asset URLs for production builds', async () => {
     await withTempFolder(async folder => {
       const sourcePath = join(folder, 'logo.shape.yml')
       const outputDirectory = join(folder, 'svg')
-      await writeFile(sourcePath, `shape: M0 0H1V1H0Z\nsize: 1\ncolor: '#123456'\n`)
+      await writeFile(sourcePath, 'shape: M0 0H1V1H0Z\nsize: 1\ncolor: \'#123456\'\n')
       const plugin = vitePluginSvgable({outputDirectory})
       const context = makeContext()
       callConfigResolved(plugin, {
@@ -118,17 +121,16 @@ describe('vite-plugin-svgable', () => {
       const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
       expect(code).toBe('export default import.meta.ROLLUP_FILE_URL_asset1')
       expect(context.emitted).toHaveLength(1)
-      expect(context.emitted[0]?.name).toMatch(/^logo\.[a-f0-9]{12}\.svg$/)
+      expect(context.emitted[0]?.name).toMatch(/^logo\.[0-9a-f]{12}\.svg$/)
       expect(context.emitted[0]?.source).toContain('<svg')
       expect(context.emitted[0]?.source).toContain('fill="#123456"')
     })
   })
-
   test('defaults uncolored shapes to app-selectable light and dark assets', async () => {
     await withTempFolder(async folder => {
       const sourcePath = join(folder, 'logo.shape.yml')
       const outputDirectory = join(folder, 'svg')
-      await writeFile(sourcePath, `shape: M0 0H1V1H0Z\nsize: 1\n`)
+      await writeFile(sourcePath, 'shape: M0 0H1V1H0Z\nsize: 1\n')
       const plugin = vitePluginSvgable({outputDirectory})
       const context = makeContext()
       callConfigResolved(plugin, {
@@ -144,7 +146,6 @@ describe('vite-plugin-svgable', () => {
       expect(context.emitted[1]?.source).not.toContain('currentColor')
     })
   })
-
   test('exports an SVG file URL in development', async () => {
     await withTempFolder(async folder => {
       const sourcePath = join(folder, 'logo.svg')
@@ -162,7 +163,6 @@ describe('vite-plugin-svgable', () => {
       expect(context.emitted).toHaveLength(0)
     })
   })
-
   test('exports themed SVG file URLs from dark sidecars', async () => {
     await withTempFolder(async folder => {
       const sourcePath = join(folder, 'logo.svg')
@@ -184,7 +184,6 @@ describe('vite-plugin-svgable', () => {
       expect(context.watched).toEqual([darkPath, sourcePath])
     })
   })
-
   test('exports themed SVG file URLs from light sidecars', async () => {
     await withTempFolder(async folder => {
       const sourcePath = join(folder, 'logo.svg')
@@ -206,7 +205,6 @@ describe('vite-plugin-svgable', () => {
       expect(context.watched).toEqual([sourcePath, lightPath])
     })
   })
-
   test('emits SVG files as Rollup assets for production builds', async () => {
     await withTempFolder(async folder => {
       const sourcePath = join(folder, 'logo.svg')

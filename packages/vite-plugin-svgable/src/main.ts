@@ -22,9 +22,11 @@ type SvgableRequest = {
 
 type SvgablePluginContext = {
   addWatchFile: (path: string) => void
-  emitFile: (emittedFile: {name: string
+  emitFile: (emittedFile: {
+    name: string
     source: string
-    type: 'asset'}) => string
+    type: 'asset'
+  }) => string
 }
 
 type ThemedValue<T> = Record<Theme, T>
