@@ -1,0 +1,30 @@
+{
+  "name": "text-editor",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Monaco text editor with Antimono and shared defaults",
+  "funding": "https://github.com/sponsors/Jaid",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jaid/tok.show.git",
+    "directory": "packages/text-editor"
+  },
+  "main": "src/main.tsx",
+  "scripts": {
+    "test": "bun test ./test"
+  },
+  "dependencies": {
+    "@monaco-editor/react": "4.7.0",
+    "antimono": "0.1.0",
+    "monaco-editor": "0.56.0"
+  },
+  "peerDependencies": {
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
+  },
+  "devDependencies": {
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  }
+}

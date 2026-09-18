@@ -1,11 +1,8 @@
-import type {Theme} from '#src/components/ThemeToggle/useTheme.ts'
-import type {OnChange, OnMount} from '@monaco-editor/react'
-import type {FirstParameter} from 'more-types'
-import type {ComponentProps, FunctionComponent, Ref} from 'react'
+import type {FunctionComponent, Ref} from 'react'
+import type {TextEditorProps} from 'text-editor'
 
-import {Editor as MonacoEditor} from '@monaco-editor/react'
-import {once} from 'es-toolkit/function'
 import {useCallback, useEffect, useImperativeHandle, useRef} from 'react'
+import TextEditor from 'text-editor'
 
 import HexViewer from '#component/HexViewer'
 import {useTheme} from '#src/components/ThemeToggle/useTheme.ts'
@@ -22,6 +19,10 @@ export type EditorHandle = {
   setHighlightRange: (range: EditorHighlightRange | null) => void
 }
 
+type TextEditorOnMount = NonNullable<TextEditorProps['onMount']>
+type MonacoEditorInstance = Parameters<TextEditorOnMount>[0]
+type DecorationsCollection = ReturnType<MonacoEditorInstance['createDecorationsCollection']>
+
 type Props = {
   binaryData?: Uint8Array | null
   highlightRange?: EditorHighlightRange | null
@@ -33,44 +34,25 @@ type Props = {
   value: string
 }
 
-const monacoThemeByTheme = {
-  dark: 'black',
-  light: 'vs',
-} satisfies Record<Theme, string>
-const ensureTheme = once((monaco: FirstParameter<ComponentProps<typeof MonacoEditor>['beforeMount']>) => {
-  monaco.editor.defineTheme('black', {
-    base: 'vs-dark',
-    inherit: true,
-    colors: {
-      'editor.background': '#000000',
-      'editor.lineHighlightBorder': '#00000000',
-      'editor.selectionBackground': '#333333',
-      'editor.inactiveSelectionBackground': '#222222',
-      'editorCursor.foreground': '#fff',
-    },
-    rules: [],
-  })
-})
 const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange, ref}) => {
   const theme = useTheme()
-  const editorRef = useRef<any>(null)
-  const monacoRef = useRef<any>(null)
-  const decorationsRef = useRef<Array<string>>([])
-  const handleMount: OnMount = (editor, monaco) => {
+  const editorRef = useRef<MonacoEditorInstance | null>(null)
+  const decorationsRef = useRef<DecorationsCollection | null>(null)
+  const handleMount: TextEditorOnMount = editor => {
     editorRef.current = editor
-    monacoRef.current = monaco
+    decorationsRef.current = editor.createDecorationsCollection()
   }
-  const handleChange: OnChange = val => {
+  const handleChange: NonNullable<TextEditorProps['onChange']> = val => {
     onChange(val ?? '')
   }
   const setHighlightRange = useCallback((range: EditorHighlightRange | null) => {
     const editor = editorRef.current
-    const monaco = monacoRef.current
-    if (!editor || !monaco) {
+    const decorations = decorationsRef.current
+    if (!editor || !decorations) {
       return
     }
     if (!range) {
-      decorationsRef.current = editor.deltaDecorations(decorationsRef.current, [])
+      decorations.clear()
       return
     }
     const model = editor.getModel()
@@ -78,9 +60,9 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
       return
     }
     const textRange = getTextRangeFromByteRange(model.getValue(), range)
-    decorationsRef.current = editor.deltaDecorations(decorationsRef.current, [
+    decorations.set([
       {
-        range: new monaco.Range(textRange.startLineNumber, textRange.startColumn, textRange.endLineNumber, textRange.endColumn),
+        range: textRange,
         options: {
           className: css.tokenHighlight,
           inlineClassName: css.tokenInlineHighlight,
@@ -106,41 +88,14 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
       onChange={e => onChange(e.currentTarget.value)}
     />
   }
-  const monacoOptions: ComponentProps<typeof MonacoEditor>['options'] = {
-    minimap: {enabled: false},
-    stickyScroll: {enabled: false},
-    lineNumbers: 'off',
-    fontFamily: 'Antimono',
-    fontSize: 14,
-    lineHeight: 16,
-    tabSize: 2,
-    dragAndDrop: false,
-    accessibilitySupport: 'off',
-    guides: {indentation: false},
-    overviewRulerBorder: false,
-    renderWhitespace: 'trailing',
-    disableMonospaceOptimizations: true,
-    wordWrap: 'on',
-    contextmenu: true,
-    readOnly,
-    scrollbar: {
-      vertical: 'auto',
-      horizontal: 'auto',
-    },
-    renderLineHighlight: 'none',
-    renderControlCharacters: true,
-    folding: false,
-    largeFileOptimizations: false,
-    padding: {
-      top: 6,
-    },
-  }
   return <div className={css.container}>
-    <MonacoEditor
-      beforeMount={ensureTheme}
+    <TextEditor
+      dark={theme === 'dark'}
       language='plaintext'
-      options={monacoOptions}
-      theme={monacoThemeByTheme[theme]}
+      options={{
+        padding: {top: 6},
+        readOnly,
+      }}
       value={value}
       onChange={handleChange}
       onMount={handleMount}
