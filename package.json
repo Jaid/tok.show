@@ -24,9 +24,6 @@
     "vite": "bun node_modules/vite/dist/node/cli.js --configLoader runner"
   },
   "dependencies": {
-    "@dnd-kit/dom": "0.5.0",
-    "@dnd-kit/react": "0.5.0",
-    "@floating-ui/react": "0.27.20",
     "clsx": "2.1.1",
     "es-toolkit": "1.52.0",
     "material-icon-theme": "5.38.1",
@@ -41,14 +38,12 @@
     "token-vocabs": "0.8.0",
     "valtio": "2.3.2",
     "vite-plugin-svgable": "workspace:*",
-    "vite-plugin-svgr": "5.2.0"
+    "vite-plugin-svgr": "5.2.0",
+    "@dnd-kit/dom": "0.5.0",
+    "@dnd-kit/react": "0.5.0",
+    "@floating-ui/react": "0.27.20"
   },
   "devDependencies": {
-    "@babel/core": "8.0.5",
-    "@rolldown/plugin-babel": "0.2.4",
-    "@svgr/plugin-jsx": "8.1.0",
-    "@svgr/plugin-svgo": "8.1.0",
-    "@vitejs/plugin-react": "6.1.1",
     "autoprefixer": "10.6.1",
     "babel-plugin-react-compiler": "1.0.0",
     "browserslist": "4.29.0",
@@ -71,6 +66,11 @@
     "vite-plugin-media-mixins": "0.10.0",
     "vite-plugin-title": "0.6.0",
     "webmcp-types": "0.1.9",
+    "@babel/core": "8.0.5",
+    "@rolldown/plugin-babel": "0.2.4",
+    "@svgr/plugin-jsx": "8.1.0",
+    "@svgr/plugin-svgo": "8.1.0",
+    "@vitejs/plugin-react": "6.1.1",
     "@types/bun": "1.4.2",
     "@types/postcss-normalize": "9.0.4",
     "@types/react": "19.3.0",
