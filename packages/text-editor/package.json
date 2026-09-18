@@ -15,9 +15,9 @@
     "test": "bun test ./test"
   },
   "dependencies": {
-    "@monaco-editor/react": "4.7.0",
     "antimono": "0.1.0",
-    "monaco-editor": "0.56.0"
+    "monaco-editor": "0.56.0",
+    "@monaco-editor/react": "4.7.0"
   },
   "peerDependencies": {
     "react": "^19.3.0",
