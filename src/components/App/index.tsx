@@ -388,7 +388,7 @@ const App: FunctionComponent = () => {
             }
           }}
         />
-        <div className={css.paneBody}>
+        <div className={clsx(css.paneBody, css.editorPaneBody)}>
           <Editor
             binaryData={state.binaryData} isBinary={state.isBinary} useMonaco={state.useMonaco} value={state.text}
             ref={editorRef} onChange={onInput}

@@ -12,9 +12,11 @@ import svgrPlugin from 'vite-plugin-svgr'
 import titlePlugin from 'vite-plugin-title'
 
 const svgPaths: Array<string> = []
+const isMonacozenModule = (id: string) => /[/\\]node_modules[/\\](?:\.bun[/\\]monacozen@[^/\\]+[/\\]node_modules[/\\])?monacozen[/\\]/u.test(id)
 const getCommonConfig = () => {
   const config: UserConfig = {
     build: {target: 'chrome152'},
+    resolve: {dedupe: ['react', 'react-dom']},
     plugins: [
       titlePlugin(),
       reactPlugin(),
@@ -90,6 +92,7 @@ const getProductionConfig = () => {
         output: {
           minify: true,
           topLevelVar: true,
+          entryFileNames: 'main.js',
           chunkFileNames: chunkInfo => {
             if (chunkInfo.name === 'rolldown-runtime') {
               return 'runtime.js'
@@ -106,15 +109,14 @@ const getProductionConfig = () => {
             groups: [
               {
                 name: 'react',
-                test: /\/node_modules\/react(-dom)?\//,
+                test: /[/\\]node_modules[/\\]react(-dom)?[/\\]/,
                 priority: 2,
               },
               {
                 name: 'vendor',
-                test: /node_modules/,
+                test: id => /[/\\]node_modules[/\\]/.test(id) && !isMonacozenModule(id),
                 priority: 1,
               },
-              {name: 'main'},
             ],
           },
         },

@@ -21,7 +21,7 @@ const parseBoolean = (value: string | null): boolean => {
   }
   return value !== 'false'
 }
-const readUrlParameters = (): UrlParameters => {
+export const readUrlParameters = (): UrlParameters => {
   if (globalThis.window === undefined) {
     return defaults
   }

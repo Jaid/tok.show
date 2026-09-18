@@ -1,8 +1,8 @@
+import type {SwitchableEditorProps} from 'monacozen'
 import type {FunctionComponent, Ref} from 'react'
-import type {TextEditorProps} from 'text-editor'
 
+import Monacozen from 'monacozen'
 import {useCallback, useEffect, useImperativeHandle, useRef} from 'react'
-import TextEditor from 'text-editor'
 
 import HexViewer from '#component/HexViewer'
 import {useTheme} from '#src/components/ThemeToggle/useTheme.ts'
@@ -19,8 +19,8 @@ export type EditorHandle = {
   setHighlightRange: (range: EditorHighlightRange | null) => void
 }
 
-type TextEditorOnMount = NonNullable<TextEditorProps['onMount']>
-type MonacoEditorInstance = Parameters<TextEditorOnMount>[0]
+type MonacozenOnMount = NonNullable<SwitchableEditorProps['onMount']>
+type MonacoEditorInstance = Exclude<Parameters<MonacozenOnMount>[0], HTMLTextAreaElement>
 type DecorationsCollection = ReturnType<MonacoEditorInstance['createDecorationsCollection']>
 
 type Props = {
@@ -38,13 +38,6 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
   const theme = useTheme()
   const editorRef = useRef<MonacoEditorInstance | null>(null)
   const decorationsRef = useRef<DecorationsCollection | null>(null)
-  const handleMount: TextEditorOnMount = editor => {
-    editorRef.current = editor
-    decorationsRef.current = editor.createDecorationsCollection()
-  }
-  const handleChange: NonNullable<TextEditorProps['onChange']> = val => {
-    onChange(val ?? '')
-  }
   const setHighlightRange = useCallback((range: EditorHighlightRange | null) => {
     const editor = editorRef.current
     const decorations = decorationsRef.current
@@ -70,6 +63,21 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
       },
     ])
   }, [])
+  const handleMount: MonacozenOnMount = editor => {
+    if (!('createDecorationsCollection' in editor)) {
+      editorRef.current = null
+      decorationsRef.current = null
+      return
+    }
+    editorRef.current = editor
+    decorationsRef.current = editor.createDecorationsCollection()
+    if (highlightRange !== undefined) {
+      setHighlightRange(highlightRange)
+    }
+  }
+  const handleChange: NonNullable<SwitchableEditorProps['onChange']> = val => {
+    onChange(val ?? '')
+  }
   useImperativeHandle(ref, () => ({setHighlightRange}), [setHighlightRange])
   useEffect(() => {
     if (highlightRange !== undefined) {
@@ -79,23 +87,12 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
   if (isBinary && binaryData) {
     return <HexViewer bytes={binaryData} />
   }
-  if (!useMonaco) {
-    return <textarea
-      className={css.textarea}
-      readOnly={readOnly}
-      spellCheck={false}
-      value={value}
-      onChange={e => onChange(e.currentTarget.value)}
-    />
-  }
   return <div className={css.container}>
-    <TextEditor
+    <Monacozen
       dark={theme === 'dark'}
       language='plaintext'
-      options={{
-        padding: {top: 6},
-        readOnly,
-      }}
+      monaco={useMonaco ? {padding: {top: 6}} : false}
+      readOnly={readOnly}
       value={value}
       onChange={handleChange}
       onMount={handleMount}

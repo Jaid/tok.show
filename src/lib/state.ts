@@ -4,6 +4,7 @@ import {modelIds} from 'token-vocabs'
 import {proxy} from 'valtio'
 
 import modelsMap from './models/index.ts'
+import {readUrlParameters} from './useUrlParameters.ts'
 
 export type EntryId = string
 export type InputTabId = string
@@ -60,7 +61,7 @@ export const state = proxy({
   modelStates: initialModelStates,
   activeTab: 'tokenized' as 'ids' | 'preprocessed' | 'tokenized' | 'webmcp',
   hoveredTokenIndex: null as number | null,
-  useMonaco: true,
+  useMonaco: readUrlParameters().monaco,
   averageExplicitlyHidden: false,
 })
 
