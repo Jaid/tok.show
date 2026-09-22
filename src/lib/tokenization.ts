@@ -22,7 +22,6 @@ export const encodeUtf8 = (text: string) => utf8Encoder.encode(text)
 export const decodeUtf8 = (bytes: Uint8Array) => utf8Decoder.decode(bytes)
 
 const toInputBytes = (input: TokenizeInput) => (typeof input === 'string' ? encodeUtf8(input) : input)
-
 const getTokenStartOffsets = (tokenizeResult: RawTokenizeResult) => [0, ...tokenizeResult.offsets]
 
 export const getTokenRanges = (tokenizeResult: RawTokenizeResult, inputByteLength: number): Array<ByteRange> => {

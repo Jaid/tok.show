@@ -22,7 +22,7 @@ const contentAndModelSchema = {
   ...contentSourceRequirement,
   additionalProperties: false,
 } as const
-const getErrorMessage = (error: unknown) => Error.isError(error) ? error.message : String(error)
+const getErrorMessage = (error: unknown) => (Error.isError(error) ? error.message : String(error))
 const runForModels = async <Value>(selectedModelIds: ReadonlyArray<ModelId>, signal: AbortSignal, operation: (modelId: ModelId) => Value): Promise<{
   errors: Record<string, string>
   values: Partial<Record<ModelId, Value>>
@@ -277,7 +277,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       const signal = getExecutionSignal(options)
       const content = await resolveContentSource(input, signal)
       const selectedModelIds = getModelIds(input.models, defaultPermalinkState.models)
-      const focusedModel = input.model === undefined ? selectedModelIds.includes(defaultPermalinkState.model!) ? defaultPermalinkState.model! : selectedModelIds[0]!
+      const focusedModel = input.model === undefined ? (selectedModelIds.includes(defaultPermalinkState.model!) ? defaultPermalinkState.model! : selectedModelIds[0]!)
         : getModelId(input.model)
       if (!selectedModelIds.includes(focusedModel)) {
         selectedModelIds.push(focusedModel)

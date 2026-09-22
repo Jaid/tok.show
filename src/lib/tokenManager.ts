@@ -6,7 +6,6 @@ import {getVisibleModelIds, state} from '#src/lib/state.ts'
 let pendingUiTokenizationOperations = 0
 const uiTokenizationListeners = new Set<() => void>
 const getCurrentInput = (): TokenizeInput => (state.isBinary && state.binaryData ? state.binaryData : state.text)
-
 const inputsEqual = (left: TokenizeInput, right: TokenizeInput): boolean => {
   if (typeof left === 'string' || typeof right === 'string') {
     return left === right

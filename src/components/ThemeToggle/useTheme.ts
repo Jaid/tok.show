@@ -5,7 +5,7 @@ export type Theme = 'dark' | 'light'
 const fallbackTheme: Theme = 'dark'
 const darkAttribute = 'data-dark'
 const lightAttribute = 'data-light'
-const getSystemTheme = (): Theme => typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : fallbackTheme
+const getSystemTheme = (): Theme => (typeof matchMedia === 'function' && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : fallbackTheme)
 const getAttributeTheme = (): Theme | null => {
   if (typeof document === 'undefined') {
     return null
