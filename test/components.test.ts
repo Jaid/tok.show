@@ -40,6 +40,23 @@ describe('components', () => {
     expect(themedHtml).toContain('src="/dark.svg"')
     expect(themedHtml).toContain('alt="Test icon"')
   })
+  test.each(['Variant', '0', '', undefined])('ModelProfile renders an optional subname: %j', async subname => {
+    const html = await render('ModelProfile', {
+      model: {
+        icon: '/model.svg',
+        name: 'Model name',
+        subname,
+        title: 'Model title',
+      },
+    })
+    expect(html).toContain('src="/model.svg"')
+    expect(html).toContain('<div class="name" title="Model title">Model name</div>')
+    if (subname) {
+      expect(html).toContain(`<div class="subname">${subname}</div>`)
+    } else {
+      expect(html).not.toContain('class="subname"')
+    }
+  })
   test('TokenizedText renders an actual line break after hex newline tokens', async () => {
     const cases = [
       {

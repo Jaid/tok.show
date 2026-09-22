@@ -1,6 +1,8 @@
 import type {Model} from '#src/lib/models/index.ts'
 import type {FunctionComponent} from 'react'
 
+import Branch from 'branch-component'
+
 import Svg from '#component/Svg'
 
 import css from './style.module.sass'
@@ -14,7 +16,9 @@ const ModelProfile: FunctionComponent<Props> = ({model}) => {
     <Svg className={css.icon} alt='' src={model.icon} />
     <div className={css.caption}>
       <div className={css.name} title={model.title}>{model.name}</div>
-      {model.subname && <div className={css.subname}>{model.subname}</div>}
+      <Branch if={model.subname}>
+        <div className={css.subname}>{model.subname}</div>
+      </Branch>
     </div>
   </>
 }

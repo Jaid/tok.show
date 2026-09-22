@@ -24,6 +24,7 @@
     "vite": "bun node_modules/vite/dist/node/cli.js --configLoader runner"
   },
   "dependencies": {
+    "branch-component": "0.4.0",
     "clsx": "2.1.1",
     "es-toolkit": "1.52.0",
     "material-icon-theme": "5.38.1",
