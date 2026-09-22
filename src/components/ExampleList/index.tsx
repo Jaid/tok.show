@@ -14,7 +14,6 @@ const ExampleList: FunctionComponent = () => {
   return <nav className={css.container} aria-label='Examples'>
     {examples.map(example => <a key={example.id} className={css.example} href={getExampleHref(example.text)}>
       <span className={css.title}>{example.title}</span>
-      <span className={css.description}>{example.description}</span>
     </a>)}
   </nav>
 }
