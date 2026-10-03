@@ -33,8 +33,9 @@ import css from './style.module.sass'
 
 const numberHotkeys = '1,2,3,4,5,6,7,8,9'
 const modelHotkeyOptions = {
-  enableOnContentEditable: true,
-  enableOnFormTags: true,
+  // Bare number shortcuts must not intercept typing in either editor or other inputs.
+  enableOnContentEditable: false,
+  enableOnFormTags: false,
   eventListenerOptions: {capture: true},
   preventDefault: true,
 } as const
