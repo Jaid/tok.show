@@ -13,9 +13,20 @@ describe.skipIf(!Bun.env.target)('number shortcuts in the browser', () => {
   let server: PreviewServer
   let url: string
   beforeAll(async () => {
-    server = await preview({configFile: false, build: {outDir: resolve(Bun.env.target!)}, preview: {host: '127.0.0.1', port: 0}})
+    server = await preview({
+      configFile: false,
+      build: {outDir: resolve(Bun.env.target!)},
+      preview: {
+        host: '127.0.0.1',
+        port: 0,
+      },
+    })
     url = server.resolvedUrls!.local[0]!
-    browser = await launch({executablePath: Bun.env.CHROME_PATH ?? Bun.which('chromium') ?? Bun.which('google-chrome') ?? undefined, args: ['--no-sandbox'], headless: true})
+    browser = await launch({
+      executablePath: Bun.env.CHROME_PATH ?? Bun.which('chromium') ?? Bun.which('google-chrome') ?? undefined,
+      args: ['--no-sandbox'],
+      headless: true,
+    })
   })
   afterAll(async () => {
     await browser?.close()
@@ -24,10 +35,10 @@ describe.skipIf(!Bun.env.target)('number shortcuts in the browser', () => {
         resolve()
         return
       }
-      server.httpServer.close(error => error ? reject(error) : resolve())
+      server.httpServer.close(error => (error ? reject(error) : resolve()))
     })
   })
-  const session = async (page: Page) => page.$eval('a[title^="Duplicate or share"]', link => Object.fromEntries(new URL((link as HTMLAnchorElement).href).searchParams))
+  const session = async (page: Page) => page.$eval('a[title^="Duplicate or share"]', link => Object.fromEntries(new URL(link.href).searchParams))
   const pressNumber = async (page: Page, digit: string, numpad: boolean) => {
     if (!numpad) {
       await page.keyboard.press(digit as KeyInput)
@@ -36,9 +47,22 @@ describe.skipIf(!Bun.env.target)('number shortcuts in the browser', () => {
     // Puppeteer’s Numpad key definitions default to Num Lock off. Send the numeric variant explicitly.
     const client = await page.createCDPSession()
     try {
-      const key = {key: digit, code: `Numpad${digit}`, windowsVirtualKeyCode: 96 + Number(digit), isKeypad: true}
-      await client.send('Input.dispatchKeyEvent', {...key, type: 'keyDown', text: digit, unmodifiedText: digit})
-      await client.send('Input.dispatchKeyEvent', {...key, type: 'keyUp'})
+      const key = {
+        key: digit,
+        code: `Numpad${digit}`,
+        windowsVirtualKeyCode: 96 + Number(digit),
+        isKeypad: true,
+      }
+      await client.send('Input.dispatchKeyEvent', {
+        ...key,
+        type: 'keyDown',
+        text: digit,
+        unmodifiedText: digit,
+      })
+      await client.send('Input.dispatchKeyEvent', {
+        ...key,
+        type: 'keyUp',
+      })
     } finally {
       await client.detach()
     }
