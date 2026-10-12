@@ -8,7 +8,7 @@ import Svg from '#component/Svg'
 import css from './style.module.sass'
 
 type Props = {
-  model: Pick<Model, 'icon' | 'name' | 'subname' | 'title'>
+  model: Pick<Model, 'icon' | 'name' | 'subname'> & {title: string}
 }
 
 const ModelProfile: FunctionComponent<Props> = ({model}) => {

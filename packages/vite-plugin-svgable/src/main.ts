@@ -93,7 +93,7 @@ const readStringProperty = (data: Record<string, unknown>, key: string, label: s
   return trimmedValue
 }
 const readThemedStringProperty = (data: Record<string, unknown>, theme: Theme, label: string, alias?: string) => {
-  const keys = [...new Set([alias, theme].filter(Boolean))]
+  const keys = [...new Set([alias, theme].filter((key): key is string => Boolean(key)))]
   const key = keys.find(key => data[key] !== undefined)
   if (!key) {
     throw new TypeError(`SVGable option “${label}” must define “${keys.join('” or “')}”.`)
@@ -291,11 +291,13 @@ const loadShapeModule = async (context: SvgablePluginContext, config: PluginConf
     const value = await makeCodeForSvg(context, config, outputDirectory, request.path, svg)
     return makeDefaultExport(value)
   }
-  const themedEntries = await Promise.all(themes.map(async theme => {
+  // Asset IDs are assigned by emitFile, so preserve the declared theme order.
+  const themedEntries: Array<readonly [Theme, string]> = []
+  for (const theme of themes) {
     const svg = makeSvg(shapeData, theme)
     const value = await makeCodeForSvg(context, config, outputDirectory, request.path, svg, theme)
-    return [theme, value] as const
-  }))
+    themedEntries.push([theme, value])
+  }
   return makeDefaultExport(Object.fromEntries(themedEntries) as Record<Theme, string>)
 }
 const loadSvgableModule = async (context: SvgablePluginContext, config: PluginConfig, outputDirectory: string, request: SvgableRequest) => {

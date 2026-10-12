@@ -73,7 +73,7 @@ const getDevelopmentConfig = (context: ConfigEnv) => {
   return config
 }
 const getProductionConfig = () => {
-  const cssnanoPlugins = cssnano({discardUnused: false}).plugins.filter(([, options]) => !options.exclude).map(([createPlugin, options]) => createPlugin(options))
+  const cssnanoPlugins = cssnano({discardUnused: false}).plugins.flatMap(([createPlugin, options]) => options === false || (options && 'exclude' in options && options.exclude) ? [] : [createPlugin(options)])
   const config: UserConfig = {
     build: {
       assetsDir: '',

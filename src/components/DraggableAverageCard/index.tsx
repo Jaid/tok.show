@@ -38,6 +38,7 @@ const DraggableAverageCard: FunctionComponent<Props> = ({averageCount, index, is
           icon: averageIcon,
           name: 'Average',
           subname,
+          title: 'Average',
         }}
       />
     </div>

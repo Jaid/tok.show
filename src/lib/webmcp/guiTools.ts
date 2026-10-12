@@ -68,6 +68,7 @@ export const createGuiTools = (getBridge: () => WebmcpUiBridge): Array<WebMCP.Mo
     inputSchema: emptySchema,
     annotations: {
       readOnlyHint: true,
+      untrustedContentHint: true,
     },
     execute: input => {
       assertObjectProperties(input, [])

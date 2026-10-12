@@ -10,7 +10,7 @@ export const modelIdSchema = {
   enum: [...modelIds],
 } as const
 
-export const assertObjectProperties = (value: unknown, allowedProperties: ReadonlyArray<string>, label = 'input'): asserts value is Record<string, unknown> => {
+export function assertObjectProperties(value: unknown, allowedProperties: ReadonlyArray<string>, label = 'input'): asserts value is Record<string, unknown> {
   if (!value || typeof value !== 'object' || Array.isArray(value)) {
     throw new TypeError(`${label} must be an object.`)
   }

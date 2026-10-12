@@ -13,5 +13,3 @@ declare module '*.svg?svgable' {
   const source: SvgableSource
   export default source
 }
-
-export {}
