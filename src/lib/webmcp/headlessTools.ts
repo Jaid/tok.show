@@ -277,8 +277,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       const signal = getExecutionSignal(options)
       const content = await resolveContentSource(input, signal)
       const selectedModelIds = getModelIds(input.models, defaultPermalinkState.models)
-      const focusedModel = input.model === undefined ? (selectedModelIds.includes(defaultPermalinkState.model!) ? defaultPermalinkState.model! : selectedModelIds[0]!)
-        : getModelId(input.model)
+      const focusedModel = input.model === undefined ? (selectedModelIds.includes(defaultPermalinkState.model!) ? defaultPermalinkState.model! : selectedModelIds[0]) : getModelId(input.model)
       if (!selectedModelIds.includes(focusedModel)) {
         selectedModelIds.push(focusedModel)
       }

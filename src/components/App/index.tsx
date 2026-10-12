@@ -368,7 +368,7 @@ const App: FunctionComponent = () => {
   const focusedTokenizeData = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData ?? null : null
   const preprocessedInput = focusedTokenizeData?.processedInput ?? focusedTokenizeData?.inputText ?? curInput
   const tokenIds = focusedTokenizeData?.tokens ?? null
-  const outputTab = currentTab === 'webmcp' ? currentTab : state.focusedId ? currentTab : 'preprocessed'
+  const outputTab = currentTab === 'webmcp' ? currentTab : (state.focusedId ? currentTab : 'preprocessed')
   const stage = useStage()
   return <Group className={css.container} orientation='horizontal'>
     <Panel defaultSize={50} minSize={20}>

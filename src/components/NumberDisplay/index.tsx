@@ -40,7 +40,7 @@ const NumberDisplay: FunctionComponent<Props> = props => {
     if (!props.suffix) {
       return
     }
-    const plural = props.suffixPlural === true ? props.value === 1 ? props.suffix : `${props.suffix}s` : typeof props.suffixPlural === 'function' ? props.suffixPlural(props.value, props.suffix) : props.suffix
+    const plural = props.suffixPlural === true ? (props.value === 1 ? props.suffix : `${props.suffix}s`) : (typeof props.suffixPlural === 'function' ? props.suffixPlural(props.value, props.suffix) : props.suffix)
     if (!props.gluedSuffix) {
       return ` ${plural}`
     }
