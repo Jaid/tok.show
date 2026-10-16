@@ -22,7 +22,7 @@ const parseBoolean = (value: string | null): boolean => {
   return value !== 'false'
 }
 export const readUrlParameters = (): UrlParameters => {
-  if (globalThis.window === undefined) {
+  if (typeof location === 'undefined') {
     return defaults
   }
   const params = new URLSearchParams(globalThis.location.search)
@@ -43,7 +43,7 @@ export function useUrlParameters() {
     }))
   }
   const shareUrl = (() => {
-    if (globalThis.window === undefined) {
+    if (typeof location === 'undefined') {
       return '#'
     }
     const url = new URL(globalThis.location.href)

@@ -36,7 +36,8 @@ export const modelSelectionSchema = {
 } as const
 
 // Chrome 152 does not yet pass execution options; Chrome 153+ follows the current draft.
-const fallbackExecutionSignal = (new AbortController).signal
+const fallbackExecutionController = new AbortController
+const fallbackExecutionSignal = fallbackExecutionController.signal
 
 export const getExecutionSignal = (options: WebMCP.ToolExecuteCallbackOptions | undefined): AbortSignal => options?.signal ?? fallbackExecutionSignal
 
@@ -56,7 +57,8 @@ export const getModelIds = (value: unknown, fallback: ReadonlyArray<ModelId> = m
     throw new TypeError('models must contain at least one model ID.')
   }
   const result = values.map((modelId, index) => getModelId(modelId, Array.isArray(value) ? `models[${index}]` : 'models'))
-  if (new Set(result).size !== result.length) {
+  const uniqueModelIds = new Set(result)
+  if (uniqueModelIds.size !== result.length) {
     throw new TypeError('models must not contain duplicate model IDs.')
   }
   return result

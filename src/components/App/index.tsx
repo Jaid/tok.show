@@ -23,6 +23,7 @@ import TokenizedText from '#component/TokenizedText'
 import WelcomePanel from '#component/WelcomePanel'
 import modelsMap from '#src/lib/models/index.ts'
 import {createInputTab, getAverageCount, getHiddenModelIds, getModel, getShouldShowAverage, getVisibleModelIds, setActiveInputTab, setVisibleModelIds, state, syncInputStateFromActiveTab, updateActiveInputTab} from '#src/lib/state.ts'
+import {decodeUtf8, encodeUtf8, isUtf8} from '#src/lib/tokenization.ts'
 import {beginUiTokenization, ensureModelLoaded, initializeModels, runTokenization, unloadModel} from '#src/lib/tokenManager.ts'
 import {getTokenSpans} from '#src/lib/tokenSpans.ts'
 import {useStage} from '#src/lib/useStage.ts'
@@ -78,6 +79,24 @@ const getModelsFromUrl = (value: string | null): Array<string> => {
   return value.split(',').map(s => s.trim()).filter(Boolean)
 }
 const serializeModels = (ids: Array<string>): string => ids.join(',')
+const createInputTabFromFile = async (file: File) => {
+  const bytes = await file.bytes()
+  if (isUtf8(bytes)) {
+    createInputTab({
+      name: file.name || 'dropped.txt',
+      text: decodeUtf8(bytes),
+      isBinary: false,
+      binaryData: null,
+    })
+    return
+  }
+  createInputTab({
+    name: file.name || 'dropped.bin',
+    text: '',
+    isBinary: true,
+    binaryData: bytes,
+  })
+}
 
 type OutputPaneContentProps = {
   focusedModel: Model | null
@@ -95,17 +114,16 @@ const OutputPaneContent: FunctionComponent<OutputPaneContentProps> = ({focusedMo
     return <WebmcpDocumentation />
   }
   if (currentTab === 'preprocessed') {
-    const displayInput = preprocessedInput instanceof Uint8Array ? new TextDecoder('utf-8', {fatal: false}).decode(preprocessedInput) : preprocessedInput
+    const displayInput = preprocessedInput instanceof Uint8Array ? decodeUtf8(preprocessedInput) : preprocessedInput
     return <div className={css.preprocessedView}>{displayInput || <span className={css.empty}>Start typing…</span>}</div>
   }
   if (currentTab === 'ids') {
     if (!tokenIds) {
       return <div className={clsx(css.idsView, css.empty)}>No tokens (focus a model)</div>
     }
-    const elements = tokenIds.map((id: number, i: number) => {
-      return <span key={i} className={css.tokenIdChip}>{id}</span>
-    })
-    return <div className={css.idsView} children={elements} />
+    return <div className={css.idsView}>
+      {tokenIds.map((id, index) => <span key={index} className={css.tokenIdChip}>{id}</span>)}
+    </div>
   }
   return <TokenizedText focusedModel={focusedModel} input={input} spans={focusedSpans} onClickSpan={onTokenClick} onHoverSpan={onTokenHover} />
 }
@@ -143,7 +161,7 @@ const App: FunctionComponent = () => {
     state.useMonaco = monacoParam
   }, [monacoParam])
   useEffect(() => {
-    void initializeModels()
+    initializeModels().catch(console.error)
   }, [])
   useEffect(() => {
     if (timerRef.current) {
@@ -164,7 +182,7 @@ const App: FunctionComponent = () => {
       }
       finishTokenization()
     }
-  }, [state.text, state.isBinary, state.binaryData, snap.focusedId, snap.visibleEntries])
+  }, [snap.text, snap.isBinary, snap.binaryData, snap.focusedId, snap.visibleEntries])
   useEffect(() => {
     const visibleSet = new Set(getVisibleModelIds())
     for (const id of allModelIds) {
@@ -179,7 +197,7 @@ const App: FunctionComponent = () => {
       return []
     }
     const ms = snap.modelStates[fid]
-    if (!ms?.tokenizeData) {
+    if (!ms.tokenizeData) {
       return []
     }
     return getTokenSpans({
@@ -192,7 +210,7 @@ const App: FunctionComponent = () => {
   const loadingSet = (() => {
     const s = new Set<string>
     for (const id of getVisibleModelIds()) {
-      if (snap.modelStates[id]?.loading) {
+      if (snap.modelStates[id].loading) {
         s.add(id)
       }
     }
@@ -200,11 +218,8 @@ const App: FunctionComponent = () => {
   })()
   const tokenCounts = (() => {
     const c: Record<string, number> = {}
-    for (const [id, ms] of Object.entries(snap.modelStates) as Array<[string, {
-      loaded: boolean
-      tokenCount: number
-    }]>) {
-      if (ms && (ms.tokenCount > 0 || ms.loaded)) {
+    for (const [id, ms] of Object.entries(snap.modelStates)) {
+      if (ms.tokenCount > 0 || ms.loaded) {
         c[id] = ms.tokenCount
       }
     }
@@ -212,8 +227,8 @@ const App: FunctionComponent = () => {
   })()
   const modelErrors = (() => {
     const e: Record<string, string | null> = {}
-    for (const [id, ms] of Object.entries(snap.modelStates) as Array<[string, {error: string | null}]>) {
-      e[id] = ms?.error ?? null
+    for (const [id, ms] of Object.entries(snap.modelStates)) {
+      e[id] = ms.error
     }
     return e
   })()
@@ -238,7 +253,7 @@ const App: FunctionComponent = () => {
         state.visibleEntries = [...state.visibleEntries, modelId]
         setModelsRaw(serializeModels(getVisibleModelIds()))
       }
-      void ensureModelLoaded(modelId as ModelId)
+      ensureModelLoaded(modelId as ModelId).catch(console.error)
     }
   }
   const onReorder = (order: Array<EntryId>) => {
@@ -260,7 +275,7 @@ const App: FunctionComponent = () => {
     if (!state.visibleEntries.includes(id)) {
       state.visibleEntries = [...state.visibleEntries, id]
       setModelsRaw(serializeModels(getVisibleModelIds()))
-      void ensureModelLoaded(id as ModelId)
+      ensureModelLoaded(id as ModelId).catch(console.error)
     }
   }
   const onDragOver = (e: DragEvent) => {
@@ -272,35 +287,12 @@ const App: FunctionComponent = () => {
       setIsDragOver(false)
     }
   }
-  const onDrop = async (e: DragEvent) => {
+  const onDrop = (e: DragEvent) => {
     e.preventDefault()
     setIsDragOver(false)
-    const file = e.dataTransfer.files[0]
+    const file = e.dataTransfer.files.item(0)
     if (file) {
-      const buffer = await file.arrayBuffer()
-      const bytes = new Uint8Array(buffer)
-      let isUtf8 = true
-      try {
-        new TextDecoder('utf-8', {fatal: true}).decode(bytes)
-      } catch {
-        isUtf8 = false
-      }
-      if (isUtf8) {
-        const text = (new TextDecoder).decode(bytes)
-        createInputTab({
-          name: file.name || 'dropped.txt',
-          text,
-          isBinary: false,
-          binaryData: null,
-        })
-      } else {
-        createInputTab({
-          name: file.name || 'dropped.bin',
-          text: '',
-          isBinary: true,
-          binaryData: bytes,
-        })
-      }
+      createInputTabFromFile(file).catch(console.error)
       return
     }
     const t = e.dataTransfer.getData('text/plain')
@@ -313,14 +305,9 @@ const App: FunctionComponent = () => {
       })
     }
   }
-  const onCopy = async () => {
-    const t = state.isBinary && state.binaryData ? new TextDecoder('utf-8', {fatal: false}).decode(state.binaryData) : state.text
-    try {
-      await navigator.clipboard.writeText(t)
-    } catch {
-      const ta = document.body.appendChild(document.createElement('textarea'))
-      ta.value = t; ta.select(); document.execCommand('copy'); ta.remove()
-    }
+  const onCopy = () => {
+    const text = state.isBinary && state.binaryData ? decodeUtf8(state.binaryData) : state.text
+    navigator.clipboard.writeText(text).catch(console.error)
   }
   const onTokenHover = (span: TokenSpan | null) => {
     editorRef.current?.setHighlightRange(span ? {
@@ -333,9 +320,6 @@ const App: FunctionComponent = () => {
       start: span.byteStart,
       end: span.byteEnd,
     })
-  }
-  const onStashDrop = (entry: EntryId) => {
-    onHide(entry)
   }
   const clearFocus = () => {
     state.focusedId = null
@@ -365,7 +349,7 @@ const App: FunctionComponent = () => {
   const hidden = getHiddenModelIds().map((id: ModelId) => getModel(id)).filter(Boolean)
   const focusedModel = state.focusedId ? getModel(state.focusedId) : null
   const curInput = state.isBinary && state.binaryData ? state.binaryData : state.text
-  const focusedTokenizeData = state.focusedId ? snap.modelStates[state.focusedId]?.tokenizeData ?? null : null
+  const focusedTokenizeData = state.focusedId ? snap.modelStates[state.focusedId].tokenizeData : null
   const preprocessedInput = focusedTokenizeData?.processedInput ?? focusedTokenizeData?.inputText ?? curInput
   const tokenIds = focusedTokenizeData?.tokens ?? null
   const outputTab = currentTab === 'webmcp' ? currentTab : (state.focusedId ? currentTab : 'preprocessed')
@@ -378,7 +362,7 @@ const App: FunctionComponent = () => {
           binaryByteCount={state.binaryData?.byteLength ?? null}
           charCount={state.text.length}
           isBinary={state.isBinary}
-          sizeInBytes={(new TextEncoder).encode(state.text).byteLength}
+          sizeInBytes={encodeUtf8(state.text).byteLength}
           tabs={snap.inputTabs}
           onClear={() => onInput('')}
           onCopy={onCopy}
@@ -418,11 +402,11 @@ const App: FunctionComponent = () => {
         <OutputFooter
           averageCount={avgCount} counts={tokenCounts}
           entries={state.visibleEntries} errors={modelErrors} focusedId={state.focusedId}
-          hiddenEntryIds={state.hiddenEntryIds} hiddenModels={hidden}
+          hiddenModels={hidden}
           loadingSet={loadingSet} modelsById={modelsMap} showAverage={showAvg}
-          visibleModelCount={visibleCount} onFocus={onFocus} onHide={(id: EntryId) => onHide(id)}
+          visibleModelCount={visibleCount} onFocus={onFocus}
           onReorder={onReorder}
-          onStashDrop={onStashDrop} onUnhide={onUnhide}
+          onStashDrop={onHide} onUnhide={onUnhide}
         />
       </div>
     </Panel>

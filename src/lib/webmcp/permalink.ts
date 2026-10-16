@@ -14,7 +14,7 @@ export const defaultPermalinkState: PermalinkState = {
   text: '',
 }
 
-export const buildPermalink = (parameters: PermalinkState, base = globalThis.location?.href ?? 'https://tok.show/'): string => {
+export const buildPermalink = (parameters: PermalinkState, base = typeof location === 'undefined' ? 'https://tok.show/' : location.href): string => {
   const url = new URL(base)
   url.search = ''
   url.hash = ''

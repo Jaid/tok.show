@@ -2,8 +2,6 @@ import {createGuiTools} from './guiTools.ts'
 import {createHeadlessTools} from './headlessTools.ts'
 import {modelIdSchema} from './shared.ts'
 
-export type WebmcpToolGroup = 'GUI' | 'headless'
-
 export type WebmcpToolDocumentation = {
   annotations?: WebMCP.ToolAnnotations
   description: string
@@ -13,6 +11,8 @@ export type WebmcpToolDocumentation = {
   outputSchema: object
   title?: string
 }
+
+type WebmcpToolGroup = 'GUI' | 'headless'
 
 const emptyObjectSchema = {
   type: 'object',
@@ -408,7 +408,7 @@ const headlessOutputSchemas: Record<string, object> = {
     additionalProperties: false,
   },
 }
-const documentTools = (group: WebmcpToolGroup, tools: ReadonlyArray<WebMCP.ModelContextTool>, outputSchemas: Record<string, object>): Array<WebmcpToolDocumentation> => tools.map(tool => {
+const documentTools = (group: WebmcpToolGroup, tools: ReadonlyArray<WebMCP.ModelContextTool>, outputSchemas: Partial<Record<string, object>>): Array<WebmcpToolDocumentation> => tools.map(tool => {
   const outputSchema = outputSchemas[tool.name]
   if (!outputSchema) {
     throw new Error(`Missing WebMCP output schema documentation for \u{201C}${tool.name}\u{201D}.`)

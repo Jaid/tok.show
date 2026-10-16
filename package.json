@@ -19,7 +19,7 @@
     "build": "bun run vite build",
     "build:dev": "bun run vite build --mode development",
     "lint": "tsc --noEmit --noUnusedLocals --pretty false ; knip-bun --reporter json",
-    "test": "bun test --max-concurrency 1 ./test",
+    "test": "bun test ./test ./packages",
     "test-live": "bun run build && target=dist bun test test/live.test.ts",
     "vite": "bun node_modules/vite/dist/node/cli.js --configLoader runner"
   },
@@ -35,7 +35,6 @@
     "react-hotkeys-hook": "5.3.3",
     "react-icons": "5.7.0",
     "react-resizable-panels": "4.14.4",
-    "shape-to-svg": "0.1.0",
     "token-vocabs": "0.8.0",
     "valtio": "2.3.2",
     "vite-plugin-svgable": "workspace:*",
@@ -49,13 +48,10 @@
     "babel-plugin-react-compiler": "1.0.0",
     "browserslist": "4.29.3",
     "caniuse-lite": "1.0.30001815",
-    "count-in-png": "0.1.0",
     "cssnano-preset-advanced": "9.6.0",
     "eslint": "10.12.0",
     "eslint-config-jaid": "35.0.0",
-    "fs-extra": "11.4.1",
     "knip": "6.41.0",
-    "optis": "0.3.0",
     "postcss-normalize": "13.0.1",
     "puppeteer-core": "25.13.0",
     "sass-embedded": "1.105.1",
@@ -76,6 +72,14 @@
     "@types/postcss-normalize": "9.0.4",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0"
+  },
+  "knip": {
+    "ignoreDependencies": [
+      "caniuse-lite",
+      "material-icon-theme",
+      "@svgr/plugin-jsx",
+      "@svgr/plugin-svgo"
+    ]
   },
   "workspaces": [
     "packages/*"

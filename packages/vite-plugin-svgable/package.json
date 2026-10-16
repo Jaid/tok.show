@@ -2,15 +2,19 @@
   "name": "vite-plugin-svgable",
   "version": "0.1.0",
   "type": "module",
+  "description": "Vite plugin that turns SVG files and YAML shape definitions into themed SVG asset URLs",
   "main": "src/main.ts",
   "scripts": {
-    "test": "bun test --max-concurrency 1 ./test"
+    "test": "bun test ./test"
   },
   "dependencies": {
-    "shape-to-svg": "^0.1.0",
-    "yaml": "^2.9.1"
+    "shape-to-svg": "0.1.0",
+    "yaml": "2.9.1"
   },
   "peerDependencies": {
     "vite": "^8.3.4"
+  },
+  "devDependencies": {
+    "vite": "8.3.4"
   }
 }

@@ -32,7 +32,7 @@ type SvgablePluginContext = {
 type ThemedValue<T> = Record<Theme, T>
 
 type ShapeData = {
-  color: ThemedValue<string> | undefined
+  color: ThemedValue<string>
   path: ThemedValue<string>
   size: SvgSizeOptions
 }
@@ -52,7 +52,6 @@ const isRecord = (input: unknown): input is Record<string, unknown> => {
   return Boolean(input) && typeof input === 'object' && !Array.isArray(input)
 }
 const toPosixPath = (path: string) => path.replaceAll('\\', '/')
-const normalizeFilePath = (path: string) => toPosixPath(path)
 const getHash = (input: string) => {
   return createHash('sha256').update(input).digest('hex').slice(0, 12)
 }
@@ -94,7 +93,7 @@ const readStringProperty = (data: Record<string, unknown>, key: string, label: s
 }
 const readThemedStringProperty = (data: Record<string, unknown>, theme: Theme, label: string, alias?: string) => {
   const keys = [...new Set([alias, theme].filter((key): key is string => Boolean(key)))]
-  const key = keys.find(key => data[key] !== undefined)
+  const key = keys.find(candidate => data[candidate] !== undefined)
   if (!key) {
     throw new TypeError(`SVGable option “${label}” must define “${keys.join('” or “')}”.`)
   }
@@ -118,14 +117,8 @@ const normalizeThemedString = (input: unknown, label: string, aliases?: Partial<
     return [theme, readThemedStringProperty(input, theme, label, aliases?.[theme])]
   })) as ThemedValue<string>
 }
-const normalizeOptionalThemedString = (input: unknown, label: string, aliases?: Partial<Record<Theme, string>>) => {
-  if (input === undefined) {
-    return
-  }
-  return normalizeThemedString(input, label, aliases)
-}
 const getSourceValue = (data: Record<string, unknown>, keys: Array<string>, label: string) => {
-  const key = keys.find(key => data[key] !== undefined)
+  const key = keys.find(candidate => data[candidate] !== undefined)
   if (!key) {
     throw new TypeError(`SVGable data must define “${label}”.`)
   }
@@ -166,10 +159,10 @@ const normalizeShapeData = (input: unknown): ShapeData => {
     throw new TypeError('SVGable data must be an object.')
   }
   const path = normalizeThemedString(getSourceValue(input, ['shape', 'path'], 'shape'), 'shape')
-  const color = normalizeOptionalThemedString(input.color, 'color', {
+  const color = input.color === undefined ? defaultShapeColor : normalizeThemedString(input.color, 'color', {
     dark: 'onDark',
     light: 'onLight',
-  }) ?? defaultShapeColor
+  })
   const size = normalizeSize(input)
   return {
     color,
@@ -177,10 +170,7 @@ const normalizeShapeData = (input: unknown): ShapeData => {
     size,
   }
 }
-const makeThemedColor = (color: ThemedValue<string> | undefined) => {
-  if (!color) {
-    return
-  }
+const makeThemedColor = (color: ThemedValue<string>) => {
   if (color.dark === color.light) {
     return color.light
   }
@@ -189,22 +179,16 @@ const makeThemedColor = (color: ThemedValue<string> | undefined) => {
     onLight: color.light,
   } satisfies ThemedColor
 }
-const makeStaticColor = (color: ThemedValue<string> | undefined, theme: Theme) => {
-  if (!color) {
-    return
-  }
-  return color[theme]
-}
 const makeSvg = (data: ShapeData, theme?: Theme) => {
   const input = {
     ...data.size,
-    color: theme ? makeStaticColor(data.color, theme) : makeThemedColor(data.color),
+    color: theme ? data.color[theme] : makeThemedColor(data.color),
     path: theme ? data.path[theme] : data.path.light,
   }
   return shapeToSvg(input as ShapeToSvgOptions & ColorOptions)
 }
 const makePersistedFileName = (sourcePath: string, root: string, svg: string, theme?: Theme) => {
-  const relativePath = normalizeFilePath(relative(root, sourcePath))
+  const relativePath = toPosixPath(relative(root, sourcePath))
   const extension = extname(sourcePath)
   const sourceBaseName = basename(sourcePath, extension).replace(shapeSuffixPattern, '')
   const themeSuffix = theme ? `-${theme}` : ''
@@ -219,8 +203,9 @@ const resolveOutputDirectory = (config: PluginConfig, outputDirectory: string) =
 }
 const persistSvg = async (config: PluginConfig, outputDirectory: string, sourcePath: string, svg: string, theme?: Theme) => {
   const fileName = makePersistedFileName(sourcePath, config.root, svg, theme)
-  const outputPath = join(resolveOutputDirectory(config, outputDirectory), fileName)
-  await mkdir(resolveOutputDirectory(config, outputDirectory), {recursive: true})
+  const resolvedOutputDirectory = resolveOutputDirectory(config, outputDirectory)
+  const outputPath = join(resolvedOutputDirectory, fileName)
+  await mkdir(resolvedOutputDirectory, {recursive: true})
   await writeFile(outputPath, svg)
   return {
     fileName,
@@ -228,7 +213,7 @@ const persistSvg = async (config: PluginConfig, outputDirectory: string, sourceP
   }
 }
 const makeDevUrl = (path: string) => {
-  return encodeURI(`/@fs/${normalizeFilePath(path)}`)
+  return encodeURI(`/@fs/${toPosixPath(path)}`)
 }
 const makeBuildUrl = (referenceId: string) => {
   return `import.meta.ROLLUP_FILE_URL_${referenceId}`
@@ -286,7 +271,7 @@ const loadShapeModule = async (context: SvgablePluginContext, config: PluginConf
   context.addWatchFile(request.path)
   const source = await readFile(request.path, 'utf8')
   const shapeData = normalizeShapeData(parseYaml(source))
-  if (shapeData.path.light === shapeData.path.dark && shapeData.color?.light === shapeData.color?.dark) {
+  if (shapeData.path.light === shapeData.path.dark && shapeData.color.light === shapeData.color.dark) {
     const svg = makeSvg(shapeData)
     const value = await makeCodeForSvg(context, config, outputDirectory, request.path, svg)
     return makeDefaultExport(value)
@@ -306,8 +291,7 @@ const loadSvgableModule = async (context: SvgablePluginContext, config: PluginCo
   }
   return loadShapeModule(context, config, outputDirectory, request)
 }
-
-export const svgablePlugin = (options: SvgablePluginOptions = {}): Plugin => {
+const svgablePlugin = (options: SvgablePluginOptions = {}): Plugin => {
   const outputDirectory = options.outputDirectory ?? defaultOutputDirectory
   let config: PluginConfig | undefined
   return {

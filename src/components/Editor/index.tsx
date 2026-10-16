@@ -10,13 +10,13 @@ import {getTextRangeFromByteRange} from '#src/lib/tokenization.ts'
 
 import css from './style.module.sass'
 
-export type EditorHighlightRange = {
-  end: number
-  start: number
-}
-
 export type EditorHandle = {
   setHighlightRange: (range: EditorHighlightRange | null) => void
+}
+
+type EditorHighlightRange = {
+  end: number
+  start: number
 }
 
 type MonacozenOnMount = NonNullable<SwitchableEditorProps['onMount']>

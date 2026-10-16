@@ -1,40 +1,26 @@
-import type {RawTokenizeResult, TokenizeInput} from 'token-vocabs'
-
 export type ByteRange = {
   end: number
   start: number
 }
 
-export type DisplayToken = ByteRange & {
-  bytes: Uint8Array
-  id: number
-  index: number
-  key: string
-  text: string
-  visuallyRepresentable: boolean
-}
-
 const utf8Encoder = new TextEncoder
 const utf8Decoder = new TextDecoder('utf-8', {fatal: false})
+const strictUtf8Decoder = new TextDecoder('utf-8', {fatal: true})
 
 export const encodeUtf8 = (text: string) => utf8Encoder.encode(text)
 
 export const decodeUtf8 = (bytes: Uint8Array) => utf8Decoder.decode(bytes)
 
-const toInputBytes = (input: TokenizeInput) => (typeof input === 'string' ? encodeUtf8(input) : input)
-const getTokenStartOffsets = (tokenizeResult: RawTokenizeResult) => [0, ...tokenizeResult.offsets]
-
-export const getTokenRanges = (tokenizeResult: RawTokenizeResult, inputByteLength: number): Array<ByteRange> => {
-  const starts = getTokenStartOffsets(tokenizeResult)
-  return starts.map((start, index) => ({
-    end: starts[index + 1] ?? inputByteLength,
-    start,
-  }))
+export const isUtf8 = (bytes: Uint8Array) => {
+  try {
+    strictUtf8Decoder.decode(bytes)
+    return true
+  } catch {
+    return false
+  }
 }
 
 export const bytesToHexPairs = (bytes: Uint8Array) => Array.from(bytes, byte => byte.toString(16).padStart(2, '0'))
-
-export const bytesToHex = (bytes: Uint8Array) => bytesToHexPairs(bytes).join(' ')
 
 const controlCharacterPattern = /[\u{0}-\u{8}\v\f\u{E}-\u{1F}\u{7F}\u{200B}-\u{200F}\u{202A}-\u{202E}\u{2060}-\u{206F}\u{FEFF}\u{FFFD}]/u
 const visibleContentPattern = /[\p{Letter}\p{Mark}\p{Number}\p{Punctuation}\p{Separator}\p{Symbol}]/u
@@ -47,25 +33,6 @@ export const isVisuallyRepresentable = (text: string) => {
     return false
   }
   return visibleContentPattern.test(text)
-}
-
-export const buildDisplayTokens = (input: TokenizeInput, tokenizeResult: RawTokenizeResult): Array<DisplayToken> => {
-  const effectiveInput = tokenizeResult.processedInput ?? input
-  const bytes = toInputBytes(effectiveInput)
-  const ranges = getTokenRanges(tokenizeResult, bytes.byteLength)
-  return ranges.map((range, index) => {
-    const tokenBytes = bytes.slice(range.start, range.end)
-    const text = decodeUtf8(tokenBytes)
-    return {
-      ...range,
-      bytes: tokenBytes,
-      id: tokenizeResult.tokens[index] ?? -1,
-      index,
-      key: `${index}:${range.start}:${range.end}:${tokenizeResult.tokens[index] ?? -1}`,
-      text,
-      visuallyRepresentable: isVisuallyRepresentable(text),
-    }
-  })
 }
 
 const getStringIndexFromByteOffset = (text: string, offset: number, bias: 'end' | 'start') => {
@@ -110,5 +77,3 @@ export const getTextRangeFromByteRange = (text: string, range: ByteRange) => {
     startLineNumber: start.lineNumber,
   }
 }
-
-export const formatTokenCount = (value: number | undefined) => (value === undefined ? '…' : value.toLocaleString('en-US'))

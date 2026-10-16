@@ -64,7 +64,8 @@ const NumberDisplay: FunctionComponent<Props> = props => {
     return elements
   }
   const numberParts = getNumberParts()
-  const numberElement = <span className={clsx(props.numberClassName, css.number)} ref={props.numberRef}>{numberParts}</span>
+  const {numberRef} = props
+  const numberElement = <span className={clsx(props.numberClassName, css.number)} ref={numberRef}>{numberParts}</span>
   return <span className={clsx(props.className, css.element)}>
     {prefixElement}
     {numberElement}

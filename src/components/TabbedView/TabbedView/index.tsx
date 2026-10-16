@@ -37,7 +37,7 @@ export const TabbedView = <TabKey extends TabbedViewKey = TabbedViewKey>({active
       disabled: child.props.disabled,
     })
   })
-  const fallbackTabKey = tabs[0]?.key
+  const fallbackTabKey = tabs.at(0)?.key
   const [uncontrolledTabKey, setUncontrolledTabKey] = useState<TabKey | undefined>(defaultTabKey ?? fallbackTabKey)
   const tabKey = activeTabKey ?? uncontrolledTabKey ?? fallbackTabKey
   if (tabKey === undefined) {
@@ -59,7 +59,7 @@ export const TabbedView = <TabKey extends TabbedViewKey = TabbedViewKey>({active
     tabKey,
     tabs,
   } satisfies TabbedViewContextValue<TabKey>
-  return <TabbedViewContext.Provider value={context as unknown as TabbedViewContextValue}>
+  return <TabbedViewContext value={context as unknown as TabbedViewContextValue}>
     <div className={clsx(css.container, className)} data-tab-index={tabIndex} data-tab-key={tabKey}>
       <div className={css.tabs} role='tablist'>
         {tabs.map(tab => {
@@ -81,5 +81,5 @@ export const TabbedView = <TabKey extends TabbedViewKey = TabbedViewKey>({active
       {decoration && <div className={css.decoration}>{decoration}</div>}
     </div>
     {contentChildren}
-  </TabbedViewContext.Provider>
+  </TabbedViewContext>
 }

@@ -17,21 +17,19 @@ export interface InputTab {
   text: string
 }
 
-export interface TokenizeData {
+interface TokenizeData {
   inputText: Uint8Array | string
   offsets: ReadonlyArray<number>
   processedInput?: Uint8Array | string
   tokens: ReadonlyArray<number>
 }
-
-export interface ModelState {
+interface ModelState {
   error: string | null
   loaded: boolean
   loading: boolean
   tokenCount: number
   tokenizeData: TokenizeData | null
 }
-
 const initialModelStates: Record<ModelId, ModelState> = {} as Record<ModelId, ModelState>
 for (const id of modelIds) {
   initialModelStates[id] = {
@@ -57,12 +55,9 @@ export const state = proxy({
   }] as Array<InputTab>,
   focusedId: 'gpt' as ModelId | null,
   visibleEntries: ['average', 'gpt', 'deepseek'] as Array<EntryId>,
-  hiddenEntryIds: [] as Array<EntryId>,
   modelStates: initialModelStates,
   activeTab: 'tokenized' as 'ids' | 'preprocessed' | 'tokenized' | 'webmcp',
-  hoveredTokenIndex: null as number | null,
   useMonaco: readUrlParameters().monaco,
-  averageExplicitlyHidden: false,
 })
 
 let nextInputTabId = 1
@@ -116,8 +111,7 @@ export function getHiddenModelIds(): Array<ModelId> {
 }
 
 export function getShouldShowAverage(): boolean {
-  const realCount = getVisibleModelIds().length
-  return realCount >= 2 && !state.averageExplicitlyHidden
+  return getVisibleModelIds().length >= 2
 }
 
 export function getModel(id: ModelId) {
@@ -125,9 +119,7 @@ export function getModel(id: ModelId) {
 }
 
 export function getAverageCount(): number | null {
-  const counts = getVisibleModelIds()
-    .map(id => state.modelStates[id]?.tokenCount)
-    .filter((c): c is number => c !== null && c !== undefined && c >= 0)
+  const counts = getVisibleModelIds().map(id => state.modelStates[id].tokenCount)
   if (counts.length < 2) {
     return null
   }

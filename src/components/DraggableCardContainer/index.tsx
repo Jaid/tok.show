@@ -23,7 +23,6 @@ type Props = {
   entries: Array<EntryId>
   errors: Record<string, string | null>
   focusedId: string | null
-  hiddenEntryIds: Array<EntryId>
   loadingSet: Set<string>
   modelsById: Map<string, Model>
   onFocus: (modelId: string) => void
@@ -40,30 +39,28 @@ const getBestEntryIds = (counts: Record<string, number>, entries: Array<EntryId>
       continue
     }
     const c = counts[id]
-    if (c !== null && c !== undefined && c > 0) {
+    if (c > 0) {
       allCounts.set(id, c)
     }
   }
   if (allCounts.size < 2) {
     return new Set<string>
   }
-  const values = [...allCounts.values()]
-  const min = Math.min(...values)
+  const min = Math.min(...allCounts.values())
   const winners = [...allCounts].filter(([, c]) => c === min).map(([id]) => id)
   return new Set(winners)
 }
-const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, modelsById, counts, errors, focusedId, loadingSet, onReorder, onFocus, onStashDrop, showAverage, averageCount, hiddenEntryIds, visibleModelCount}) => {
+const DraggableCardContainer: FunctionComponent<Props> = ({children, entries, modelsById, counts, errors, focusedId, loadingSet, onReorder, onFocus, onStashDrop, showAverage, averageCount, visibleModelCount}) => {
   const bestEntryIds = getBestEntryIds(counts, entries)
   const handleDragEnd = (event: DragEndEvent) => {
     if (event.canceled) {
       return
     }
     const sourceId = event.operation.source?.id as EntryId | undefined
-    const targetId = event.operation.target?.id as EntryId | undefined
     if (!sourceId) {
       return
     }
-    if (targetId === 'stash-zone') {
+    if (event.operation.target?.id === 'stash-zone') {
       onStashDrop(sourceId)
       return
     }

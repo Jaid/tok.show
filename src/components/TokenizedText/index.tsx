@@ -10,7 +10,7 @@ import {Fragment, useLayoutEffect, useRef, useState} from 'react'
 import Svg from '#component/Svg'
 import modelsMap from '#src/lib/models/index.ts'
 import {getVisibleModelIds} from '#src/lib/state.ts'
-import textDecoder from '#src/lib/textDecoder.ts'
+import {decodeUtf8} from '#src/lib/tokenization.ts'
 
 import css from './style.module.sass'
 
@@ -78,7 +78,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
     setTooltipOpen(true)
     refs.setReference(event.currentTarget)
     onClickSpan?.(span)
-    void computeSupported(span)
+    computeSupported(span).catch(console.error)
   }
   const setHoveredTokenId = (id: number | null) => {
     const oldId = hoveredIdRef.current
@@ -108,6 +108,15 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
       token.classList.add(css.tokenHovered)
     }
   })
+  // Plain text when no focused model or no spans
+  if (!focusedModel || spans.length === 0) {
+    const displayText = input instanceof Uint8Array ? decodeUtf8(input) : input
+    return (
+      <div className={css.plain}>
+        {displayText || <span className={css.empty}>Start typing…</span>}
+      </div>
+    )
+  }
   const handleMouseEnter = (span: TokenSpan) => {
     setHoveredTokenId(span.id)
     onHoverSpan?.(span)
@@ -116,24 +125,14 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
     setHoveredTokenId(null)
     onHoverSpan?.(null)
   }
-  // Plain text when no focused model or no spans
-  if (!focusedModel || spans.length === 0) {
-    const displayText = input instanceof Uint8Array ? textDecoder.decode(input) : input
-    return (
-      <div className={css.plain}>
-        {displayText || <span className={css.empty}>Start typing…</span>}
-      </div>
-    )
-  }
   return (
     <div className={css.container} ref={containerRef}>
-      {spans.map((span, i) => {
-        const isOdd = i % 2 === 0
-        const isClicked = clickedSpan?.index === i
-        const lineBreaksCount = getArtificialLineBreaks(span)
-        const lineBreaks = Array.from({length: lineBreaksCount}, (_, i) => <br key={i} />)
+      {spans.map((span, index) => {
+        const isOdd = index % 2 === 0
+        const isClicked = clickedSpan?.index === index
+        const lineBreaks = Array.from({length: getArtificialLineBreaks(span)}, (_, lineBreakIndex) => <br key={lineBreakIndex} />)
         return (
-          <Fragment key={i}>
+          <Fragment key={index}>
             <span
               className={clsx(css.token, !isOdd && css.tokenEven, isClicked && css.tokenClicked, span.isNonRepresentable && css.tokenHex)}
               onClick={e => handleSpanClick(span, e)}
@@ -154,7 +153,7 @@ const TokenizedText: FunctionComponent<Props> = ({spans, input, focusedModel, on
         && <div
           className={css.tooltip}
           style={floatingStyles}
-          ref={refs.setFloating}
+          ref={element => refs.setFloating(element)}
           {...getFloatingProps()}
         >
           <div className={css.tooltipRow}>

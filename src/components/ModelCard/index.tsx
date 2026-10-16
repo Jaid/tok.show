@@ -21,6 +21,18 @@ type Props = {
   ref?: React.Ref<HTMLDivElement>
 }
 
+const CountContent: FunctionComponent<Pick<Props, 'count' | 'error' | 'isLoading'>> = ({count, error, isLoading}) => {
+  if (isLoading) {
+    return <span className={css.countLoading}>…</span>
+  }
+  if (error) {
+    return <span className={css.countError}>⚠</span>
+  }
+  if (count === null) {
+    return <span className={css.countNa}>–</span>
+  }
+  return <TokenCount className={css.countElement} numberClassName={css.countNumber} suffixClassName={css.countLabel} value={count} />
+}
 const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, isLoading, error, onClick, handleRef, ref}) => {
   const stage = useStage()
   return <div
@@ -38,7 +50,7 @@ const ModelCard: FunctionComponent<Props> = ({model, count, isBest, isFocused, i
   >
     {stage === 'editing' && <div className={css.triangle}>⏶</div>}
     {stage === 'editing' && <div className={css.count}>
-      {isLoading ? <span className={css.countLoading}>…</span> : error ? <span className={css.countError}>⚠</span> : count !== null ? <TokenCount className={css.countElement} numberClassName={css.countNumber} suffixClassName={css.countLabel} value={count} /> : <span className={css.countNa}>–</span>}
+      <CountContent count={count} error={error} isLoading={isLoading} />
     </div>}
     <div className={css.profile} ref={handleRef}>
       <ModelProfile model={model} />

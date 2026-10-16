@@ -1,3 +1,4 @@
+import type {Theme} from '#src/components/ThemeToggle/useTheme.ts'
 import type {ClassValue} from 'clsx'
 import type {ComponentProps, FunctionComponent} from 'react'
 
@@ -8,11 +9,9 @@ import {useTheme} from '#src/components/ThemeToggle/useTheme.ts'
 
 import css from './style.module.sass'
 
-export type Theme = 'dark' | 'light'
-
-export type SvgSource = ThemedSource | string
-
 type ThemedSource = Record<Theme, string>
+
+type SvgSource = ThemedSource | string
 
 type Props = {
   alt?: string
@@ -31,7 +30,7 @@ type Props = {
 const getDefaultColorForTheme = (theme: Theme) => (theme === 'light' ? 'black' : 'white')
 const normalizeSvgSrc = (input: string, theme: Theme) => {
   if (/^\s*<svg\s/i.test(input)) {
-    const themedInput = input.replaceAll('currentColor', getDefaultColorForTheme(theme))
+    const themedInput = input.replaceAll('currentColor', () => getDefaultColorForTheme(theme))
     const serializedInput = btoa(themedInput)
     return `data:image/svg+xml;base64,${serializedInput}`
   }

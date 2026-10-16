@@ -43,23 +43,22 @@ const makeKeyframes = (color: string): Array<Keyframe> => [
     transform: 'scale(1)',
   },
 ]
-const PulsatingNumber: FunctionComponent<Props> = ({colorNegative = '#ff1717', colorPositive = '#22c55e', numberClassName, ...numberDisplayProps}) => {
+const PulsatingNumber: FunctionComponent<Props> = ({colorNegative = '#ff1717', colorPositive = '#22c55e', numberClassName, value, ...numberDisplayProps}) => {
   const spanRef = useRef<HTMLSpanElement | null>(null)
-  const prevRef = useRef(numberDisplayProps.value)
+  const prevRef = useRef(value)
   useEffect(() => {
     const el = spanRef.current
     if (!el) {
       return
     }
-    const {value} = numberDisplayProps
     const prev = prevRef.current
     prevRef.current = value
-    if (typeof value !== 'number' || typeof prev !== 'number' || value === prev) {
+    if (value === prev) {
       return
     }
     const color = value > prev ? colorNegative : colorPositive
     el.animate(makeKeyframes(color), timing)
-  }, [numberDisplayProps.value, colorNegative, colorPositive])
+  }, [value, colorNegative, colorPositive])
   return (
     <NumberDisplay
       {...numberDisplayProps}
@@ -67,6 +66,7 @@ const PulsatingNumber: FunctionComponent<Props> = ({colorNegative = '#ff1717', c
       numberRef={el => {
         spanRef.current = el
       }}
+      value={value}
     />
   )
 }

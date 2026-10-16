@@ -1,33 +1,25 @@
 import type {Model} from '#src/lib/models/index.ts'
+import type {FunctionComponent} from 'react'
 
 import {useDroppable} from '@dnd-kit/react'
 import {flip, offset, shift, useClick, useDismiss, useFloating, useInteractions} from '@floating-ui/react'
 import clsx from 'clsx'
-import {forwardRef, useImperativeHandle, useRef, useState} from 'react'
+import {useState} from 'react'
 
 import HiddenCardStash from '#component/HiddenCardStash'
 
 import css from './style.module.sass'
 
-export type HiddenCardStashButtonHandle = {
-  getBoundingClientRect: () => DOMRect | null
-}
-
 type Props = {
   hiddenModels: Array<Model>
-  onHide: (modelId: string) => void
   onUnhide: (modelId: string) => void
 }
 
-const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(({hiddenModels, onUnhide}, ref) => {
+const HiddenCardStashButton: FunctionComponent<Props> = ({hiddenModels, onUnhide}) => {
   const [isOpen, setIsOpen] = useState(false)
   const {ref: droppableRef, isDropTarget} = useDroppable({
     id: 'stash-zone',
   })
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  useImperativeHandle(ref, () => ({
-    getBoundingClientRect: () => buttonRef.current?.getBoundingClientRect() ?? null,
-  }))
   const {refs, floatingStyles, context} = useFloating({
     open: isOpen,
     onOpenChange: setIsOpen,
@@ -37,26 +29,25 @@ const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(({h
   const click = useClick(context)
   const dismiss = useDismiss(context)
   const {getReferenceProps, getFloatingProps} = useInteractions([click, dismiss])
-  const setRefs = (el: HTMLButtonElement | null) => {
-    buttonRef.current = el
-    refs.setReference(el)
-    droppableRef(el)
+  const setRefs = (element: HTMLButtonElement | null) => {
+    refs.setReference(element)
+    droppableRef(element)
   }
-  const count = hiddenModels.length
   return (
     <>
       <button
         className={clsx(css.element, isDropTarget && css.dropTarget)}
+        type='button'
         ref={setRefs}
         {...getReferenceProps()}
       >
-        {`+ ${count}`}
+        {`+ ${hiddenModels.length}`}
       </button>
       {isOpen
           && <div
             className={css.popover}
             style={floatingStyles}
-            ref={refs.setFloating}
+            ref={element => refs.setFloating(element)}
             {...getFloatingProps()}
           >
             <HiddenCardStash
@@ -69,6 +60,6 @@ const HiddenCardStashButton = forwardRef<HiddenCardStashButtonHandle, Props>(({h
       }
     </>
   )
-})
+}
 
 export default HiddenCardStashButton

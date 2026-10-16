@@ -42,7 +42,7 @@ const validateText = (text: string): string => {
 const resolveUrl = (value: string): URL => {
   let url: URL
   try {
-    url = new URL(value, globalThis.location?.href)
+    url = new URL(value, typeof location === 'undefined' ? undefined : location.href)
   } catch {
     throw new TypeError('url must be a valid HTTP(S) URL.')
   }

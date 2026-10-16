@@ -2,8 +2,7 @@ import type {ModelId, RawTokenizeResult, TokenizeInput} from 'token-vocabs'
 
 import {free, load, models, tokenizeLoaded} from 'token-vocabs'
 
-export type ModelIconTheme = 'dark' | 'light'
-export type ModelIcon = Record<ModelIconTheme, string> | string
+type ModelIcon = Record<'dark' | 'light', string> | string
 
 const compactNameOverrides: Partial<Record<ModelId, string>> = {
   sdxl: 'SDXL',

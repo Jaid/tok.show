@@ -55,30 +55,37 @@ export const isUiTokenizationIdle = (): boolean => {
 export const waitForUiTokenizationIdle = async (signal?: AbortSignal): Promise<void> => {
   while (!isUiTokenizationIdle()) {
     signal?.throwIfAborted()
-    await new Promise<void>((resolve, reject) => {
-      const onChange = () => {
-        cleanup()
-        resolve()
-      }
-      const onAbort = () => {
-        cleanup()
-        reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'))
-      }
-      const cleanup = () => {
-        uiTokenizationListeners.delete(onChange)
-        signal?.removeEventListener('abort', onAbort)
-      }
-      uiTokenizationListeners.add(onChange)
-      signal?.addEventListener('abort', onAbort, {once: true})
-      if (isUiTokenizationIdle()) {
-        cleanup()
-        resolve()
-      }
-    })
+    const {promise, resolve, reject} = Promise.withResolvers<void>()
+    const onAbort = () => reject(signal?.reason ?? new DOMException('Aborted', 'AbortError'))
+    uiTokenizationListeners.add(resolve)
+    signal?.addEventListener('abort', onAbort, {once: true})
+    if (isUiTokenizationIdle()) {
+      resolve()
+    }
+    try {
+      await promise
+    } finally {
+      uiTokenizationListeners.delete(resolve)
+      signal?.removeEventListener('abort', onAbort)
+    }
   }
 }
 
-export async function loadModel(modelId: ModelId): Promise<void> {
+export function unloadModel(modelId: ModelId): void {
+  const model = modelsMap.get(modelId)
+  if (model) {
+    model.unload()
+  }
+  state.modelStates[modelId] = {
+    error: null,
+    loaded: false,
+    loading: false,
+    tokenCount: 0,
+    tokenizeData: null,
+  }
+}
+
+async function loadModel(modelId: ModelId): Promise<void> {
   const model = modelsMap.get(modelId)
   if (!model) {
     return
@@ -101,21 +108,6 @@ export async function loadModel(modelId: ModelId): Promise<void> {
     state.modelStates[modelId].loading = false
   }
 }
-
-export function unloadModel(modelId: ModelId): void {
-  const model = modelsMap.get(modelId)
-  if (model) {
-    model.unload()
-  }
-  state.modelStates[modelId] = {
-    error: null,
-    loaded: false,
-    loading: false,
-    tokenCount: 0,
-    tokenizeData: null,
-  }
-}
-
 const tokenizeLoadedModel = (modelId: ModelId, input: TokenizeInput): boolean => {
   const model = modelsMap.get(modelId)
   if (!model?.loaded) {
