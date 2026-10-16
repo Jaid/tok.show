@@ -50,7 +50,7 @@
     "caniuse-lite": "1.0.30001815",
     "cssnano-preset-advanced": "9.6.0",
     "eslint": "10.12.0",
-    "eslint-config-jaid": "35.0.0",
+    "eslint-config-jaid": "37.1.0",
     "knip": "6.41.0",
     "postcss-normalize": "13.0.1",
     "puppeteer-core": "25.13.0",
