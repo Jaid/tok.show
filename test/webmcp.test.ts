@@ -1,50 +1,27 @@
-import {afterEach, describe, expect, test} from 'bun:test'
+import {describe, expect, test} from 'bun:test'
 
 import {state} from '#src/lib/state.ts'
-import {beginUiTokenization, ensureModelLoaded, unloadModel} from '#src/lib/tokenManager.ts'
+import {beginUiTokenization, ensureModelLoaded} from '#src/lib/tokenManager.ts'
 import {createWebmcpTools} from '#src/lib/webmcp/tools.ts'
 
-const originalState = {
-  activeInputTabId: state.activeInputTabId,
-  activeTab: state.activeTab,
-  binaryData: state.binaryData,
-  focusedId: state.focusedId,
-  inputTabs: state.inputTabs.map(tab => ({
-    ...tab,
-    binaryData: tab.binaryData?.slice() ?? null,
-  })),
-  isBinary: state.isBinary,
-  text: state.text,
-  visibleEntries: [...state.visibleEntries],
-}
-const executeOptions = {signal: (new AbortController).signal}
+import {restoreStateAfterEach} from './lib/restoreState.ts'
+
+const executeController = new AbortController
+const executeOptions = {signal: executeController.signal}
 const createTools = () => {
   let permalinkText = ''
+  const tools = createWebmcpTools(() => ({
+    setText: value => {
+      permalinkText = value
+    },
+  }))
   return {
-    tools: createWebmcpTools(() => ({
-      setText: value => {
-        permalinkText = value
-      },
-    })),
     getPermalinkText: () => permalinkText,
+    getTool: (name: string) => tools.find(tool => tool.name === name)!,
+    tools,
   }
 }
-const getTool = (tools: Array<WebMCP.ModelContextTool>, name: string) => tools.find(tool => tool.name === name)!
-afterEach(() => {
-  unloadModel('glm')
-  unloadModel('sdxl')
-  state.activeInputTabId = originalState.activeInputTabId
-  state.activeTab = originalState.activeTab
-  state.binaryData = originalState.binaryData
-  state.focusedId = originalState.focusedId
-  state.inputTabs = originalState.inputTabs.map(tab => ({
-    ...tab,
-    binaryData: tab.binaryData?.slice() ?? null,
-  }))
-  state.isBinary = originalState.isBinary
-  state.text = originalState.text
-  state.visibleEntries = [...originalState.visibleEntries]
-})
+restoreStateAfterEach()
 describe('WebMCP', () => {
   test('exposes the GUI and headless tool contract', () => {
     const {tools} = createTools()
@@ -63,10 +40,10 @@ describe('WebMCP', () => {
     ])
   })
   test('GUI tools edit and inspect the current editor', async () => {
-    const {tools, getPermalinkText} = createTools()
-    const overwriteEditor = getTool(tools, 'overwrite_editor')
-    const readEditor = getTool(tools, 'read_editor')
-    const inspect = getTool(tools, 'inspect')
+    const {getTool, getPermalinkText} = createTools()
+    const overwriteEditor = getTool('overwrite_editor')
+    const readEditor = getTool('read_editor')
+    const inspect = getTool('inspect')
     await overwriteEditor.execute({text: 'WebMCP GUI state'}, executeOptions)
     const editor = await readEditor.execute({}, executeOptions) as {
       text: string
@@ -87,11 +64,11 @@ describe('WebMCP', () => {
     expect(getPermalinkText()).toBe('WebMCP GUI state')
   })
   test('headless tools accept arrayable models without changing GUI state', async () => {
-    const {tools} = createTools()
+    const {getTool} = createTools()
     const originalText = state.text
-    const countTokens = getTool(tools, 'count_tokens')
-    const tokenize = getTool(tools, 'tokenize')
-    const createSpans = getTool(tools, 'create_spans')
+    const countTokens = getTool('count_tokens')
+    const tokenize = getTool('tokenize')
+    const createSpans = getTool('create_spans')
     const counts = await countTokens.execute({
       text: 'headless tokenizer',
       models: 'glm',
@@ -114,31 +91,31 @@ describe('WebMCP', () => {
     expect(state.text).toBe(originalText)
   })
   test('rejects undeclared properties in code instead of relying on schema enforcement', async () => {
-    const {tools} = createTools()
-    const inspect = getTool(tools, 'inspect')
-    const countTokens = getTool(tools, 'count_tokens')
-    const compare = getTool(tools, 'compare')
-    expect(() => inspect.execute({unexpected: true} as any, executeOptions)).toThrow('unknown property “unexpected”')
+    const {getTool} = createTools()
+    const inspect = getTool('inspect')
+    const countTokens = getTool('count_tokens')
+    const compare = getTool('compare')
+    expect(() => inspect.execute({unexpected: true}, executeOptions)).toThrow('unknown property “unexpected”')
     await expect(countTokens.execute({
       text: 'strict',
       models: 'glm',
       unexpected: true,
-    } as any, executeOptions)).rejects.toThrow('unknown property “unexpected”')
+    }, executeOptions)).rejects.toThrow('unknown property “unexpected”')
     await expect(compare.execute({
       model: 'glm',
       cases: [{
         text: 'first',
         unexpected: true,
       }, {text: 'second'}],
-    } as any, executeOptions)).rejects.toThrow('cases[0] must not contain unknown property “unexpected”')
+    }, executeOptions)).rejects.toThrow('cases[0] must not contain unknown property “unexpected”')
   })
   test('marks editor contents as untrusted agent output', () => {
-    const {tools} = createTools()
-    expect(getTool(tools, 'read_editor').annotations?.untrustedContentHint).toBe(true)
+    const {getTool} = createTools()
+    expect(getTool('read_editor').annotations?.untrustedContentHint).toBe(true)
   })
   test('ContentSource URL inputs are fetched and text/url are mutually exclusive', async () => {
-    const {tools} = createTools()
-    const countTokens = getTool(tools, 'count_tokens')
+    const {getTool} = createTools()
+    const countTokens = getTool('count_tokens')
     const originalFetch = globalThis.fetch
     globalThis.fetch = (async (input, init) => {
       const url = input instanceof Request ? input.url : String(input)
@@ -173,8 +150,8 @@ describe('WebMCP', () => {
     }
   })
   test('create_spans identifies normalized tokenizer input', async () => {
-    const {tools} = createTools()
-    const createSpans = getTool(tools, 'create_spans')
+    const {getTool} = createTools()
+    const createSpans = getTool('create_spans')
     const result = await createSpans.execute({
       text: '  HELLO  WORLD  ',
       models: 'sdxl',
@@ -201,15 +178,13 @@ describe('WebMCP', () => {
     }])
   })
   test('read_results waits for GUI tokenization to become idle', async () => {
-    const {tools} = createTools()
+    const {getTool} = createTools()
     state.visibleEntries = ['glm']
     state.text = 'wait for idle'
-    state.isBinary = false
-    state.binaryData = null
     await ensureModelLoaded('glm')
     const finish = beginUiTokenization()
     let resolved = false
-    const reading = Promise.resolve(getTool(tools, 'read_results').execute({}, executeOptions)).then((value: unknown) => {
+    const reading = Promise.resolve(getTool('read_results').execute({}, executeOptions)).then((value: unknown) => {
       resolved = true
       return value as {counts: {glm: number}}
     })
@@ -220,9 +195,9 @@ describe('WebMCP', () => {
     expect(results.counts.glm).toBeGreaterThan(0)
   })
   test('compare and create_permalink operate headlessly', async () => {
-    const {tools} = createTools()
-    const compare = getTool(tools, 'compare')
-    const createPermalink = getTool(tools, 'create_permalink')
+    const {getTool} = createTools()
+    const compare = getTool('compare')
+    const createPermalink = getTool('create_permalink')
     const comparison = await compare.execute({
       model: 'glm',
       cases: [{text: 'short'}, {text: 'a much longer comparison case'}],

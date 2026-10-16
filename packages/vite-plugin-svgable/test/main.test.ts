@@ -1,236 +1,140 @@
+import type {Plugin} from 'vite'
+
 import {describe, expect, test} from 'bun:test'
 import {mkdtemp, readFile, rm, writeFile} from 'node:fs/promises'
 import {tmpdir} from 'node:os'
 import {join} from 'node:path'
 
-import vitePluginSvgable from '../src/main.ts'
+import svgablePlugin from '../src/main.ts'
 
-type TestPluginContext = {
-  addWatchFile: (path: string) => void
-  emitFile: (file: {
-    name: string
-    source: string
-    type: 'asset'
-  }) => string
-  emitted: Array<{
-    name: string
-    source: string
-    type: 'asset'
-  }>
-  watched: Array<string>
+type EmittedFile = {
+  name: string
+  source: string
+  type: 'asset'
 }
 
-const makeContext = (): TestPluginContext => {
-  const context: TestPluginContext = {
-    emitted: [],
-    watched: [],
-    addWatchFile(path) {
-      this.watched.push(path)
-    },
-    emitFile(file) {
-      this.emitted.push(file)
-      return `asset${this.emitted.length}`
-    },
-  }
-  return context
+type LoadHook = (this: unknown, id: string) => Promise<string | undefined>
+type ConfigResolvedHook = (this: unknown, config: unknown) => void
+
+const square = (size: number) => `M0 0H${size}V${size}H0Z`
+const svgFile = (size: number) => `<svg xmlns="http://www.w3.org/2000/svg"><path d="${square(size)}"/></svg>`
+const toDevUrl = (path: string) => `/@fs/${path.replaceAll('\\', '/')}`
+const readDevUrl = (url: string) => readFile(decodeURI(url.replace('/@fs/', '')), 'utf8')
+const evaluateDefaultExport = (code: string) => {
+  const evaluate = new Function(`return (${code.replace(/^export default /, '')})`) as () => unknown
+  return evaluate()
 }
-const callConfigResolved = (plugin: ReturnType<typeof vitePluginSvgable>, config: unknown) => {
-  if (typeof plugin.configResolved !== 'function') {
-    throw new TypeError('Expected configResolved hook to be a function.')
-  }
-  return (plugin.configResolved as (this: unknown, config: unknown) => unknown).call({}, config)
-}
-const callLoad = async (plugin: ReturnType<typeof vitePluginSvgable>, context: TestPluginContext, id: string) => {
-  if (typeof plugin.load !== 'function') {
-    throw new TypeError('Expected load hook to be a function.')
-  }
-  return await (plugin.load as unknown as (this: TestPluginContext, id: string) => unknown).call(context, id)
-}
-const readDefaultExport = (code: string) => {
-  const expression = code.replace(/^export default /, '')
-  return new Function(`return (${expression})`)() as unknown
-}
-const withTempFolder = async <Result>(task: (folder: string) => Promise<Result>) => {
+const createFixture = async (command: 'build' | 'serve', files: Record<string, string>) => {
   const folder = await mkdtemp(join(tmpdir(), 'vite-plugin-svgable-'))
-  try {
-    return await task(folder)
-  } finally {
-    await rm(folder, {
+  for (const [name, content] of Object.entries(files)) {
+    await writeFile(join(folder, name), content)
+  }
+  const plugin: Plugin = svgablePlugin({outputDirectory: join(folder, 'svg')})
+  const configResolved = plugin.configResolved as ConfigResolvedHook
+  configResolved.call({}, {
+    command,
+    root: folder,
+  })
+  const emitted: Array<EmittedFile> = []
+  const watched: Array<string> = []
+  const context = {
+    addWatchFile: (path: string) => watched.push(path),
+    emitFile: (file: EmittedFile) => `asset${emitted.push(file)}`,
+  }
+  const load = async (name: string) => {
+    const loadHook = plugin.load as LoadHook
+    const code = await loadHook.call(context, `${join(folder, name)}?svgable`)
+    expect(code).toBeString()
+    return code!
+  }
+  return {
+    emitted,
+    load,
+    path: (name: string) => join(folder, name),
+    watched,
+    [Symbol.asyncDispose]: () => rm(folder, {
       force: true,
       recursive: true,
-    })
+    }),
   }
 }
-describe('vite-plugin-svgable', () => {
+describe('vite-plugin-svgable shapes', () => {
   test('exports a persisted SVG URL for static shape data in development', async () => {
-    await withTempFolder(async folder => {
-      const sourcePath = join(folder, 'logo.shape.yml')
-      const outputDirectory = join(folder, 'svg')
-      await writeFile(sourcePath, 'shape: M0 0H1V1H0Z\nsize: 1\ncolor: \'#123456\'\n')
-      const plugin = vitePluginSvgable({outputDirectory})
-      const context = makeContext()
-      callConfigResolved(plugin, {
-        command: 'serve',
-        root: folder,
-      })
-      const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
-      expect(typeof code).toBe('string')
-      const url = readDefaultExport(code as string)
-      expect(url).toStartWith('/@fs/')
-      expect(context.watched).toEqual([sourcePath])
-      expect(context.emitted).toHaveLength(0)
-      const outputPath = decodeURI((url as string).replace('/@fs/', ''))
-      const svg = await readFile(outputPath, 'utf8')
-      expect(svg).toContain('<svg')
-      expect(svg).toContain('fill="#123456"')
-    })
+    await using fixture = await createFixture('serve', {'logo.shape.yml': `shape: ${square(1)}\nsize: 1\ncolor: '#123456'\n`})
+    const url = evaluateDefaultExport(await fixture.load('logo.shape.yml')) as string
+    expect(url).toStartWith('/@fs/')
+    expect(fixture.watched).toEqual([fixture.path('logo.shape.yml')])
+    expect(fixture.emitted).toHaveLength(0)
+    const svg = await readDevUrl(url)
+    expect(svg).toContain('<svg')
+    expect(svg).toContain('fill="#123456"')
   })
   test('exports themed persisted SVG URLs when shape paths differ', async () => {
-    await withTempFolder(async folder => {
-      const sourcePath = join(folder, 'logo.shape.yml')
-      const outputDirectory = join(folder, 'svg')
-      await writeFile(sourcePath, 'shape:\n  light: M0 0H1V1H0Z\n  dark: M0 0H2V2H0Z\nsize: 2\n')
-      const plugin = vitePluginSvgable({outputDirectory})
-      const context = makeContext()
-      callConfigResolved(plugin, {
-        command: 'serve',
-        root: folder,
-      })
-      const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
-      const urls = readDefaultExport(code as string) as Record<string, string>
-      expect(Object.keys(urls).sort()).toEqual(['dark', 'light'])
-      expect(urls.light).toContain('-light.')
-      expect(urls.dark).toContain('-dark.')
-      const lightSvg = await readFile(decodeURI(urls.light.replace('/@fs/', '')), 'utf8')
-      const darkSvg = await readFile(decodeURI(urls.dark.replace('/@fs/', '')), 'utf8')
-      expect(lightSvg).toContain('M0 0H1V1H0Z')
-      expect(darkSvg).toContain('M0 0H2V2H0Z')
-    })
+    await using fixture = await createFixture('serve', {'logo.shape.yml': `shape:\n  light: ${square(1)}\n  dark: ${square(2)}\nsize: 2\n`})
+    const urls = evaluateDefaultExport(await fixture.load('logo.shape.yml')) as Record<'dark' | 'light', string>
+    expect(Object.keys(urls).toSorted()).toEqual(['dark', 'light'])
+    expect(urls.light).toContain('-light.')
+    expect(urls.dark).toContain('-dark.')
+    expect(await readDevUrl(urls.light)).toContain(square(1))
+    expect(await readDevUrl(urls.dark)).toContain(square(2))
   })
   test('emits Rollup asset URLs for production builds', async () => {
-    await withTempFolder(async folder => {
-      const sourcePath = join(folder, 'logo.shape.yml')
-      const outputDirectory = join(folder, 'svg')
-      await writeFile(sourcePath, 'shape: M0 0H1V1H0Z\nsize: 1\ncolor: \'#123456\'\n')
-      const plugin = vitePluginSvgable({outputDirectory})
-      const context = makeContext()
-      callConfigResolved(plugin, {
-        command: 'build',
-        root: folder,
-      })
-      const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
-      expect(code).toBe('export default import.meta.ROLLUP_FILE_URL_asset1')
-      expect(context.emitted).toHaveLength(1)
-      expect(context.emitted[0]?.name).toMatch(/^logo\.[0-9a-f]{12}\.svg$/)
-      expect(context.emitted[0]?.source).toContain('<svg')
-      expect(context.emitted[0]?.source).toContain('fill="#123456"')
-    })
+    await using fixture = await createFixture('build', {'logo.shape.yml': `shape: ${square(1)}\nsize: 1\ncolor: '#123456'\n`})
+    expect(await fixture.load('logo.shape.yml')).toBe('export default import.meta.ROLLUP_FILE_URL_asset1')
+    expect(fixture.emitted).toHaveLength(1)
+    expect(fixture.emitted[0]?.name).toMatch(/^logo\.[\da-f]{12}\.svg$/)
+    expect(fixture.emitted[0]?.source).toContain('fill="#123456"')
   })
-  test('defaults uncolored shapes to app-selectable light and dark assets', async () => {
-    await withTempFolder(async folder => {
-      const sourcePath = join(folder, 'logo.shape.yml')
-      const outputDirectory = join(folder, 'svg')
-      await writeFile(sourcePath, 'shape: M0 0H1V1H0Z\nsize: 1\n')
-      const plugin = vitePluginSvgable({outputDirectory})
-      const context = makeContext()
-      callConfigResolved(plugin, {
-        command: 'build',
-        root: folder,
-      })
-      const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
-      expect(code).toBe('export default {light:import.meta.ROLLUP_FILE_URL_asset1,dark:import.meta.ROLLUP_FILE_URL_asset2}')
-      expect(context.emitted).toHaveLength(2)
-      expect(context.emitted[0]?.source).toContain('fill="black"')
-      expect(context.emitted[1]?.source).toContain('fill="white"')
-      expect(context.emitted[0]?.source).not.toContain('currentColor')
-      expect(context.emitted[1]?.source).not.toContain('currentColor')
-    })
+  test('defaults uncolored shapes to black and white theme assets', async () => {
+    await using fixture = await createFixture('build', {'logo.shape.yml': `shape: ${square(1)}\nsize: 1\n`})
+    expect(await fixture.load('logo.shape.yml')).toBe('export default {light:import.meta.ROLLUP_FILE_URL_asset1,dark:import.meta.ROLLUP_FILE_URL_asset2}')
+    expect(fixture.emitted).toHaveLength(2)
+    expect(fixture.emitted[0]?.source).toContain('fill="black"')
+    expect(fixture.emitted[1]?.source).toContain('fill="white"')
+    for (const file of fixture.emitted) {
+      expect(file.source).not.toContain('currentColor')
+    }
   })
+})
+describe('vite-plugin-svgable SVG files', () => {
   test('exports an SVG file URL in development', async () => {
-    await withTempFolder(async folder => {
-      const sourcePath = join(folder, 'logo.svg')
-      await writeFile(sourcePath, '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0H1V1H0Z"/></svg>')
-      const plugin = vitePluginSvgable()
-      const context = makeContext()
-      callConfigResolved(plugin, {
-        command: 'serve',
-        root: folder,
-      })
-      const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
-      const url = readDefaultExport(code as string)
-      expect(url).toBe(`/@fs/${sourcePath.replaceAll('\\', '/')}`)
-      expect(context.watched).toEqual([sourcePath])
-      expect(context.emitted).toHaveLength(0)
-    })
+    await using fixture = await createFixture('serve', {'logo.svg': svgFile(1)})
+    expect(evaluateDefaultExport(await fixture.load('logo.svg'))).toBe(toDevUrl(fixture.path('logo.svg')))
+    expect(fixture.watched).toEqual([fixture.path('logo.svg')])
+    expect(fixture.emitted).toHaveLength(0)
   })
-  test('exports themed SVG file URLs from dark sidecars', async () => {
-    await withTempFolder(async folder => {
-      const sourcePath = join(folder, 'logo.svg')
-      const darkPath = join(folder, 'logo.dark.svg')
-      await writeFile(sourcePath, '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0H1V1H0Z"/></svg>')
-      await writeFile(darkPath, '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0H2V2H0Z"/></svg>')
-      const plugin = vitePluginSvgable()
-      const context = makeContext()
-      callConfigResolved(plugin, {
-        command: 'serve',
-        root: folder,
-      })
-      const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
-      const urls = readDefaultExport(code as string) as Record<string, string>
-      expect(urls).toEqual({
-        dark: `/@fs/${darkPath.replaceAll('\\', '/')}`,
-        light: `/@fs/${sourcePath.replaceAll('\\', '/')}`,
-      })
-      expect(context.watched).toEqual([darkPath, sourcePath])
+  test.each([
+    ['dark', 'logo.dark.svg', 'logo.svg'],
+    ['light', 'logo.svg', 'logo.light.svg'],
+  ])('exports themed SVG file URLs from %s sidecars', async (sidecarTheme, darkName, lightName) => {
+    const sidecarName = sidecarTheme === 'dark' ? darkName : lightName
+    await using fixture = await createFixture('serve', {
+      'logo.svg': svgFile(1),
+      [sidecarName]: svgFile(2),
     })
-  })
-  test('exports themed SVG file URLs from light sidecars', async () => {
-    await withTempFolder(async folder => {
-      const sourcePath = join(folder, 'logo.svg')
-      const lightPath = join(folder, 'logo.light.svg')
-      await writeFile(sourcePath, '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0H2V2H0Z"/></svg>')
-      await writeFile(lightPath, '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0H1V1H0Z"/></svg>')
-      const plugin = vitePluginSvgable()
-      const context = makeContext()
-      callConfigResolved(plugin, {
-        command: 'serve',
-        root: folder,
-      })
-      const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
-      const urls = readDefaultExport(code as string) as Record<string, string>
-      expect(urls).toEqual({
-        dark: `/@fs/${sourcePath.replaceAll('\\', '/')}`,
-        light: `/@fs/${lightPath.replaceAll('\\', '/')}`,
-      })
-      expect(context.watched).toEqual([sourcePath, lightPath])
+    expect(evaluateDefaultExport(await fixture.load('logo.svg'))).toEqual({
+      dark: toDevUrl(fixture.path(darkName)),
+      light: toDevUrl(fixture.path(lightName)),
     })
+    expect(fixture.watched).toEqual([fixture.path(darkName), fixture.path(lightName)])
   })
   test('emits SVG files as Rollup assets for production builds', async () => {
-    await withTempFolder(async folder => {
-      const sourcePath = join(folder, 'logo.svg')
-      const darkPath = join(folder, 'logo.dark.svg')
-      await writeFile(sourcePath, '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0H1V1H0Z"/></svg>')
-      await writeFile(darkPath, '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0H2V2H0Z"/></svg>')
-      const plugin = vitePluginSvgable()
-      const context = makeContext()
-      callConfigResolved(plugin, {
-        command: 'build',
-        root: folder,
-      })
-      const code = await callLoad(plugin, context, `${sourcePath}?svgable`)
-      expect(code).toBe('export default {light:import.meta.ROLLUP_FILE_URL_asset2,dark:import.meta.ROLLUP_FILE_URL_asset1}')
-      expect(context.emitted).toEqual([
-        {
-          name: 'logo.dark.svg',
-          source: '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0H2V2H0Z"/></svg>',
-          type: 'asset',
-        },
-        {
-          name: 'logo.svg',
-          source: '<svg xmlns="http://www.w3.org/2000/svg"><path d="M0 0H1V1H0Z"/></svg>',
-          type: 'asset',
-        },
-      ])
+    await using fixture = await createFixture('build', {
+      'logo.svg': svgFile(1),
+      'logo.dark.svg': svgFile(2),
     })
+    expect(await fixture.load('logo.svg')).toBe('export default {light:import.meta.ROLLUP_FILE_URL_asset2,dark:import.meta.ROLLUP_FILE_URL_asset1}')
+    expect(fixture.emitted).toEqual([
+      {
+        name: 'logo.dark.svg',
+        source: svgFile(2),
+        type: 'asset',
+      },
+      {
+        name: 'logo.svg',
+        source: svgFile(1),
+        type: 'asset',
+      },
+    ])
   })
 })
