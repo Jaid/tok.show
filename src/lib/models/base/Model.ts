@@ -34,7 +34,7 @@ export default abstract class Model {
     return this.title.slice(this.name.length).replace(/^[\s-]+/, '') || undefined
   }
 
-  get title() {
+  get title(): string {
     return models[this.id].title
   }
 

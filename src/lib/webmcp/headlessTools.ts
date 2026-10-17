@@ -92,6 +92,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
             name: model.name,
             subname: model.subname ?? null,
             ...definition,
+            title: model.title,
           }
         }),
       }
@@ -233,7 +234,7 @@ export const createHeadlessTools = (): Array<WebMCP.ModelContextTool> => [
       const maximum = Math.max(...counts)
       return {
         model: modelId,
-        title: models[modelId].title,
+        title: modelsMap.get(modelId)!.title,
         cases: comparedCases,
         summary: {
           minimum: {
