@@ -92,18 +92,18 @@ const getProductionConfig = () => {
         output: {
           minify: true,
           topLevelVar: true,
-          entryFileNames: 'main.js',
+          entryFileNames: 'main-[hash].js',
           chunkFileNames: chunkInfo => {
             if (chunkInfo.name === 'rolldown-runtime') {
-              return 'runtime.js'
+              return 'runtime-[hash].js'
             }
-            return '[name].js'
+            return '[name]-[hash].js'
           },
           assetFileNames: chunkInfo => {
             if (chunkInfo.names[0] === 'index.css') {
-              return 'style.css'
+              return 'style-[hash].css'
             }
-            return '[name].[ext]'
+            return '[name]-[hash].[ext]'
           },
           codeSplitting: {
             groups: [
