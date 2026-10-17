@@ -19,7 +19,7 @@
         "react-hotkeys-hook": "5.3.3",
         "react-icons": "5.7.0",
         "react-resizable-panels": "4.14.5",
-        "token-vocabs": "0.8.0",
+        "token-vocabs": "1.0.0",
         "valtio": "2.3.2",
         "vite-plugin-svgable": "workspace:*",
         "vite-plugin-svgr": "5.2.0",
@@ -1241,7 +1241,7 @@
 
     "tinyglobby": ["tinyglobby@0.2.17", "", { "dependencies": { "fdir": "^6.5.0", "picomatch": "^4.0.4" } }, "sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g=="],
 
-    "token-vocabs": ["token-vocabs@0.8.0", "", {}, "sha512-82FhSkIL9OEfZDp+5I/lgPHv+akAap0R8W2n7wdyccwjzCTcNf6hpuCJ4rAhNHKj/kOlSOjH6V1eCVh/fwCyKw=="],
+    "token-vocabs": ["token-vocabs@1.0.0", "", {}, "sha512-/ji72i7AM7UhvlYc7uFFw1b/QJ7rysGBAbiN41vjMWk81fpkMhQi+CgIq9YBCavsuRqaAwozEVmt1hJF9zD0vQ=="],
 
     "ts-api-utils": ["ts-api-utils@2.5.0", "", { "peerDependencies": { "typescript": ">=4.8.4" } }, "sha512-OJ/ibxhPlqrMM0UiNHJ/0CKQkoKF243/AEmplt3qpRgkW8VG7IfOS41h7V8TjITqdByHzrjcS/2si+y4lIh8NA=="],
 

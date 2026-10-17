@@ -35,7 +35,7 @@
     "react-hotkeys-hook": "5.3.3",
     "react-icons": "5.7.0",
     "react-resizable-panels": "4.14.5",
-    "token-vocabs": "0.8.0",
+    "token-vocabs": "1.0.0",
     "valtio": "2.3.2",
     "vite-plugin-svgable": "workspace:*",
     "vite-plugin-svgr": "5.2.0",
