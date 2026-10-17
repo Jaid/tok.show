@@ -9,6 +9,7 @@ import HyModel from './HyModel.ts'
 import KimiModel from './KimiModel.ts'
 import MimoModel from './MimoModel.ts'
 import MinimaxModel from './MinimaxModel.ts'
+import MuseModel from './MuseModel.ts'
 import QwenModel from './QwenModel.ts'
 import SdxlModel from './SdxlModel.ts'
 import StepModel from './StepModel.ts'
@@ -28,6 +29,7 @@ add('hy', HyModel)
 add('minimax', MinimaxModel)
 add('sdxl', SdxlModel)
 add('step', StepModel)
+add('muse', MuseModel)
 
 export type {default as Model} from './base/Model.ts'
 export default map
