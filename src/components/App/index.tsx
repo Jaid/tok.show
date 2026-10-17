@@ -1,4 +1,4 @@
-import type {EditorHandle} from '#component/Editor'
+import type {EditorHighlightRange} from '#component/Editor'
 import type {OutputTab} from '#component/OutputHeader'
 import type {Model} from '#src/lib/models/index.ts'
 import type {EntryId} from '#src/lib/state.ts'
@@ -131,7 +131,7 @@ const App: FunctionComponent = () => {
   const snap = useSnapshot(state)
   const {model: modelParam, models: modelsRaw, monaco: monacoParam, setModel: setModelParam, setModels: setModelsRaw, setText: setTextParam, shareUrl, text: textParam} = useUrlParameters()
   const [currentTab, setCurrentTab] = useState<OutputTab>('tokenized')
-  const editorRef = useRef<EditorHandle>(null)
+  const [highlightRange, setHighlightRange] = useState<EditorHighlightRange | null>(null)
   const [isDragOver, setIsDragOver] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(() => {
@@ -310,13 +310,13 @@ const App: FunctionComponent = () => {
     navigator.clipboard.writeText(text).catch(console.error)
   }
   const onTokenHover = (span: TokenSpan | null) => {
-    editorRef.current?.setHighlightRange(span ? {
+    setHighlightRange(span ? {
       start: span.byteStart,
       end: span.byteEnd,
     } : null)
   }
   const onTokenClick = (span: TokenSpan) => {
-    editorRef.current?.setHighlightRange({
+    setHighlightRange({
       start: span.byteStart,
       end: span.byteEnd,
     })
@@ -375,8 +375,8 @@ const App: FunctionComponent = () => {
         />
         <div className={clsx(css.paneBody, css.editorPaneBody)}>
           <Editor
-            binaryData={state.binaryData} isBinary={state.isBinary} useMonaco={state.useMonaco} value={state.text}
-            ref={editorRef} onChange={onInput}
+            binaryData={state.binaryData} highlightRange={highlightRange} isBinary={state.isBinary} useMonaco={state.useMonaco}
+            value={state.text} onChange={onInput}
           />
         </div>
         <EditorFooter shareUrl={shareUrl} />

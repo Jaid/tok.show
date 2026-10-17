@@ -1,8 +1,8 @@
 import type {SwitchableEditorProps} from 'monacozen'
-import type {FunctionComponent, Ref} from 'react'
+import type {FunctionComponent} from 'react'
 
 import Monacozen from 'monacozen'
-import {useCallback, useEffect, useImperativeHandle, useRef} from 'react'
+import {useEffect, useRef} from 'react'
 
 import HexViewer from '#component/HexViewer'
 import {useTheme} from '#src/components/ThemeToggle/useTheme.ts'
@@ -10,11 +10,7 @@ import {getTextRangeFromByteRange} from '#src/lib/tokenization.ts'
 
 import css from './style.module.sass'
 
-export type EditorHandle = {
-  setHighlightRange: (range: EditorHighlightRange | null) => void
-}
-
-type EditorHighlightRange = {
+export type EditorHighlightRange = {
   end: number
   start: number
 }
@@ -29,16 +25,15 @@ type Props = {
   isBinary?: boolean
   onChange: (value: string) => void
   readOnly?: boolean
-  ref?: Ref<EditorHandle>
   useMonaco?: boolean
   value: string
 }
 
-const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange, ref}) => {
+const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco = true, isBinary, binaryData, highlightRange = null}) => {
   const theme = useTheme()
   const editorRef = useRef<MonacoEditorInstance | null>(null)
   const decorationsRef = useRef<DecorationsCollection | null>(null)
-  const setHighlightRange = useCallback((range: EditorHighlightRange | null) => {
+  const applyHighlightRange = (range: EditorHighlightRange | null) => {
     const editor = editorRef.current
     const decorations = decorationsRef.current
     if (!editor || !decorations) {
@@ -62,7 +57,7 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
         },
       },
     ])
-  }, [])
+  }
   const handleMount: MonacozenOnMount = editor => {
     if (!('createDecorationsCollection' in editor)) {
       editorRef.current = null
@@ -71,19 +66,14 @@ const Editor: FunctionComponent<Props> = ({value, onChange, readOnly, useMonaco 
     }
     editorRef.current = editor
     decorationsRef.current = editor.createDecorationsCollection()
-    if (highlightRange !== undefined) {
-      setHighlightRange(highlightRange)
-    }
+    applyHighlightRange(highlightRange)
   }
   const handleChange: NonNullable<SwitchableEditorProps['onChange']> = val => {
     onChange(val ?? '')
   }
-  useImperativeHandle(ref, () => ({setHighlightRange}), [setHighlightRange])
   useEffect(() => {
-    if (highlightRange !== undefined) {
-      setHighlightRange(highlightRange)
-    }
-  }, [highlightRange, setHighlightRange])
+    applyHighlightRange(highlightRange)
+  }, [highlightRange])
   if (isBinary && binaryData) {
     return <HexViewer bytes={binaryData} />
   }
